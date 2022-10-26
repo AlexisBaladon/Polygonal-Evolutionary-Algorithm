@@ -9,13 +9,14 @@ from deap import algorithms
 
 import prueba
 
-IND_SIZE=50
+IND_SIZE=100
 
 # estas habra que setearlas segun la imagen que leamos
-WIDTH_MIN, WIDTH_MAX = 0, 255
-HEIGHT_MIN, HEIGHT_MAX = 0, 255
+WIDTH_MIN, WIDTH_MAX = 0, 25
+HEIGHT_MIN, HEIGHT_MAX = 0, 25
 
 COLOR_MIN, COLOR_MAX = 0, 255
+VERTEX_COUNT = 3
 VERTEX_COUNT = 3
 
 
@@ -47,9 +48,9 @@ def register_population(toolbox):
 
 def register_operators(toolbox: base.Toolbox):
     toolbox.register("evaluate", prueba.evalDelaunay)
-    toolbox.register("mate", tools.cxOnePoint)
-    toolbox.register("mutate", tools.mutUniformInt, low=COLOR_MIN, up=COLOR_MAX, indpb=0.1) #TODO: DESHARDCODEAR up y low
-    toolbox.register("select", tools.selRoulette)
+    toolbox.register("mate", tools.cxBlend, alpha=0.5)
+    toolbox.register("mutate", tools.mutUniformInt, low=0, up=255, indpb=0.1) #TODO: DESHARDCODEAR up y low
+    toolbox.register("select", tools.selTournament, tournsize=3)
     return toolbox
 
 def register_stats():
@@ -61,12 +62,12 @@ def register_stats():
     return stats
 
 def main():
-    random.seed(128)
-    NGEN = 150
+    random.seed(64)
+    NGEN = 500
     MU = 50
     LAMBDA = 100
-    CXPB = 0.5
-    MUTPB = 0.5
+    CXPB = 0.8
+    MUTPB = 0.2
 
     toolbox = base.Toolbox()
     register_population(toolbox)

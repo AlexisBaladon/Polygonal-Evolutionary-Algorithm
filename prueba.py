@@ -40,20 +40,19 @@ def decode(individual):
     colored_vertices = get_colored_vertices(individual)
     polygonal_image = create_polygonal_image(colored_vertices)
     global idx
-    if idx % 500 == 0:
+    if idx > 5000 and idx < 5500 or idx == 14000:
         polygonal_image.save(f'./test_images/ind-{idx}.png')
     idx += 1
     return polygonal_image
 #DECODE -->
 
-image = Image.open("img/verde.png")
+image = Image.open("img/tri.jpeg")
 original_image = image.convert("RGB").resize((255,255))
-original_image.show()
+#original_image.show()
 
 def get_fitness(decoded_individual):
     individual_image_matrix = np.asarray(decoded_individual, dtype=int)
     original_image_matrix = np.asarray(original_image, dtype=int)
-    #fitness = np.sum([np.linalg(individual_image_matrix[i,j] - original_image_matrix[i,j]) for i in range(individual_image_matrix.shape[0]) for j in range(original_image_matrix[1])])
     fitness = np.sum((individual_image_matrix - original_image_matrix)**2, dtype=int)
     return fitness
 
@@ -61,3 +60,19 @@ def evalDelaunay(individual):
     decoded_individual = decode(individual)
     fit = get_fitness(decoded_individual)
     return fit,
+
+if __name__ == "__main__":
+    ind1 = [
+        5,5, 0,0,0,
+        255,20, 255,255,255,
+        128,50, 0,0,0,
+    ]
+    ind2 = [
+        15,15, 0,0,0,
+        200,20, 255,255,255,
+        12,50, 0,0,0,
+    ]
+    img1, img2 = decode(ind1), decode(ind2)
+    img1.show(), img2.show()
+    img1, img2 = np.asarray(img1), np.asarray(img2)
+    print(np.sum((img1 - img2)**2, dtype=int))

@@ -16,7 +16,7 @@ WIDTH_MIN, WIDTH_MAX = 0, 255
 HEIGHT_MIN, HEIGHT_MAX = 0, 255
 
 COLOR_MIN, COLOR_MAX = 0, 255
-VERTEX_COUNT = 100
+VERTEX_COUNT = 3
 
 
 def create_individual_representation(toolbox, rgb = True): #TODO: abstraer
@@ -47,9 +47,9 @@ def register_population(toolbox):
 
 def register_operators(toolbox: base.Toolbox):
     toolbox.register("evaluate", prueba.evalDelaunay)
-    toolbox.register("mate", tools.cxBlend, alpha=0.5)
-    toolbox.register("mutate", tools.mutUniformInt, low=0, up=255, indpb=0.1) #TODO: DESHARDCODEAR up y low
-    toolbox.register("select", tools.selBest)
+    toolbox.register("mate", tools.cxOnePoint)
+    toolbox.register("mutate", tools.mutUniformInt, low=COLOR_MIN, up=COLOR_MAX, indpb=0.1) #TODO: DESHARDCODEAR up y low
+    toolbox.register("select", tools.selRoulette)
     return toolbox
 
 def register_stats():
@@ -61,12 +61,12 @@ def register_stats():
     return stats
 
 def main():
-    random.seed(64)
-    NGEN = 50
+    random.seed(128)
+    NGEN = 150
     MU = 50
     LAMBDA = 100
-    CXPB = 0.7
-    MUTPB = 0.2
+    CXPB = 0.5
+    MUTPB = 0.5
 
     toolbox = base.Toolbox()
     register_population(toolbox)
@@ -74,7 +74,7 @@ def main():
     pop = toolbox.population(n=MU)
     stats = register_stats()
 
-    pop, stats = algorithms.eaMuPlusLambda(pop, toolbox, MU, LAMBDA, CXPB, MUTPB, NGEN, stats, verbose=True)
+    pop, stats = algorithms.eaSimple(pop, toolbox, CXPB, MUTPB, NGEN, stats, verbose=True)
 
 
     return pop, stats

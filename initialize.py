@@ -15,16 +15,10 @@ IND_SIZE=100
 WIDTH_MIN, WIDTH_MAX = 0, 255
 HEIGHT_MIN, HEIGHT_MAX = 0, 255
 
-COLOR_MIN, COLOR_MAX = 0, 255
-VERTEX_COUNT = 150
+VERTEX_COUNT = 500
 
-
-def create_individual_representation(toolbox, rgb = False): #TODO: abstraer
-    if rgb:
-        return (toolbox.attr_x_coord, toolbox.attr_y_coord, 
-                    toolbox.attr_color, toolbox.attr_color, toolbox.attr_color)
-    return (toolbox.attr_x_coord, toolbox.attr_y_coord, 
-                    toolbox.attr_color)
+def create_individual_representation(toolbox, rgb = False):
+    return (toolbox.attr_x_coord, toolbox.attr_y_coord)
 
 def register_population(toolbox):
     creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
@@ -33,7 +27,6 @@ def register_population(toolbox):
     # definicion de atributos y sus rangos de valores asociados
     toolbox.register("attr_x_coord", random.randint, WIDTH_MIN, WIDTH_MAX)
     toolbox.register("attr_y_coord", random.randint, HEIGHT_MIN, HEIGHT_MAX)
-    toolbox.register("attr_color", random.randint, COLOR_MIN, COLOR_MAX)
 
     individual_representation = create_individual_representation(toolbox)
     toolbox.register("individual", 

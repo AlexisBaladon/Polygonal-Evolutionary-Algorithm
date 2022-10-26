@@ -4,67 +4,39 @@ import numpy as np
 
 
 idx = 0
-image = Image.open("./img/wom.png")
-original_image = image.convert("L").resize((255,255)) #TODO: CAMBIAR L
-#original_image.show()
+image = Image.open("./img/fox.jpg")
+original_image = image.convert("RGB").resize((255,255)) #TODO: CAMBIAR L
+original_image.show()
 original_image_matrix = np.asarray(original_image, dtype=int)
 
 width, height = 255, 255 #TODO: DESHARDCODEAR POR AMOR A CRISTO
 
 #<!-- DECODE
-def get_color(individual, rgb=False) -> tuple: #TODO: ABSTRAER
-    if rgb:
-        return individual[0:3], 3 
-    return individual[0], 1
 
-def get_colored_vertices(individual):
-    decoded_individual = []
-    i = 0
+def get_vertices(individual):
     ind_size = len(individual)
-    while i < ind_size:
-        coord = individual[i], individual[i + 1]
-        color, size_color = get_color(individual[i+2:])
-        decoded_individual.append((coord, color))
-        i += 2 + size_color
-    return decoded_individual
+    return [(individual[i], individual[i + 1]) for i in range(ind_size >> 1)]
 
-def area(x1, y1, x2, y2, x3, y3):
-    return abs((x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)))
- 
-def isInside(x1, y1, x2, y2, x3, y3, x, y):
-    A = area (x1, y1, x2, y2, x3, y3)
-    A1 = area (x, y, x2, y2, x3, y3)
-    A2 = area (x1, y1, x, y, x3, y3)
-    A3 = area (x1, y1, x2, y2, x, y)
-    if(A == A1 + A2 + A3):
-        return True
-    return False
-
-def create_polygonal_image(colored_vertices):
-    im = Image.new('L', (width, height), color="white")
+def create_polygonal_image(vertices):
+    im = Image.new('RGB', (width, height), color="white")
     draw = ImageDraw.Draw(im)
-    vertices = [vertex_data[0] for vertex_data in colored_vertices]
     tri = Delaunay(vertices)
     triangles = tri.simplices
     for t in triangles:
         triangle = [tuple(vertices[t[i]]) for i in range(3)]
-        colors = [colored_vertices[t[i]][1] for i in range(3)]
-        #color = tuple(np.mean(colors, axis=0, dtype=int)) #TODO: no anda para grayscale
-        #color = int(np.median(colors)) #TODO: solo anda para grayscale
-        #isIn = lambda x,y: isInside(*triangle[0], *triangle[1], *triangle[2], x, y)
         range_x = range(min([x[0] for x in triangle]), max([x[0] for x in triangle]))
         range_y = range(min([x[1] for x in triangle]), max([x[1] for x in triangle]))
-        colorsss = [original_image_matrix[x, y] for x in range_y for y in range_x]
-        color = int(np.median(colorsss))
+        colors = [original_image_matrix[x, y] for x in range_y for y in range_x]
+        color = tuple(np.median(colors, axis=0).astype(int))
         draw.polygon(triangle, fill = color)
     return im
 
 def decode(individual):
-    colored_vertices = get_colored_vertices(individual)
-    polygonal_image = create_polygonal_image(colored_vertices)
+    vertices = get_vertices(individual)
+    polygonal_image = create_polygonal_image(vertices)
     global idx
-    if idx % 2001 == 0:
-        polygonal_image.save(f'./test_images/{idx}.png')
+    if idx % 500 == 0:
+        polygonal_image.save(f'./test_images/fox/median_{idx}.png')
     idx += 1
     return polygonal_image
 #DECODE -->

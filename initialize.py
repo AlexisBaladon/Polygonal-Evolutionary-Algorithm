@@ -1,6 +1,7 @@
 import random
 
 import numpy
+import os
 
 from deap import base
 from deap import creator
@@ -9,13 +10,13 @@ from deap import algorithms
 
 import prueba
 
-IND_SIZE=100
+IND_SIZE=20
 
 # estas habra que setearlas segun la imagen que leamos
 WIDTH_MIN, WIDTH_MAX = 0, 255
 HEIGHT_MIN, HEIGHT_MAX = 0, 255
 
-VERTEX_COUNT = 500
+VERTEX_COUNT = 1000
 
 def create_individual_representation(toolbox, rgb = False):
     return (toolbox.attr_x_coord, toolbox.attr_y_coord)
@@ -29,12 +30,7 @@ def register_population(toolbox):
     toolbox.register("attr_y_coord", random.randint, HEIGHT_MIN, HEIGHT_MAX)
 
     individual_representation = create_individual_representation(toolbox)
-    toolbox.register("individual", 
-                        tools.initCycle,
-                        creator.Individual,
-                        individual_representation, 
-                        n=VERTEX_COUNT
-                    )
+    toolbox.register("individual", tools.initCycle, creator.Individual, individual_representation, n=VERTEX_COUNT)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     return toolbox
 
@@ -42,7 +38,7 @@ def register_operators(toolbox: base.Toolbox):
     toolbox.register("evaluate", prueba.evalDelaunay)
     toolbox.register("mate", tools.cxOnePoint)#, alpha=0.5)
     toolbox.register("mutate", tools.mutUniformInt, low=0, up=255, indpb=0.1) #TODO: DESHARDCODEAR up y low
-    toolbox.register("select", tools.selTournament, tournsize=3)
+    toolbox.register("select", tools.selBest)#, tournsize=5)
     return toolbox
 
 def register_stats():
@@ -52,6 +48,12 @@ def register_stats():
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
     return stats
+
+def register_parallelism(toolbox, pool_size= os.cpu_count()):
+    import multiprocessing as mp
+    pool = mp.Pool(pool_size)
+    toolbox.register("map", pool.map)
+    return toolbox
 
 def main():
     random.seed(64)
@@ -64,11 +66,11 @@ def main():
     toolbox = base.Toolbox()
     register_population(toolbox)
     register_operators(toolbox)
+    #register_parallelism(toolbox)
     pop = toolbox.population(n=MU)
     stats = register_stats()
 
     pop, stats = algorithms.eaSimple(pop, toolbox, CXPB, MUTPB, NGEN, stats, verbose=True)
-
 
     return pop, stats
 

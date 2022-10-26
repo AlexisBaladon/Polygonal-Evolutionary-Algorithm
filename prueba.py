@@ -2,6 +2,8 @@ from scipy.spatial import Delaunay
 from PIL import Image,ImageDraw
 import numpy as np
 
+from initialize import VERTEX_COUNT
+
 
 idx = 0
 image = Image.open("./img/fox.jpg")
@@ -26,8 +28,10 @@ def create_polygonal_image(vertices):
         triangle = [tuple(vertices[t[i]]) for i in range(3)]
         range_x = range(min([x[0] for x in triangle]), max([x[0] for x in triangle]))
         range_y = range(min([x[1] for x in triangle]), max([x[1] for x in triangle]))
-        colors = [original_image_matrix[x, y] for x in range_y for y in range_x]
-        color = tuple(np.median(colors, axis=0).astype(int))
+        #colors = [original_image_matrix[x, y] for x in range_y for y in range_x]
+        #color = tuple(np.median(colors, axis=0).astype(int))
+        vertices_centroid = np.mean(np.array(triangle), axis=0, dtype=int)
+        color = tuple(original_image_matrix[vertices_centroid[1], vertices_centroid[0]])
         draw.polygon(triangle, fill = color)
     return im
 
@@ -35,8 +39,8 @@ def decode(individual):
     vertices = get_vertices(individual)
     polygonal_image = create_polygonal_image(vertices)
     global idx
-    if idx % 500 == 0:
-        polygonal_image.save(f'./test_images/fox/median_{idx}.png')
+    if idx % 100 == 0:
+        polygonal_image.save(f'./test_images/fox/median_{idx}-{VERTEX_COUNT}.png')
     idx += 1
     return polygonal_image
 #DECODE -->

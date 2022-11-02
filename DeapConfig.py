@@ -7,7 +7,7 @@ import random
 import numpy as np
 import os
 
-from multiprocessing import Pool
+import multiprocessing
 
 class DeapConfig:
     def __init__(self, seed=64, vertex_count=1000, toolbox=base.Toolbox(), stats=tools.Statistics(),  gene_mutation_probability=0.1, pool_size=os.cpu_count(), NGEN=1000000, MU=50, LAMBDA=50, CXPB=0.8, MUTPB=0.2, mutation_probability=0.1, width_max=255, height_max=255):
@@ -76,10 +76,8 @@ class DeapConfig:
         self.stats.register("max", np.max)
 
     def register_parallelism(self):
-        # with Pool(self.pool_size) as pool:
-        #     results = pool.imap_unordered(self.toolbox.evaluate, )
-        # self.toolbox.register("map", pool.map)
-        # return results
+        pool = multiprocessing.Pool()
+        self.toolbox.register("map", pool.imap_unordered)
         return
     
     def run_algorithm(self):

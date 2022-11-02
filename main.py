@@ -2,6 +2,10 @@ import argparse
 import sys
 import prueba
 
+from AE import AE
+from DeapConfig import DeapConfig
+from ImageProcessor import ImageProcessor
+
 def get_arguments() -> dict:
     parser = argparse.ArgumentParser()
     parser.add_argument("--vertex_count", type=int, default="./", required=True, help=f"")
@@ -18,6 +22,11 @@ def check_preconditions(args):
 def main():
     args = get_arguments()
     args = check_preconditions(args)
+
+    dc = DeapConfig(seed=args["seed"], vertex_count=args["vertex_count"])
+    ip = ImageProcessor(img_in_dir=args["img_in_dir"], img_out_dir=args["img_out_dir"])
+    ae = AE(dc, ip)
+
     return
 
 if __name__ == "__main__":

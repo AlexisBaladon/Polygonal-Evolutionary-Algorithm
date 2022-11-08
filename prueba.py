@@ -75,3 +75,4 @@ if __name__ == "__main__":
     img1.show(), img2.show()
     img1, img2 = np.asarray(img1), np.asarray(img2)
     print(np.sum((img1 - img2)**2, dtype=int))
+

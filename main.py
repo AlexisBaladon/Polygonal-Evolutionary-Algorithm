@@ -1,6 +1,5 @@
 import argparse
 import sys
-import prueba
 
 from AE import AE
 from DeapConfig import DeapConfig
@@ -8,25 +7,65 @@ from ImageProcessor import ImageProcessor
 
 def get_arguments() -> dict:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--vertex_count", type=int, default="./", required=True, help=f"")
-    parser.add_argument("--seed", type=str, default="N", required=True, help=f"")
-    parser.add_argument("--img_out_dir", type=str, default="./", required=False, help=f"")
-    parser.add_argument("--img_in_dir", type=str, default="./", required=False, help=f"")
+
+    #DEAP CONFIGURATION
+    parser.add_argument("--INDPB", type=float, default=0.1, help="Individual probability")
+    parser.add_argument("--CXPB", type=float, default=0.8, help="Crossover probability")
+    parser.add_argument("--MUTPB", type=float, default=0.2, help="Mutation probability")
+    parser.add_argument("--NGEN", type=int, default=100, help="Number of generations")
+    parser.add_argument("--MU", type=int, default=50, help="Population size")
+    parser.add_argument("--LAMBDA", type=int, default=50, help="Number of children to produce at each generation")
+    parser.add_argument("--seed", type=int, default=64, help="Seed")
+
+    #IMAGE PROCESSING
+    parser.add_argument("--input_path", type=str, default="./img", help=f"")
+    parser.add_argument("--input_name", type=str, default="monalisa.jpg", required=True, help=f"")
+    parser.add_argument("--output_path", type=str, default="./", help=f"")
+    parser.add_argument("--output_name", type=str, default="monalisa.jpg", help=f"")
+    parser.add_argument("--width_max", type=int, default=255, help="Maximum width")
+    parser.add_argument("--height_max", type=int, default=255, help="Maximum height")
+
+    #DELAUNAY
+    parser.add_argument("--vertex_count", type=int, default=50, required=True, help=f"")
+    parser.add_argument("--cpu_count", type=int, default=1, help="Number of CPUs to use")
 
     args = vars(parser.parse_args())
     return args
 
 def check_preconditions(args):
+    if args["width_max"] < 0 or args["height_max"] < 0:
+        raise Exception("Invalid image size")
+    if args["vertex_count"] < 5:
+        raise Exception("Invalid vertex count")
+    if args["cpu_count"] < 1:
+        raise Exception("Invalid CPU count")
+
+    #TODO: Check if input file exists
+    #TODO: Check if output file exists
+    #TODO: Check if output path exists
+    #TODO: Check if input path exists
+    #TODO: Check if input file is an image
+    
+    #Variable renaming
+    args["ind_size"] = args["vertex_count"] * 2
+    args["max_x"] = args["width_max"]
+    args["max_y"] = args["height_max"]
     return args
 
 def main():
-    args = get_arguments()
-    args = check_preconditions(args)
+    #command example
+    #py main.py --input_name Bart.jpg --vertex_count 50 
+    try:
+        args = get_arguments()
+        args = check_preconditions(args)
+    except Exception as e:
+        print(e.with_traceback()) #Remove traceback in production
+        sys.exit(1)
 
-    dc = DeapConfig(seed=args["seed"], vertex_count=args["vertex_count"])
-    ip = ImageProcessor(img_in_dir=args["img_in_dir"], img_out_dir=args["img_out_dir"])
-    ae = AE(dc, ip)
-
+    dc = DeapConfig(**args)
+    ip = ImageProcessor(**args)
+    ae = AE(ip,dc)
+    ae.run()
     return
 
 if __name__ == "__main__":

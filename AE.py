@@ -11,7 +11,6 @@ class AE:
 
 
     def buildDeapModule(self):
-        self.deap_configurer.register_individual_type()
         self.deap_configurer.register_fitness()
         self.deap_configurer.register_population()
         self.deap_configurer.register_operators(self.image_processor.evalDelaunay)
@@ -29,7 +28,7 @@ class AE:
 
 
 if __name__ == "__main__":
-    img_p = ImageProcessor.ImageProcessor()
-    deap_c = DeapConfig.DeapConfig()
+    img_p = ImageProcessor()
+    deap_c = DeapConfig()
     ae = AE(img_p, deap_c)
     ae.run()

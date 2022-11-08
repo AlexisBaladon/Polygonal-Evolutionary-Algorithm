@@ -3,7 +3,7 @@ from scipy.spatial import Delaunay
 import numpy as np
 
 class ImageProcessor:
-    def __init__(self, img_in_dir="img/girl.jpg", img_out_dir="out/girl/",    img_desired_width=255, img_desired_height=255):
+    def __init__(self, img_in_dir="img/triangles.png", img_out_dir="out/triangles/",    img_desired_width=255, img_desired_height=255):
         self.img_in_dir = img_in_dir
         self.img_out_dir = img_out_dir
         self.img_desired_width = img_desired_width
@@ -25,7 +25,9 @@ class ImageProcessor:
 
     def get_vertices(self, individual):
         ind_size = len(individual)
-        return [(individual[i], individual[i + 1]) for i in range(ind_size) if i&1==0]
+        individual = [255 if ind > 255 else 0 if ind < 0 else int(ind) for ind in individual]
+        individual = [(individual[i], individual[i + 1]) for i in range(ind_size) if i&1==0]
+        return individual
 
     def create_polygonal_image(self, vertices):
         w, h = self.img_desired_width, self.img_desired_height

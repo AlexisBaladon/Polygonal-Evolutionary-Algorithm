@@ -8,9 +8,9 @@ from deap import creator
 from deap import tools
 from deap import algorithms
 
-import prueba
+from multiprocessing import Pool
 
-IND_SIZE=20
+import prueba
 
 # estas habra que setearlas segun la imagen que leamos
 WIDTH_MIN, WIDTH_MAX = 0, 255
@@ -50,15 +50,15 @@ def register_stats():
     return stats
 
 def register_parallelism(toolbox, pool_size= os.cpu_count()):
-    import multiprocessing as mp
-    pool = mp.Pool(pool_size)
+    with Pool(pool_size) as pool:
+        results = pool.imap_unordered(toolbox.evaluate)
     toolbox.register("map", pool.map)
     return toolbox
 
 def main():
     random.seed(64)
     NGEN = 1000000
-    MU = 50
+    MU = 50 # population size
     LAMBDA = 100
     CXPB = 0.8
     MUTPB = 0.2

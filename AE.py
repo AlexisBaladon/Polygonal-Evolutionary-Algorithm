@@ -23,7 +23,7 @@ class AE:
         self.buildDeapModule()
 
         #algo
-        self.deap_configurer.run_algorithm()
+        self.deap_configurer.run_algorithm(logs=True)
 
         return
 

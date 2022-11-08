@@ -4,13 +4,14 @@ from deap import tools
 from deap import algorithms
 
 import random
+import pandas
 import numpy as np
 import os
 
 import multiprocessing
 
 class DeapConfig:
-    def __init__(self, seed=64, vertex_count=1000, toolbox=base.Toolbox(), stats=tools.Statistics(),  gene_mutation_probability=0.1, pool_size=os.cpu_count(), NGEN=1000000, MU=50, LAMBDA=50, CXPB=0.8, MUTPB=0.2, mutation_probability=0.1, width_max=255, height_max=255):
+    def __init__(self, seed=64, vertex_count=12, toolbox=base.Toolbox(), stats=tools.Statistics(),  gene_mutation_probability=0.1, pool_size=os.cpu_count(), NGEN=1000000, MU=50, LAMBDA=50, CXPB=0.8, MUTPB=0.2, mutation_probability=0.1, width_max=255, height_max=255):
         self.seed = seed
         self.vertex_count = vertex_count
 
@@ -60,9 +61,11 @@ class DeapConfig:
 
     def register_operators(self, fitness_custom_function):
         self.toolbox.register("evaluate", fitness_custom_function)
-        self.toolbox.register("mate", tools.cxOnePoint)
-        min = self.height_max if self.height_max < self.width_max else self.width_max
-        self.toolbox.register("mutate", tools.mutUniformInt, low=0, up=min, indpb=self.gene_mutation_probability)
+        #self.toolbox.register("mate", tools.cxOnePoint)
+        self.toolbox.register("mate", tools.cxTwoPoint)
+        #min = self.height_max if self.height_max < self.width_max else self.width_max
+        #self.toolbox.register("mutate", tools.mutUniformInt, low=0, up=min, indpb=self.gene_mutation_probability)
+        self.toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=15, indpb=self.gene_mutation_probability)
         self.toolbox.register("select", tools.selBest)
 
     
@@ -80,6 +83,12 @@ class DeapConfig:
         self.toolbox.register("map", pool.imap_unordered)
         return
     
-    def run_algorithm(self):
+    def save_logs(self, logbook):
+        df_log = pandas.DataFrame(logbook)
+        df_log.to_csv('/logs/last.csv', index=False)
+    
+    def run_algorithm(self, logs=False):
         pop = self.toolbox.population(n=self.MU)
-        algorithms.eaMuPlusLambda(pop, self.toolbox, self.MU, self.LAMBDA, self.CXPB, self.MUTPB, self.NGEN, self.stats, verbose=True)
+        pop, logbook = algorithms.eaMuPlusLambda(pop, self.toolbox, self.MU, self.LAMBDA, self.CXPB, self.MUTPB, self.NGEN, self.stats, verbose=True)
+        if logs:
+            self.save_logs(logbook)

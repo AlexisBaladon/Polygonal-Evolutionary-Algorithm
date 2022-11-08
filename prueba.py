@@ -6,7 +6,7 @@ from initialize import VERTEX_COUNT
 
 
 idx = 0
-image = Image.open("./img/fox.jpg")
+image = Image.open("./img/pok.png")
 original_image = image.convert("RGB").resize((255,255)) #TODO: CAMBIAR L
 original_image.show()
 original_image_matrix = np.asarray(original_image, dtype=int)
@@ -17,7 +17,7 @@ width, height = 255, 255 #TODO: DESHARDCODEAR POR AMOR A CRISTO
 
 def get_vertices(individual):
     ind_size = len(individual)
-    return [(individual[i], individual[i + 1]) for i in range(ind_size >> 1)]
+    return [(individual[i], individual[i + 1]) for i in range(ind_size>>1) if i&1==0]
 
 def create_polygonal_image(vertices):
     im = Image.new('RGB', (width, height), color="white")
@@ -40,7 +40,7 @@ def decode(individual):
     polygonal_image = create_polygonal_image(vertices)
     global idx
     if idx % 100 == 0:
-        polygonal_image.save(f'./test_images/fox/median_{idx}-{VERTEX_COUNT}.png')
+        polygonal_image.save(f'./test_images/pok/median_{idx}-{VERTEX_COUNT}.png')
     idx += 1
     return polygonal_image
 #DECODE -->

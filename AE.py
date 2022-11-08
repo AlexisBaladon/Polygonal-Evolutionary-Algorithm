@@ -1,8 +1,8 @@
-import ImageProcessor
-import DeapConfig
+from ImageProcessor import ImageProcessor
+from DeapConfig import DeapConfig
 
 class AE:
-    def __init__(self, img_p, deap_c):
+    def __init__(self, img_p: ImageProcessor, deap_c: DeapConfig):
         self.image_processor = img_p
         self.deap_configurer = deap_c
 
@@ -16,7 +16,7 @@ class AE:
         self.deap_configurer.register_population()
         self.deap_configurer.register_operators(self.image_processor.evalDelaunay)
         self.deap_configurer.register_stats()
-        self.deap_configurer.register_parallelism()
+        #self.deap_configurer.register_parallelism()
         
     def run(self):
         self.buildImageModule()

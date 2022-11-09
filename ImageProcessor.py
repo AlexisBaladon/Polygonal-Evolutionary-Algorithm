@@ -74,7 +74,7 @@ class ImageProcessor:
         
         return image
 
-    def read_image(self, verbose=True, edge_detection=False, color_palette: int=0, denoise=True):
+    def read_image(self, verbose=False, edge_detection=False, color_palette: int=0, denoise=True):
         image = Image.open(self.img_in_dir).convert("RGB")
         image = self.__tune_image(image, color_palette, denoise, edge_detection)
         self.width, self.height = image.size
@@ -109,10 +109,10 @@ class ImageProcessor:
         vertices = self.get_vertices(individual)
         polygonal_image = self.create_polygonal_image(vertices)
 
-        if self.idx % 100 == 0:
-            polygonal_image.save(f'test/{self.idx}-{self.order}.png')
-            self.order += 1
-        self.idx += 1
+        #if self.idx % 100 == 0:
+        #    polygonal_image.save(f'test/{self.idx}-{self.order}.png')
+        #    self.order += 1
+        #self.idx += 1
         
         return polygonal_image
 

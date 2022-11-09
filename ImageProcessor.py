@@ -39,7 +39,6 @@ class ImageProcessor:
         cv2.imshow("edges", edges)
         cv2.waitKey(0)
         self.edges_coordinates = list(np.argwhere(edges > 0))
-        #reverse the coordinates
         self.edges_coordinates = [tuple(reversed(x)) for x in self.edges_coordinates]
 
     def __resize_image(self, image: Image.Image, w: int, h: int):
@@ -52,24 +51,32 @@ class ImageProcessor:
         image = image.resize((w, h))
         return image
 
-    def read_image(self, verbose=True, edge_detection=False, color_palette: int=0, denoise=True):
+    def __denoise(self, image):
+        image = np.array(image)
+        dst = cv2.fastNlMeansDenoisingColored(image, None, 10, 10, 7, 21)
+        image = Image.fromarray(dst)
+        return image
+
+    def __tune_image(self, image: Image.Image, color_palette: int, denoise: bool, edge_detection: bool) -> Image.Image:
         w, h = self.width, self.height
-        image = Image.open(self.img_in_dir).convert("RGB")
-        
+
         if color_palette:
             image = image.convert('P', palette=Image.ADAPTIVE, colors=color_palette).convert('RGB')
 
         if denoise:
-            image = np.array(image)
-            dst = cv2.fastNlMeansDenoisingColored(image, None, 10, 10, 7, 21)
-            image = Image.fromarray(dst)
+            image = self.__denoise(image)
 
         if edge_detection:
             self.__edge_detection(image)
-        
+
         if w is not None or h is not None:
             image = self.__resize_image(image, w, h)
+        
+        return image
 
+    def read_image(self, verbose=True, edge_detection=False, color_palette: int=0, denoise=True):
+        image = Image.open(self.img_in_dir).convert("RGB")
+        image = self.__tune_image(image, color_palette, denoise, edge_detection)
         self.width, self.height = image.size
         self.original_image_matrix = np.asarray(image, dtype=np.uint64)
 

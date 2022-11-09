@@ -12,9 +12,10 @@ class AE:
 
     def buildDeapModule(self):
         self.deap_configurer.register_fitness()
-        self.deap_configurer.register_population()
+        self.deap_configurer.register_population(self.image_processor.width - 1, self.image_processor.height - 1)
         self.deap_configurer.register_operators(self.image_processor.evalDelaunay)
         self.deap_configurer.register_stats()
+        self.deap_configurer.register_seed()
         #self.deap_configurer.register_parallelism()
         
     def run(self):

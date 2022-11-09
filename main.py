@@ -22,8 +22,8 @@ def get_arguments() -> dict:
     parser.add_argument("--input_name", type=str, default="monalisa.jpg", required=True, help=f"")
     parser.add_argument("--output_path", type=str, default="./", help=f"")
     parser.add_argument("--output_name", type=str, default="monalisa.jpg", help=f"")
-    parser.add_argument("--width_max", type=int, default=255, help="Maximum width")
-    parser.add_argument("--height_max", type=int, default=255, help="Maximum height")
+    parser.add_argument("--width", type=int, default=None, help="Maximum width")
+    parser.add_argument("--height", type=int, default=None, help="Maximum height")
 
     #DELAUNAY
     parser.add_argument("--vertex_count", type=int, default=50, required=True, help=f"")
@@ -33,8 +33,10 @@ def get_arguments() -> dict:
     return args
 
 def check_preconditions(args):
-    if args["width_max"] < 0 or args["height_max"] < 0:
-        raise Exception("Invalid image size")
+    if args["width"] is not None and args["width"] < 0:
+        raise Exception("Invalid image width")
+    if args["height"] is not None and args["height"] < 0:
+        raise Exception("Invalid image height")
     if args["vertex_count"] < 5:
         raise Exception("Invalid vertex count")
     if args["cpu_count"] < 1:
@@ -48,8 +50,6 @@ def check_preconditions(args):
     
     #Variable renaming
     args["ind_size"] = args["vertex_count"] * 2
-    args["max_x"] = args["width_max"]
-    args["max_y"] = args["height_max"]
     return args
 
 def main():

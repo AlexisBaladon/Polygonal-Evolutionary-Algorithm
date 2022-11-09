@@ -1,11 +1,12 @@
 from PIL import Image, ImageDraw
 from scipy.spatial import Delaunay
 import numpy as np
+import cv2
 
 class ImageProcessor:
     def __init__(self, input_path="img/", input_name="triangles.jpg",
                  output_path="out/triangles/", output_name="delaunay.jpg",
-                 width=255, height=255, vertex_count=50, **kwargs):
+                 width=None, height=None, vertex_count=50, **kwargs):
         
         # Image parameters
         self.input_path = input_path
@@ -25,31 +26,64 @@ class ImageProcessor:
         self.idx = 0
         self.order = 0
 
-    def read_image(self, verbose=False):
+    def read_image(self, verbose=True):
         w, h = self.width, self.height
-        image = Image.open(self.img_in_dir).convert("RGB").resize((w,h))
-        self.original_image_matrix = np.asarray(image, dtype=int)
+
+        image = cv2.imread(self.img_in_dir, cv2.IMREAD_COLOR)
+        #show image
+        #image = Image.open(self.img_in_dir).convert("RGB")
+        
+        # Resize image if needed
+        if w is not None or h is not None:
+            print("no deberia entrar")
+            if h is not None:
+                original_width, = image.size
+                w = int(h * original_width / image.height)
+            else:
+                _, original_height = image.size
+                h = int(w * original_height / image.width)
+            image = image.resize((w, h))
+
+        self.height, self.width = image.shape[:2]
+        self.original_image_matrix = image#np.asarray(image, dtype=np.uint64)
+
         if verbose:
-            image.show()
+            #show image with cv2
+            cv2.imshow("Original Image", image)
+            cv2.waitKey(0)
 
     def get_vertices(self, individual):
-        individual = [max(0, min(255, x)) for x in individual]
+        #clip the odd indices to be between 0 and self.width and the pair indices to be between 0 and self.height
+        individual[::2] = np.clip(individual[::2], 0, self.width)
+        individual[1::2] = np.clip(individual[1::2], 0, self.height)
         individual = list(map(int, individual))
         vertices = list(zip(individual[::2], individual[1::2]))
-        vertices.extend([[0,0], [0,255], [255,0], [255,255]])
+        vertices.extend([(0,0), (0,self.height), (self.width,0), (self.width,self.height)])
         return vertices
 
     def create_polygonal_image(self, vertices):
         w, h = self.width, self.height
-        im = Image.new('RGB', (w, h), color="white")
-        draw = ImageDraw.Draw(im)
+        #creates cv2 white image
+        #create numpy image with white background
+        im = np.zeros((h, w, 3), np.uint8)
+        
+        #im = Image.new('RGB', (w, h), color="white") TODO: PIL
+        #draw = ImageDraw.Draw(im) TODO: PIL
         tri = Delaunay(vertices)
         triangles = tri.simplices
         for t in triangles:
             triangle = [tuple(vertices[t[i]]) for i in range(3)]
             vertices_centroid = np.mean(np.array(triangle), axis=0, dtype=int)
             color = tuple(self.original_image_matrix[vertices_centroid[1], vertices_centroid[0]])
-            draw.polygon(triangle, fill = color)
+            color = tuple([int(x) for x in color])
+            #fill image with cv2 polygon
+            cv2.imshow("Original Image", im)
+            cv2.waitKey(0)
+            cv2.fillConvexPoly(im, np.array(triangle), color)
+            cv2.imshow("Original Image", im)
+            cv2.waitKey(0)
+            #im = cv2.fillConvexPoly(im, np.array(triangle), color)
+            #draw.polygon(triangle, fill = color)
         return im
 
     def decode(self, individual):
@@ -57,15 +91,16 @@ class ImageProcessor:
         polygonal_image = self.create_polygonal_image(vertices)
 
         if self.idx % 100 == 0:
-            polygonal_image.save(f'test/{self.idx}-{self.order}.png')
+            cv2.imwrite(f"test/{self.idx}-{self.order}.png", polygonal_image)
+            #polygonal_image.save(f'test/{self.idx}-{self.order}.png') TODO: PIL
             self.order += 1
         self.idx += 1
         
         return polygonal_image
 
     def get_fitness(self, decoded_individual):
-        individual_image_matrix = np.asarray(decoded_individual, dtype=int)
-        fitness = np.sum((individual_image_matrix - self.original_image_matrix)**2)
+        #individual_image_matrix = decoded_individual#np.asarray(decoded_individual, dtype=np.uint64) TODO: PIL
+        fitness = np.sum((decoded_individual - self.original_image_matrix)**2)
         return fitness
 
     def evalDelaunay(self, individual):

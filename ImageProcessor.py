@@ -73,16 +73,14 @@ class ImageProcessor:
         triangles = tri.simplices
         for t in triangles:
             triangle = [tuple(vertices[t[i]]) for i in range(3)]
-            vertices_centroid = np.mean(np.array(triangle), axis=0, dtype=int)
+            triangle = np.array(triangle, np.int32)
+            vertices_centroid = np.mean(triangle, axis=0, dtype=int)
+            #from height and width to cv2 coordinates
+            vertices_centroid[0] = h - vertices_centroid[0] - 1
+            #print(vertices_centroid, self.original_image_matrix)
             color = tuple(self.original_image_matrix[vertices_centroid[1], vertices_centroid[0]])
             color = tuple([int(x) for x in color])
-            #fill image with cv2 polygon
-            cv2.imshow("Original Image", im)
-            cv2.waitKey(0)
-            cv2.fillConvexPoly(im, np.array(triangle), color)
-            cv2.imshow("Original Image", im)
-            cv2.waitKey(0)
-            #im = cv2.fillConvexPoly(im, np.array(triangle), color)
+            cv2.fillConvexPoly(im, triangle, color)
             #draw.polygon(triangle, fill = color)
         return im
 

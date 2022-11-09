@@ -42,18 +42,31 @@ class DeapConfig:
     def __create_individual_representation(self):
         return (self.toolbox.attr_x_coord, self.toolbox.attr_y_coord)
 
-    def __register_individual_type(self, max_x, max_y):
+    def __register_individual_type(self):
         # definicion de atributos y sus rangos de valores asociados
-        self.toolbox.register("attr_x_coord", random.randint, 0, max_x)
-        self.toolbox.register("attr_y_coord", random.randint, 0, max_y)
+        self.toolbox.register("attr_x_coord", random.randint, 0, self.max_x)
+        self.toolbox.register("attr_y_coord", random.randint, 0, self.max_y)
     
-    def register_population(self, max_x, max_y):
-        self.__register_individual_type(max_x, max_y)
+    #define initialization of deap individual for initCycle
+    def __initCycle(self, individual, edges, n):
+        edges_coords = [random.choice(edges) for _ in range(n >> 1)]
+        genotype = [x for edge in edges_coords for x in edge]
+        genotype = individual(genotype)
+        return genotype
+
+    def register_population(self, max_x, max_y, edges=None):
+        self.max_x = max_x
+        self.max_y = max_y
+        self.__register_individual_type()
         individual_representation = self.__create_individual_representation()
 
-        self.toolbox.register("individual", tools.initCycle, creator.Individual, individual_representation, n=self.ind_size)
-
-        self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
+        if edges:
+            #initialize custom individual
+            self.toolbox.register("individual", self.__initCycle, creator.Individual, edges, self.ind_size)
+            self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
+        else:    
+            self.toolbox.register("individual", tools.initCycle, creator.Individual, individual_representation, n=self.ind_size)
+            self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
 
     def __mutGaussianCoordinate(self, individual, mu_x=0, mu_y=0, sigma_x=50, sigma_y=50, indpb=0.2):
         size = len(individual)
@@ -63,13 +76,22 @@ class DeapConfig:
                 individual[i+1] += random.gauss(mu_y, sigma_y)
         return individual,
 
+    def __mutUniformCoordinate(self, individual, indpb=0.2):
+        size = len(individual)
+        for i in range(0,size,2):
+            if random.random() < indpb:
+                individual[i] = random.randint(0,self.max_x)
+                individual[i+1] = random.randint(0,self.max_y)
+        return individual,
+
     def register_operators(self, fitness_custom_function):
         self.toolbox.register("evaluate", fitness_custom_function)
         self.toolbox.register("mate", tools.cxTwoPoint)
         #self.toolbox.register("mate", tools.cxOnePoint)
-        #self.toolbox.register("mutate", tools.mutUniformInt, low=0, up=min, indpb=self.INDPB)
+        #self.toolbox.register("mutate", tools.mutUniformInt, low=0, up=255, indpb=self.INDPB)
         #self.toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=50, indpb=self.INDPB)
-        self.toolbox.register("mutate", self.__mutGaussianCoordinate, mu_x=0, mu_y=0, sigma_x=25, sigma_y=25, indpb=self.INDPB)
+        #self.toolbox.register("mutate",self.__mutUniformCoordinate, indpb=self.INDPB)
+        self.toolbox.register("mutate", self.__mutGaussianCoordinate, mu_x=0, mu_y=0, sigma_x=self.max_x/10, sigma_y=self.max_y/10, indpb=self.INDPB)
         self.toolbox.register("select", tools.selBest)
 
     

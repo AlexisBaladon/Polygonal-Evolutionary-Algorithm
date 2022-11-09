@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 from scipy.spatial import Delaunay
 import numpy as np
 import cv2
@@ -26,19 +26,49 @@ class ImageProcessor:
         self.idx = 0
         self.order = 0
 
-    def read_image(self, verbose=True):
+        # Edge detection
+        self.edges_coordinates = None
+
+        #TODO: PARAMETRIZAR
+        # Triangle outline
+        self.triangle_outline = None
+        self.initial_color = "white"
+
+    def __edge_detection(self, image):
+        edges = cv2.Canny(np.array(image), 100, 200)
+        cv2.imshow("edges", edges)
+        cv2.waitKey(0)
+        self.edges_coordinates = list(np.argwhere(edges > 0))
+        #reverse the coordinates
+        self.edges_coordinates = [tuple(reversed(x)) for x in self.edges_coordinates]
+
+    def __resize_image(self, image: Image.Image, w: int, h: int):
+        if w is None:
+            original_width,_ = image.size
+            w = int(h * original_width / image.height)
+        elif h is None:
+            _, original_height = image.size
+            h = int(w * original_height / image.width)
+        image = image.resize((w, h))
+        return image
+
+    def read_image(self, verbose=True, edge_detection=False, color_palette: int=0, denoise=True):
         w, h = self.width, self.height
         image = Image.open(self.img_in_dir).convert("RGB")
         
+        if color_palette:
+            image = image.convert('P', palette=Image.ADAPTIVE, colors=color_palette).convert('RGB')
+
+        if denoise:
+            image = np.array(image)
+            dst = cv2.fastNlMeansDenoisingColored(image, None, 10, 10, 7, 21)
+            image = Image.fromarray(dst)
+
+        if edge_detection:
+            self.__edge_detection(image)
+        
         if w is not None or h is not None:
-            print("no deberia entrar")
-            if h is not None:
-                original_width, = image.size
-                w = int(h * original_width / image.height)
-            else:
-                _, original_height = image.size
-                h = int(w * original_height / image.width)
-            image = image.resize((w, h))
+            image = self.__resize_image(image, w, h)
 
         self.width, self.height = image.size
         self.original_image_matrix = np.asarray(image, dtype=np.uint64)
@@ -56,7 +86,7 @@ class ImageProcessor:
 
     def create_polygonal_image(self, vertices):
         w, h = self.width, self.height
-        im = Image.new('RGB', (w, h), color="white")
+        im = Image.new('RGB', (w, h), color=self.initial_color)
         draw = ImageDraw.Draw(im)
         tri = Delaunay(vertices)
         triangles = tri.simplices
@@ -64,7 +94,7 @@ class ImageProcessor:
             triangle = [tuple(vertices[t[i]]) for i in range(3)]
             vertices_centroid = np.mean(np.array(triangle), axis=0, dtype=int)
             color = tuple(self.original_image_matrix[vertices_centroid[1], vertices_centroid[0]])
-            draw.polygon(triangle, fill=color)
+            draw.polygon(triangle, fill=color, outline=self.triangle_outline)
 
         return im
 

@@ -28,12 +28,8 @@ class ImageProcessor:
 
     def read_image(self, verbose=True):
         w, h = self.width, self.height
-
-        #image = cv2.imread(self.img_in_dir, cv2.IMREAD_COLOR)
-        #show image
         image = Image.open(self.img_in_dir).convert("RGB")
         
-        # Resize image if needed
         if w is not None or h is not None:
             print("no deberia entrar")
             if h is not None:
@@ -44,17 +40,13 @@ class ImageProcessor:
                 h = int(w * original_height / image.width)
             image = image.resize((w, h))
 
-        self.width, self.height = image.size#image.shape[:2]
-        self.original_image_matrix = np.asarray(image, dtype=np.uint64) #image
+        self.width, self.height = image.size
+        self.original_image_matrix = np.asarray(image, dtype=np.uint64)
 
         if verbose:
-            #show image with cv2
-            #cv2.imshow("Original Image", image)
-            #cv2.waitKey(0)
             image.show()
 
     def get_vertices(self, individual):
-        #clip the odd indices to be between 0 and self.width and the pair indices to be between 0 and self.height
         individual[::2] = np.clip(individual[::2], 0, self.width)
         individual[1::2] = np.clip(individual[1::2], 0, self.height)
         individual = list(map(int, individual))
@@ -64,23 +56,14 @@ class ImageProcessor:
 
     def create_polygonal_image(self, vertices):
         w, h = self.width, self.height
-        #creates cv2 white image
-        #create numpy image with white background
-        #im = np.zeros((h, w, 3), np.uint8)
-        
-        im = Image.new('RGB', (w, h), color="white") #TODO: PIL
-        draw = ImageDraw.Draw(im)# TODO: PIL
+        im = Image.new('RGB', (w, h), color="white")
+        draw = ImageDraw.Draw(im)
         tri = Delaunay(vertices)
         triangles = tri.simplices
         for t in triangles:
             triangle = [tuple(vertices[t[i]]) for i in range(3)]
             vertices_centroid = np.mean(np.array(triangle), axis=0, dtype=int)
-            #from height and width to cv2 coordinates
-            #vertices_centroid[0] = h - vertices_centroid[0] - 1
-            #print(vertices_centroid, self.original_image_matrix)
             color = tuple(self.original_image_matrix[vertices_centroid[1], vertices_centroid[0]])
-            #color = tuple([int(x) for x in color])
-            #cv2.fillConvexPoly(im, triangle, color)
             draw.polygon(triangle, fill=color)
 
         return im
@@ -90,15 +73,14 @@ class ImageProcessor:
         polygonal_image = self.create_polygonal_image(vertices)
 
         if self.idx % 100 == 0:
-            #cv2.imwrite(f"test/{self.idx}-{self.order}.png", polygonal_image)
-            polygonal_image.save(f'test/{self.idx}-{self.order}.png') #TODO: PIL
+            polygonal_image.save(f'test/{self.idx}-{self.order}.png')
             self.order += 1
         self.idx += 1
         
         return polygonal_image
 
     def get_fitness(self, decoded_individual):
-        individual_image_matrix = np.asarray(decoded_individual, dtype=np.uint64) #TODO: PIL
+        individual_image_matrix = np.asarray(decoded_individual, dtype=np.uint64)
         fitness = np.sum((individual_image_matrix - self.original_image_matrix)**2)
         return fitness
 

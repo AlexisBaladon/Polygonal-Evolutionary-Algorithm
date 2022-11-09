@@ -52,19 +52,39 @@ def check_preconditions(args):
     args["ind_size"] = args["vertex_count"] * 2
     return args
 
+
+
+dc = DeapConfig()
+ip = ImageProcessor()
+ae = AE(ip,dc)
+ae.buildImageModule()
+ae.buildDeapModule()
+
 def main():
     #command example
     #py main.py --input_name Bart.jpg --vertex_count 50 
     try:
         args = get_arguments()
         args = check_preconditions(args)
+
+
+        #deap parallelism outside main
+        #import multiprocessing
+        #from deap import base
+        #toolbox = base.Toolbox()
+        #process_pool = multiprocessing.Pool(4)
+        #args["toolbox"] = toolbox
+        #args["process_pool"] = process_pool
+
     except Exception as e:
         print(e.with_traceback()) #Remove traceback in production
         sys.exit(1)
 
-    dc = DeapConfig(**args)
-    ip = ImageProcessor(**args)
-    ae = AE(ip,dc)
+    #dc = DeapConfig(**args)
+    #ip = ImageProcessor(**args)
+    #ae = AE(ip,dc)
+
+    dc.register_parallelism()
     ae.run()
     return
 

@@ -17,16 +17,17 @@ class AE:
         self.deap_configurer.register_operators(self.image_processor.evalDelaunay)
         self.deap_configurer.register_stats()
         self.deap_configurer.register_seed()
-        #self.deap_configurer.register_parallelism()
+        #self.deap_configurer.register_parallelism() #ONLY RUN INSIDE MAIN
         
     def run(self):
         self.buildImageModule()
         self.buildDeapModule()
 
         #algo
-        self.deap_configurer.run_algorithm(logs=True)
-
+        #self.deap_configurer.run_algorithm(logs=True)
+        self.deap_configurer.run_parallel_algorithm(logs=True, imageprocessor=self.image_processor)
         return
+
 
 
 if __name__ == "__main__":

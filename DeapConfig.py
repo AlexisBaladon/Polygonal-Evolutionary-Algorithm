@@ -11,9 +11,9 @@ import os
 import multiprocessing
 
 class DeapConfig:
-    def __init__(self, seed=64, ind_size=12,
+    def __init__(self, seed=64, ind_size=300,
                  INDPB=0.1, cpu_count=os.cpu_count(),
-                 NGEN=100, MU=50, LAMBDA=50, CXPB=0.8, MUTPB=0.2, **kwargs):
+                 NGEN=15, MU=50, LAMBDA=50, CXPB=0.8, MUTPB=0.2, **kwargs):
 
         self.toolbox = base.Toolbox()
         self.stats = tools.Statistics()
@@ -105,8 +105,8 @@ class DeapConfig:
         self.stats.register("max", np.max)
 
     def register_parallelism(self):
-        pool = multiprocessing.Pool(self.cpu_count)
-        self.toolbox.register("map", pool.map)
+        self.process_pool = multiprocessing.Pool(self.cpu_count)
+        self.toolbox.register("map", self.process_pool.map)
         return
     
     def save_logs(self, logbook):
@@ -116,8 +116,16 @@ class DeapConfig:
     def register_seed(self):
         random.seed(self.seed)
 
-    def run_algorithm(self, logs=False):
-        pop = self.toolbox.population(n=self.MU)
-        pop, logbook = algorithms.eaMuPlusLambda(pop, self.toolbox, self.MU, self.LAMBDA, self.CXPB, self.MUTPB, self.NGEN, self.stats, verbose=True)
-        if logs:
-            self.save_logs(logbook)
+    def run_parallel_algorithm(self, logs=False, imageprocessor=None):
+        with self.process_pool:
+            self.run_algorithm(logs=logs, imageprocessor=imageprocessor)
+
+    def run_algorithm(self, logs=False, imageprocessor=None):
+            pop = self.toolbox.population(n=self.MU)
+            pop, logbook = algorithms.eaMuPlusLambda(pop, self.toolbox, self.MU, self.LAMBDA, self.CXPB, self.MUTPB, self.NGEN, self.stats, verbose=True)
+            if logs:
+                self.save_logs(logbook)
+            img = imageprocessor.decode(pop[0])
+            img.show()
+            img2 = imageprocessor.decode(pop[len(pop)-1])
+            img2.show()

@@ -2,11 +2,12 @@ from PIL import Image, ImageDraw, ImageFilter
 from scipy.spatial import Delaunay
 import numpy as np
 import cv2
+import random
 
-class ImageProcessor:
-    def __init__(self, input_path="img/", input_name="triangles.jpg",
-                 output_path="out/triangles/", output_name="delaunay.jpg",
-                 width=None, height=None, vertex_count=50, **kwargs):
+class ImageProcessor():
+    def __init__(self, input_path="img/", input_name="scarlet.jpg",
+                 output_path="test", output_name="delaunay.jpg",
+                 width=None, height=None, vertex_count=150, **kwargs):
         
         # Image parameters
         self.input_path = input_path
@@ -110,7 +111,7 @@ class ImageProcessor:
         polygonal_image = self.create_polygonal_image(vertices)
 
         #if self.idx % 100 == 0:
-        #    polygonal_image.save(f'test/{self.idx}-{self.order}.png')
+        #    polygonal_image.save(f'test/{self.idx}-{self.order}-{random.randint(0,500)}.png')
         #    self.order += 1
         #self.idx += 1
         

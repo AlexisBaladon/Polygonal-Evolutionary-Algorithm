@@ -3,11 +3,12 @@ from scipy.spatial import Delaunay
 import numpy as np
 import cv2
 import random
+import os
 
 class ImageProcessor():
     def __init__(self, input_path="img/", input_name="scarlet.jpg",
                  output_path="test", output_name="delaunay.jpg",
-                 width=None, height=None, vertex_count=150, **kwargs):
+                 width=None, height=None, vertex_count=1000, **kwargs):
         
         # Image parameters
         self.input_path = input_path
@@ -24,7 +25,7 @@ class ImageProcessor():
 
         #Matrix of the original image
         self.original_image_matrix = None
-        self.idx = 0
+        self.idx = {}
         self.order = 0
 
         # Edge detection
@@ -75,8 +76,9 @@ class ImageProcessor():
         
         return image
 
-    def read_image(self, verbose=False, edge_detection=False, color_palette: int=0, denoise=True):
+    def read_image(self, verbose=True, edge_detection=True, color_palette: int=0, denoise=True):
         image = Image.open(self.img_in_dir).convert("RGB")
+        image.show()
         image = self.__tune_image(image, color_palette, denoise, edge_detection)
         self.width, self.height = image.size
         self.original_image_matrix = np.asarray(image, dtype=np.uint64)
@@ -87,9 +89,10 @@ class ImageProcessor():
     def get_vertices(self, individual):
         individual[::2] = np.clip(individual[::2], 0, self.width)
         individual[1::2] = np.clip(individual[1::2], 0, self.height)
-        individual = list(map(int, individual))
+        individual = [int(x) for x in individual]
         vertices = list(zip(individual[::2], individual[1::2]))
         vertices.extend([(0,0), (0,self.height), (self.width,0), (self.width,self.height)])
+        #vertices.sort(key=lambda x: (x[0], x[1]))
         return vertices
 
     def create_polygonal_image(self, vertices):
@@ -103,17 +106,18 @@ class ImageProcessor():
             vertices_centroid = np.mean(np.array(triangle), axis=0, dtype=int)
             color = tuple(self.original_image_matrix[vertices_centroid[1], vertices_centroid[0]])
             draw.polygon(triangle, fill=color, outline=self.triangle_outline)
-
         return im
 
     def decode(self, individual):
         vertices = self.get_vertices(individual)
         polygonal_image = self.create_polygonal_image(vertices)
 
-        #if self.idx % 100 == 0:
-        #    polygonal_image.save(f'test/{self.idx}-{self.order}-{random.randint(0,500)}.png')
-        #    self.order += 1
-        #self.idx += 1
+        #POR AHORA ES LO QUE HAY
+        #pid = os.getppid()
+        #idx = self.idx.get(pid, 0)
+        #if idx % 50 == 0:
+        #    polygonal_image.save(f'test/womhd/{self.vertex_count}-{pid}-{idx}.png')
+        #self.idx[pid] = idx + 1
         
         return polygonal_image
 

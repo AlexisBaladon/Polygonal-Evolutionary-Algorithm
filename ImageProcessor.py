@@ -2,14 +2,14 @@ from PIL import Image, ImageDraw, ImageFilter
 from scipy.spatial import Delaunay
 import numpy as np
 import cv2
-import random
-import os
 
 class ImageProcessor():
-    def __init__(self, input_path="img/", input_name="scarlet.jpg",
+    def __init__(self, vertex_count: int, 
+                 input_name: str, input_path="img/",
                  output_path="test", output_name="delaunay.jpg",
-                 width=None, height=None, vertex_count=1000, **kwargs):
-        
+                 width=None, height=None,
+                 tri_outline=None, **kwargs):
+
         # Image parameters
         self.input_path = input_path
         self.input_name = input_name
@@ -22,8 +22,9 @@ class ImageProcessor():
         self.width = width
         self.height = height
         self.vertex_count = vertex_count
+        self.triangle_outline = tri_outline
 
-        #Matrix of the original image
+        # Matrix of the original image
         self.original_image_matrix = None
         self.idx = {}
         self.order = 0
@@ -31,17 +32,14 @@ class ImageProcessor():
         # Edge detection
         self.edges_coordinates = None
 
-        #TODO: PARAMETRIZAR
-        # Triangle outline
-        self.triangle_outline = None
-        self.initial_color = "white"
-
-    def __edge_detection(self, image):
+    def __edge_detection(self, image, verbose=False):
         edges = cv2.Canny(np.array(image), 100, 200)
-        cv2.imshow("edges", edges)
-        cv2.waitKey(0)
         self.edges_coordinates = list(np.argwhere(edges > 0))
         self.edges_coordinates = [tuple(reversed(x)) for x in self.edges_coordinates]
+        
+        if verbose:
+            cv2.imshow("Edge detection", edges)
+            cv2.waitKey(0)
 
     def __resize_image(self, image: Image.Image, w: int, h: int):
         if w is None:
@@ -59,45 +57,32 @@ class ImageProcessor():
         image = Image.fromarray(dst)
         return image
 
-    def __tune_image(self, image: Image.Image, color_palette: int, denoise: bool, edge_detection: bool) -> Image.Image:
+    def __tune_image(self, image: Image.Image, denoise: bool, edge_detection: bool, verbose=False) -> Image.Image:
         w, h = self.width, self.height
 
-        if color_palette:
-            image = image.convert('P', palette=Image.ADAPTIVE, colors=color_palette).convert('RGB')
-
+        if w is not None or h is not None:
+            image = self.__resize_image(image, w, h)
+            
         if denoise:
             image = self.__denoise(image)
 
         if edge_detection:
-            self.__edge_detection(image)
+            self.__edge_detection(image, verbose)
 
-        if w is not None or h is not None:
-            image = self.__resize_image(image, w, h)
-        
         return image
 
-    def read_image(self, verbose=True, edge_detection=True, color_palette: int=0, denoise=True):
+    def read_image(self, verbose=False, edge_detection=True, denoise=True):
         image = Image.open(self.img_in_dir).convert("RGB")
-        image.show()
-        image = self.__tune_image(image, color_palette, denoise, edge_detection)
+        image = self.__tune_image(image, denoise, edge_detection, verbose=verbose)
         self.width, self.height = image.size
         self.original_image_matrix = np.asarray(image, dtype=np.uint64)
 
         if verbose:
             image.show()
 
-    def get_vertices(self, individual):
-        individual[::2] = np.clip(individual[::2], 0, self.width)
-        individual[1::2] = np.clip(individual[1::2], 0, self.height)
-        individual = [int(x) for x in individual]
-        vertices = list(zip(individual[::2], individual[1::2]))
-        vertices.extend([(0,0), (0,self.height), (self.width,0), (self.width,self.height)])
-        #vertices.sort(key=lambda x: (x[0], x[1]))
-        return vertices
-
     def create_polygonal_image(self, vertices):
         w, h = self.width, self.height
-        im = Image.new('RGB', (w, h), color=self.initial_color)
+        im = Image.new('RGB', (w, h))
         draw = ImageDraw.Draw(im)
         tri = Delaunay(vertices)
         triangles = tri.simplices
@@ -107,26 +92,3 @@ class ImageProcessor():
             color = tuple(self.original_image_matrix[vertices_centroid[1], vertices_centroid[0]])
             draw.polygon(triangle, fill=color, outline=self.triangle_outline)
         return im
-
-    def decode(self, individual):
-        vertices = self.get_vertices(individual)
-        polygonal_image = self.create_polygonal_image(vertices)
-
-        #POR AHORA ES LO QUE HAY
-        #pid = os.getppid()
-        #idx = self.idx.get(pid, 0)
-        #if idx % 50 == 0:
-        #    polygonal_image.save(f'test/womhd/{self.vertex_count}-{pid}-{idx}.png')
-        #self.idx[pid] = idx + 1
-        
-        return polygonal_image
-
-    def get_fitness(self, decoded_individual):
-        individual_image_matrix = np.asarray(decoded_individual, dtype=np.uint64)
-        fitness = np.sum((individual_image_matrix - self.original_image_matrix)**2)
-        return fitness
-
-    def evalDelaunay(self, individual):
-        decoded_individual = self.decode(individual)
-        fit = self.get_fitness(decoded_individual)
-        return fit,

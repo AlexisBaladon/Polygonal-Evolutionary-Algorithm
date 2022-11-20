@@ -1,7 +1,7 @@
 import argparse
 import sys
-import os
-from AE import AE
+from EA import EA
+from EAController import EAController
 from DeapConfig import DeapConfig
 from ImageProcessor import ImageProcessor
 
@@ -25,6 +25,7 @@ def get_arguments() -> dict:
     #DELAUNAY
     parser.add_argument("--vertex_count", type=int, default=50, required=True, help=f"")
     parser.add_argument("--cpu_count", type=int, default=1, help="Number of CPUs to use")
+    parser.add_argument("--tri_outline", type=int, default=None, help=f"Color of triangle outline")
     return vars(parser.parse_args())
 
 def check_preconditions(args):
@@ -64,12 +65,13 @@ dc = DeapConfig(**args)
 dc.register_fitness()
 
 #command example
-#py main.py --input_name Bart.jpg --vertex_count 50 --cpu_count 4 --width 500 --height 500 --output_name Bart.jpg
+#py main.py --input_name womhd.jpg --vertex_count 10000 --cpu_count 4 --width 500 --height 500 --output_name Bart.jpg
 
 if __name__ == "__main__":
     #PARALLELISM MUST BE INSIDE MAIN
     ip = ImageProcessor(**args)
-    ae = AE(ip,dc)
-    ae.buildImageModule()
-    ae.buildDeapModule()
-    ae.run()
+    ea = EA(ip)
+    eac = EAController(ea, dc)
+    eac.build_ea_module()
+    eac.build_deap_module()
+    eac.run()

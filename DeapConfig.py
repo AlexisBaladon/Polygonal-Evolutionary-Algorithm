@@ -31,7 +31,6 @@ class DeapConfig:
         # probability of mutating a gene
         self.INDPB = INDPB
     
-    #CUSTOM OPERATORS
     def __init_coordinates(self, init_coordinates, order_individual):
         coordinates = init_coordinates()
         coordinates = order_individual(coordinates)
@@ -89,12 +88,14 @@ class DeapConfig:
 
     def __stop_condition(self, gen: int, NGEN: int, fitnesses: list[int]):
         #last generation or fitness not changing for 0.2*NGEN generations
-        INVARIATION_THRESHOLD = 0.2
+        INVARIANCE_THRESHOLD = 0.2
+        GEN_INV_THRESHOLD = int(INVARIANCE_THRESHOLD * NGEN)
 
         conditions = [
             gen == NGEN,
-            (len(fitnesses) > NGEN*INVARIATION_THRESHOLD) and len(set(fitnesses[-int(NGEN*INVARIATION_THRESHOLD):])) == 1
+            GEN_INV_THRESHOLD > 1 and (gen > GEN_INV_THRESHOLD) and len(set(fitnesses[-GEN_INV_THRESHOLD:])) == 1
         ]
+
         return any(conditions)
 
     #SAME IMPLEMENTATION AS IN DEAP LIBRARY BUT WITH CHUNKSIZE DEFINED IN MAP FUNCTIONS
@@ -121,8 +122,6 @@ class DeapConfig:
         gen = 1
         best_fitnesses = [record['min']]
         while not self.__stop_condition(gen, ngen, best_fitnesses):
-            best_fitnesses.append(record['min'])
-
             offspring = algorithms.varOr(population, toolbox, lambda_, cxpb, mutpb)
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
             fitnesses = toolbox.map(toolbox.evaluate, invalid_ind, chunksize=len(population)//self.cpu_count)
@@ -138,6 +137,7 @@ class DeapConfig:
                 #import EA
                 #img = EA.EA.decode(EA.EA, population[0])
                 #img.save(f'test/womhd/{self.ind_size >> 1}-IMAGEN_{gen}.png')
+            best_fitnesses.append(record['min'])
             gen += 1
 
         return population, logbook

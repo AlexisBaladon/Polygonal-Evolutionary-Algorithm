@@ -43,8 +43,7 @@ class DeapConfig:
         creator.create("Individual", list, fitness=creator.FitnessMin)
 
     def register_population(self, init_coordinates, order_individual):
-        init_coordinates_ = lambda: init_coordinates(self.ind_size)
-        self.toolbox.register("individual", self.__init_coordinates, init_coordinates_, order_individual)
+        self.toolbox.register("individual", self.__init_coordinates, init_coordinates, order_individual)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
 
     def register_operators(self, fitness_custom_function, mutation_custom_function, max_x, max_y):
@@ -92,7 +91,7 @@ class DeapConfig:
         GEN_INV_THRESHOLD = int(INVARIANCE_THRESHOLD * NGEN)
 
         conditions = [
-            gen == NGEN,
+            gen >= NGEN,
             GEN_INV_THRESHOLD > 1 and (gen >= GEN_INV_THRESHOLD) and len(set(fitnesses[-GEN_INV_THRESHOLD:])) == 1
         ]
 

@@ -13,8 +13,9 @@ class EAController:
         #self.deap_configurer.register_fitness() ONLY RUN OUTSIDE MAIN
         width, height = self.evolutionary_algorithm.image_processor.width, self.evolutionary_algorithm.image_processor.height
         edges_coordinates = self.evolutionary_algorithm.image_processor.edges_coordinates
+        ind_size = self.evolutionary_algorithm.image_processor.vertex_count * 2
         fitness_function, mutation_function = self.evolutionary_algorithm.evalDelaunay, self.evolutionary_algorithm.mutGaussianCoordinate
-        init_coordinates = lambda ind_size: self.evolutionary_algorithm.init_coordinates(width-1, height-1, ind_size, edges_coordinates)
+        init_coordinates = lambda: self.evolutionary_algorithm.init_coordinates(width-1, height-1, ind_size, edges_coordinates)
         self.deap_configurer.register_population(init_coordinates, self.evolutionary_algorithm.order_individual)
         self.deap_configurer.register_operators(fitness_function, mutation_function, width-1, height-1)
         self.deap_configurer.register_stats()

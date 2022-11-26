@@ -4,6 +4,7 @@ from EA import EA
 from EAController import EAController
 from DeapConfig import DeapConfig
 from ImageProcessor import ImageProcessor
+from threading import Thread
 
 def get_arguments() -> dict:
     parser = argparse.ArgumentParser()
@@ -23,7 +24,7 @@ def get_arguments() -> dict:
     parser.add_argument("--width", type=int, default=None, help="Maximum width")
     parser.add_argument("--height", type=int, default=None, help="Maximum height")
     #DELAUNAY
-    parser.add_argument("--vertex_count", type=int, default=50, required=True, help=f"")
+    parser.add_argument("--vertex_count", type=int, default=None, help=f"")
     parser.add_argument("--cpu_count", type=int, default=1, help="Number of CPUs to use")
     parser.add_argument("--tri_outline", type=int, default=None, help=f"Color of triangle outline")
     return vars(parser.parse_args())
@@ -33,7 +34,7 @@ def check_preconditions(args):
         raise Exception("Invalid image width")
     if args["height"] is not None and args["height"] < 0:
         raise Exception("Invalid image height")
-    if args["vertex_count"] < 5:
+    if args["vertex_count"] is not None and args["vertex_count"] < 5:
         raise Exception("Invalid vertex count")
     if args["cpu_count"] < 1:
         raise Exception("Invalid CPU count")
@@ -44,19 +45,13 @@ def check_preconditions(args):
     #TODO: Check if input file is an image
     return args
 
-def rename_arguments(args):
-    #Modules accept different names for the same variable
-    args["ind_size"] = args["vertex_count"] * 2
-    return args
-
 def process_arguments():
     try:
         args = get_arguments()
         args = check_preconditions(args)
     except Exception as e:
-        print(e.with_traceback()) #Remove traceback in production
+        print(str(e), e.with_traceback()) #Remove traceback in production
         sys.exit(1)
-    args = rename_arguments(args)
     return args
 
 #DEAP CONFIGURATION MUST BE OUTSIDE OF MAIN WHEN USING PARALLELISM
@@ -71,11 +66,16 @@ def main(args):
     eac.build_deap_module()
     eac.run()
 
-
 #command example
 #py main.py --input_name womhd.jpg --vertex_count 10000 --cpu_count 4 --width 500 --height 500 --output_name Bart.jpg
-
 if __name__ == "__main__":
     #PARALLELISM MUST BE INSIDE MAIN
     args = process_arguments()
     main(args)
+    #algorithm_thread = Thread(target=main, args=(args,))
+    #algorithm_thread.start()
+    #while True:
+    #    input = input()
+    #    if input == "exit":
+    #        break
+    #algorithm_thread.kill()

@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw
 from scipy.spatial import Delaunay
 import numpy as np
 import cv2
@@ -33,12 +33,12 @@ class ImageProcessor():
         self.edges_coordinates = None
 
     def __edge_detection(self, image, verbose=False):
-        edges = cv2.Canny(np.array(image), 100, 200)
-        self.edges_coordinates = list(np.argwhere(edges > 0))
+        self.edges_mask = cv2.Canny(np.array(image), 100, 200)
+        self.edges_coordinates = list(np.argwhere(self.edges_mask > 0))
         self.edges_coordinates = [tuple(reversed(x)) for x in self.edges_coordinates]
         
         if verbose:
-            cv2.imshow("Edge detection", edges)
+            cv2.imshow("Edge detection", self.edges_mask)
             cv2.waitKey(0)
 
     def __resize_image(self, image: Image.Image, w: int, h: int):
@@ -77,18 +77,12 @@ class ImageProcessor():
         self.width, self.height = image.size
         self.original_image_matrix = np.asarray(image, dtype=np.uint64)
 
-        ##entropy of image
-        #w, h = self.width, self.height
-        #image = Image.new('RGB', (w, h))
-        ##create random image
-        #image2 = Image.fromarray(np.random.randint(0, 255, (w, h, 3), dtype=np.uint8))
-        #image.show()
-        #image2.show()
-        #print(image.entropy(), image2.entropy())
-        ##create random image
-#
-        #exit()
-#
+        if self.vertex_count is None:
+            image_entropy = image.entropy()
+            self.vertex_count = int(np.exp(image_entropy))
+            if verbose:
+                print(f"Image entropy: {image_entropy}")
+                print(f"Vertex count: {self.vertex_count}")
 
         if verbose:
             image.show()

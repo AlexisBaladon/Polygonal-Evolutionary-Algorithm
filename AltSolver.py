@@ -13,7 +13,7 @@ class AltSolver:
     def __get_deltas(self, method: str, threshold: int):
         if method == 'gaussian':
             gaussian_std = threshold
-            deltas = [np.random.normal(0, gaussian_std)] #changes
+            deltas = [np.random.normal(0, gaussian_std)]
         elif method == 'local_search':
             deltas = list(range(-threshold, threshold+1))
         else:

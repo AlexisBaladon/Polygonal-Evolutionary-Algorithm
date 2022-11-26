@@ -64,6 +64,18 @@ def main(args):
     eac.build_deap_module()
     return eac
 
+def handle_inputs():
+    while True:
+        usr_input = input()
+        if not algorithm_thread.is_alive():
+            print("Algorithm finished")
+            break
+        if usr_input == "exit":
+            eac.exit()
+            print("Waiting for next generation to finish before exiting...")
+            break
+
+
 DeapConfig.register_fitness() #DEAP CONFIGURATION MUST BE OUTSIDE OF MAIN WHEN USING PARALLELISM
 #py main.py --input_name womhd.jpg --vertex_count 10000 --cpu_count 4 --width 500 --height 500 --output_name Bart.jpg
 
@@ -72,12 +84,6 @@ if __name__ == "__main__":
     args = process_arguments()
     random.seed(args["seed"])
     eac = main(args)
-    algorithm_thread = Thread(target=eac.run, args=())
+    algorithm_thread = Thread(target=handle_inputs, args=())
     algorithm_thread.start()
-    while True:
-        usr_input = input()
-        if usr_input == "exit":
-            eac.exit()
-            print("Waiting for next generation to finish before exiting...")
-            break
-    algorithm_thread.join()
+    eac.run()

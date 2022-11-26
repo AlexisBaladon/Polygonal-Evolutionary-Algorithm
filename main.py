@@ -5,6 +5,7 @@ from EAController import EAController
 from DeapConfig import DeapConfig
 from ImageProcessor import ImageProcessor
 from threading import Thread
+import random
 
 def get_arguments() -> dict:
     parser = argparse.ArgumentParser()
@@ -54,9 +55,6 @@ def process_arguments():
         sys.exit(1)
     return args
 
-#DEAP CONFIGURATION MUST BE OUTSIDE OF MAIN WHEN USING PARALLELISM
-DeapConfig.register_fitness()
-
 def main(args):
     dc = DeapConfig(**args)
     ip = ImageProcessor(**args)
@@ -66,11 +64,13 @@ def main(args):
     eac.build_deap_module()
     return eac
 
-#command example
+DeapConfig.register_fitness() #DEAP CONFIGURATION MUST BE OUTSIDE OF MAIN WHEN USING PARALLELISM
 #py main.py --input_name womhd.jpg --vertex_count 10000 --cpu_count 4 --width 500 --height 500 --output_name Bart.jpg
+
 if __name__ == "__main__":
     #PARALLELISM MUST BE INSIDE MAIN
     args = process_arguments()
+    random.seed(args["seed"])
     eac = main(args)
     algorithm_thread = Thread(target=eac.run, args=())
     algorithm_thread.start()
@@ -78,6 +78,6 @@ if __name__ == "__main__":
         usr_input = input()
         if usr_input == "exit":
             eac.exit()
-            print("Waiting for next generation before exiting...")
+            print("Waiting for next generation to finish before exiting...")
             break
     algorithm_thread.join()

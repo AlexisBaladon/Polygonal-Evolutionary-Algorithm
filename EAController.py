@@ -19,7 +19,6 @@ class EAController:
         self.deap_configurer.register_population(init_coordinates, self.evolutionary_algorithm.order_individual)
         self.deap_configurer.register_operators(fitness_function, mutation_function, width-1, height-1)
         self.deap_configurer.register_stats()
-        self.deap_configurer.register_seed()
         if self.deap_configurer.cpu_count > 0:
             self.deap_configurer.register_parallelism() #ONLY RUN INSIDE MAIN
         

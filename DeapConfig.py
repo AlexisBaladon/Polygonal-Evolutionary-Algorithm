@@ -11,13 +11,12 @@ import os
 import multiprocessing
 
 class DeapConfig:
-    def __init__(self, seed=64, ind_size=2000,
+    def __init__(self, ind_size=2000,
                  INDPB=0.1, cpu_count=os.cpu_count(),
                  NGEN=2, MU=50, LAMBDA=50, CXPB=0.8, MUTPB=0.2, **kwargs):
 
         self.toolbox = base.Toolbox()
         self.stats = tools.Statistics()
-        self.seed = seed
         self.ind_size = ind_size
         self.cpu_count = cpu_count
         
@@ -71,9 +70,6 @@ class DeapConfig:
         df_log = pandas.DataFrame(logbook)
         df_log.to_csv('./logs/last.csv', index=False) #TODO: PARAMETRIZAR
     
-    def register_seed(self):
-        random.seed(self.seed)
-
     def run_algorithm(self, parallel=True):
         if parallel:
             with self.process_pool:

@@ -64,18 +64,20 @@ def main(args):
     eac = EAController(ea, dc)
     eac.build_ea_module()
     eac.build_deap_module()
-    eac.run()
+    return eac
 
 #command example
 #py main.py --input_name womhd.jpg --vertex_count 10000 --cpu_count 4 --width 500 --height 500 --output_name Bart.jpg
 if __name__ == "__main__":
     #PARALLELISM MUST BE INSIDE MAIN
     args = process_arguments()
-    main(args)
-    #algorithm_thread = Thread(target=main, args=(args,))
-    #algorithm_thread.start()
-    #while True:
-    #    input = input()
-    #    if input == "exit":
-    #        break
-    #algorithm_thread.kill()
+    eac = main(args)
+    algorithm_thread = Thread(target=eac.run, args=())
+    algorithm_thread.start()
+    while True:
+        usr_input = input()
+        if usr_input == "exit":
+            eac.exit()
+            print("Waiting for next generation before exiting...")
+            break
+    algorithm_thread.join()

@@ -34,3 +34,7 @@ class EAController:
         if logs:
             self.deap_configurer.save_logs(log_info)
         return
+
+    def exit(self):
+        self.deap_configurer.force_stop()
+        return

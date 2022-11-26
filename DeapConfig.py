@@ -30,6 +30,9 @@ class DeapConfig:
         self.MUTPB = MUTPB
         # probability of mutating a gene
         self.INDPB = INDPB
+
+        #force stop from main thread
+        self.forced_stop = False
     
     def __init_coordinates(self, init_coordinates, order_individual):
         coordinates = init_coordinates()
@@ -85,6 +88,9 @@ class DeapConfig:
                              self.CXPB, self.MUTPB, self.NGEN, self.stats, verbose=True)
             return pop, logbook
 
+    def force_stop(self):
+        self.forced_stop = True
+
     def __stop_condition(self, gen: int, NGEN: int, fitnesses: list[int]):
         #last generation or fitness not changing for 0.2*NGEN generations
         INVARIANCE_THRESHOLD = 0.2
@@ -92,7 +98,8 @@ class DeapConfig:
 
         conditions = [
             gen >= NGEN,
-            GEN_INV_THRESHOLD > 1 and (gen >= GEN_INV_THRESHOLD) and len(set(fitnesses[-GEN_INV_THRESHOLD:])) == 1
+            GEN_INV_THRESHOLD > 1 and (gen >= GEN_INV_THRESHOLD) and len(set(fitnesses[-GEN_INV_THRESHOLD:])) == 1,
+            self.forced_stop
         ]
 
         return any(conditions)

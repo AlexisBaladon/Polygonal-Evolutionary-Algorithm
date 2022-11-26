@@ -93,8 +93,10 @@ class DeapConfig:
 
         conditions = [
             gen == NGEN,
-            GEN_INV_THRESHOLD > 1 and (gen > GEN_INV_THRESHOLD) and len(set(fitnesses[-GEN_INV_THRESHOLD:])) == 1
+            GEN_INV_THRESHOLD > 1 and (gen >= GEN_INV_THRESHOLD) and len(set(fitnesses[-GEN_INV_THRESHOLD:])) == 1
         ]
+
+        print(f'gen: {gen}, NGEN: {NGEN}, fitnesses: {fitnesses[-GEN_INV_THRESHOLD:]}')
 
         return any(conditions)
 

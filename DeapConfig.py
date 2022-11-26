@@ -50,7 +50,6 @@ class DeapConfig:
         self.toolbox.register("evaluate", fitness_custom_function)
         self.toolbox.register("mate", tools.cxTwoPoint)
         self.toolbox.register("mutate", mutation_custom_function, mu_x=0, mu_y=0, sigma_x=max_x/50, sigma_y=max_y/50, indpb=self.INDPB)
-        #self.toolbox.register("select", tools.selTournament, tournsize=self.MU//5)
         self.toolbox.register("select", tools.selBest)
     
     def register_stats(self):
@@ -95,8 +94,6 @@ class DeapConfig:
             gen == NGEN,
             GEN_INV_THRESHOLD > 1 and (gen >= GEN_INV_THRESHOLD) and len(set(fitnesses[-GEN_INV_THRESHOLD:])) == 1
         ]
-
-        print(f'gen: {gen}, NGEN: {NGEN}, fitnesses: {fitnesses[-GEN_INV_THRESHOLD:]}')
 
         return any(conditions)
 

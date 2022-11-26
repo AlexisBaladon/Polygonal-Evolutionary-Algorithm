@@ -77,6 +77,19 @@ class ImageProcessor():
         self.width, self.height = image.size
         self.original_image_matrix = np.asarray(image, dtype=np.uint64)
 
+        ##entropy of image
+        #w, h = self.width, self.height
+        #image = Image.new('RGB', (w, h))
+        ##create random image
+        #image2 = Image.fromarray(np.random.randint(0, 255, (w, h, 3), dtype=np.uint8))
+        #image.show()
+        #image2.show()
+        #print(image.entropy(), image2.entropy())
+        ##create random image
+#
+        #exit()
+#
+
         if verbose:
             image.show()
 

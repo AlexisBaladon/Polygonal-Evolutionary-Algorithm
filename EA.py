@@ -12,7 +12,7 @@ class EA():
     def init_coordinates(self, max_x, max_y, n, edges, edge_rate=0.5):
         genotype = []
         for _ in range(0,n,2):
-            if random.random() < edge_rate:
+            if edges and random.random() < edge_rate:
                 edge = random.choice(edges)
                 genotype.extend(edge)
             else:

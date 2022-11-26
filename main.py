@@ -60,18 +60,22 @@ def process_arguments():
     return args
 
 #DEAP CONFIGURATION MUST BE OUTSIDE OF MAIN WHEN USING PARALLELISM
-args = process_arguments()
-dc = DeapConfig(**args)
-dc.register_fitness()
+DeapConfig.register_fitness()
 
-#command example
-#py main.py --input_name womhd.jpg --vertex_count 10000 --cpu_count 4 --width 500 --height 500 --output_name Bart.jpg
-
-if __name__ == "__main__":
-    #PARALLELISM MUST BE INSIDE MAIN
+def main(args):
+    dc = DeapConfig(**args)
     ip = ImageProcessor(**args)
     ea = EA(ip)
     eac = EAController(ea, dc)
     eac.build_ea_module()
     eac.build_deap_module()
     eac.run()
+
+
+#command example
+#py main.py --input_name womhd.jpg --vertex_count 10000 --cpu_count 4 --width 500 --height 500 --output_name Bart.jpg
+
+if __name__ == "__main__":
+    #PARALLELISM MUST BE INSIDE MAIN
+    args = process_arguments()
+    main(args)

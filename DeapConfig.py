@@ -37,7 +37,8 @@ class DeapConfig:
         coordinates = creator.Individual(coordinates)
         return coordinates
 
-    def register_fitness(self):
+    @staticmethod
+    def register_fitness():
         creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
         creator.create("Individual", list, fitness=creator.FitnessMin)
 

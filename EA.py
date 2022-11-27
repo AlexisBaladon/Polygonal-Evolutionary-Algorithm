@@ -6,8 +6,8 @@ class EA():
     def __init__(self, image_processor: ImageProcessor):
         self.image_processor = image_processor
 
-    def load_image(self):
-        self.image_processor.read_image()
+    def load_image(self, verbose=False, show=False):
+        self.image_processor.read_image(verbose=verbose, show=show)
     
     def init_coordinates(self, max_x, max_y, n, edges, edge_rate=0.5):
         genotype = []

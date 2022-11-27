@@ -6,8 +6,8 @@ class EAController:
         self.evolutionary_algorithm = ea
         self.deap_configurer = deap_c
 
-    def build_ea_module(self):
-        self.evolutionary_algorithm.load_image()
+    def build_ea_module(self, verbose=True, show_img=False):
+        self.evolutionary_algorithm.load_image(verbose=verbose, show=show_img)
 
     def build_deap_module(self):
         #self.deap_configurer.register_fitness() ONLY RUN OUTSIDE MAIN
@@ -22,14 +22,16 @@ class EAController:
         if self.deap_configurer.cpu_count > 0:
             self.deap_configurer.register_parallelism() #ONLY RUN INSIDE MAIN
         
-    def run(self, logs=True):
+    def run(self, show_res=True, logs=True):
         is_parallel = bool(self.deap_configurer.cpu_count > 1)
         population, log_info = self.deap_configurer.run_algorithm(parallel=is_parallel)
 
         # Save files
         img = self.evolutionary_algorithm.decode(population[0])
         img.save(self.evolutionary_algorithm.image_processor.img_out_dir)
-        img.show()
+
+        if show_res:
+            img.show("Result")
         if logs:
             self.deap_configurer.save_logs(log_info)
         return

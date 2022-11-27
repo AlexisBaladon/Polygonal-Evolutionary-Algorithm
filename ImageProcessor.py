@@ -32,13 +32,13 @@ class ImageProcessor():
         # Edge detection
         self.edges_coordinates = None
 
-    def __edge_detection(self, image, verbose=False):
-        self.edges_mask = cv2.Canny(np.array(image), 100, 200)
-        self.edges_coordinates = list(np.argwhere(self.edges_mask > 0))
+    def __edge_detection(self, image, show=False):
+        edges_mask = cv2.Canny(np.array(image), 100, 200)
+        self.edges_coordinates = list(np.argwhere(edges_mask > 0))
         self.edges_coordinates = [tuple(reversed(x)) for x in self.edges_coordinates]
         
-        if verbose:
-            cv2.imshow("Edge detection", self.edges_mask)
+        if show:
+            cv2.imshow("Edge detection", edges_mask)
             cv2.waitKey(0)
 
     def __resize_image(self, image: Image.Image, w: int, h: int):
@@ -57,7 +57,7 @@ class ImageProcessor():
         image = Image.fromarray(dst)
         return image
 
-    def __tune_image(self, image: Image.Image, denoise: bool, edge_detection: bool, verbose=False) -> Image.Image:
+    def __tune_image(self, image: Image.Image, denoise: bool, edge_detection: bool, show=False) -> Image.Image:
         w, h = self.width, self.height
 
         if w is not None or h is not None:
@@ -67,25 +67,25 @@ class ImageProcessor():
             image = self.__denoise(image)
 
         if edge_detection:
-            self.__edge_detection(image, verbose)
+            self.__edge_detection(image, show)
 
         return image
 
-    def read_image(self, verbose=False, edge_detection=True, denoise=True):
+    def read_image(self, verbose=False, show=False, edge_detection=True, denoise=True):
         image = Image.open(self.img_in_dir).convert("RGB")
-        image = self.__tune_image(image, denoise, edge_detection, verbose=verbose)
+        image = self.__tune_image(image, denoise, edge_detection, show=show)
         self.width, self.height = image.size
         self.original_image_matrix = np.asarray(image, dtype=np.uint64)
 
         if self.vertex_count is None:
             image_entropy = image.entropy()
-            self.vertex_count = int(np.exp(image_entropy))
+            self.vertex_count = int(np.power(2, image_entropy+4))
             if verbose:
                 print(f"Image entropy: {image_entropy}")
                 print(f"Vertex count: {self.vertex_count}")
 
-        if verbose:
-            image.show()
+        if show:
+            image.show("Preprocessed image")
 
     def create_polygonal_image(self, vertices):
         w, h = self.width, self.height

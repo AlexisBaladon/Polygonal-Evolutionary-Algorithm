@@ -10,13 +10,16 @@ import random
 def get_arguments() -> dict:
     parser = argparse.ArgumentParser()
     #DEAP CONFIGURATION
+    parser.add_argument("--seed", type=int, default=64, help="Seed")
     parser.add_argument("--INDPB", type=float, default=0.1, help="Probability of mutating a gene")
-    parser.add_argument("--CXPB", type=float, default=0.5, help="Crossover probability")
-    parser.add_argument("--MUTPB", type=float, default=0.5, help="Mutation probability")
+    parser.add_argument("--CXPB", type=float, default=0.2, help="Crossover probability")
+    parser.add_argument("--MUTPB", type=float, default=0.8, help="Mutation probability")
     parser.add_argument("--NGEN", type=int, default=100, help="Number of generations")
     parser.add_argument("--MU", type=int, default=50, help="Population size")
     parser.add_argument("--LAMBDA", type=int, default=50, help="Number of children to produce at each generation")
-    parser.add_argument("--seed", type=int, default=64, help="Seed")
+    parser.add_argument("--selection", type=str, default="best", help="Selection method (best, stochastic, tournament)")
+    parser.add_argument("--tournament_size", type=int, default=3, help="Tournament size")
+    parser.add_argument("--gaussian_rate", type=float, default=0.05, help="Gaussian rate. Multiplied by the max value of the mutated gene (coordinate)")
     #IMAGE PROCESSING
     parser.add_argument("--input_path", type=str, default="./img", help=f"")
     parser.add_argument("--input_name", type=str, default="monalisa.jpg", required=True, help=f"")
@@ -28,6 +31,11 @@ def get_arguments() -> dict:
     parser.add_argument("--vertex_count", type=int, default=None, help=f"")
     parser.add_argument("--cpu_count", type=int, default=1, help="Number of CPUs to use")
     parser.add_argument("--tri_outline", type=int, default=None, help=f"Color of triangle outline")
+    parser.add_argument("--edge_rate", type=float, default=0.5, help=f"Number of edges in initialized individual")
+    #CONSOLE
+    parser.add_argument("--verbose", type=int, default=1, help=f"Prints information to console")
+    parser.add_argument("--show", type=int, default=0, help=f"Show images")
+    parser.add_argument("--manual_console", type=int, default=0, help=f"allow to write commands while the algorithm is running (exit)")
     return vars(parser.parse_args())
 
 def check_preconditions(args):
@@ -60,11 +68,12 @@ def main(args):
     ip = ImageProcessor(**args)
     ea = EA(ip)
     eac = EAController(ea, dc)
-    eac.build_ea_module()
+    verbose, show_img = args["verbose"], args["show"]
+    eac.build_ea_module(verbose=verbose, show_img=show_img)
     eac.build_deap_module()
     return eac
 
-def handle_inputs():
+def handle_inputs(algorithm_thread: Thread, eac: EAController):
     while True:
         usr_input = input()
         if not algorithm_thread.is_alive():
@@ -75,15 +84,19 @@ def handle_inputs():
             print("Waiting for next generation to finish before exiting...")
             break
 
-
 DeapConfig.register_fitness() #DEAP CONFIGURATION MUST BE OUTSIDE OF MAIN WHEN USING PARALLELISM
-#py main.py --input_name womhd.jpg --vertex_count 10000 --cpu_count 4 --width 500 --height 500 --output_name Bart.jpg
 
+#py main.py --input_name womhd.jpg --vertex_count 10000 --cpu_count 4 --manual_console 1 --width 500 --height 500 --output_name Bart.jpg
 if __name__ == "__main__":
     #PARALLELISM MUST BE INSIDE MAIN
     args = process_arguments()
     random.seed(args["seed"])
     eac = main(args)
-    algorithm_thread = Thread(target=handle_inputs, args=())
-    algorithm_thread.start()
-    eac.run()
+    if args["manual_console"] == 1:
+        algorithm_thread = Thread(target=eac.run, args=())
+        algorithm_thread.start()
+        handle_inputs(algorithm_thread, eac)
+        algorithm_thread.join()
+    else:
+        eac.run()
+    

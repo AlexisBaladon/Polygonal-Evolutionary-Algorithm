@@ -12,8 +12,8 @@ import multiprocessing
 
 class DeapConfig:
     def __init__(self, ind_size=2000,
-                 INDPB=0.1, cpu_count=os.cpu_count(),
-                 NGEN=2, MU=50, LAMBDA=50, CXPB=0.8, MUTPB=0.2, **kwargs):
+                 INDPB=0.1, cpu_count=os.cpu_count(), selection="best", tournament_size=3,
+                 gaussian_rate=0.5, NGEN=2, MU=50, LAMBDA=50, CXPB=0.8, MUTPB=0.2, **kwargs):
 
         self.toolbox = base.Toolbox()
         self.stats = tools.Statistics()
@@ -29,6 +29,9 @@ class DeapConfig:
         self.MUTPB = MUTPB
         # probability of mutating a gene
         self.INDPB = INDPB
+        self.gaussian_rate = gaussian_rate
+        self.selection = selection
+        self.tournament_size = tournament_size
 
         #force stop from main thread
         self.forced_stop = False
@@ -49,10 +52,16 @@ class DeapConfig:
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
 
     def register_operators(self, fitness_custom_function, mutation_custom_function, max_x, max_y):
+        selections = {
+            "best"      : {"function": tools.selBest},
+            "stochastic": {"function": tools.selStochasticUniversalSampling},
+            "tournament": {"function": tools.selTournament, "tournsize": self.tournament_size},
+        }
+
         self.toolbox.register("evaluate", fitness_custom_function)
         self.toolbox.register("mate", tools.cxTwoPoint)
-        self.toolbox.register("mutate", mutation_custom_function, mu_x=0, mu_y=0, sigma_x=max_x/50, sigma_y=max_y/50, indpb=self.INDPB)
-        self.toolbox.register("select", tools.selBest)
+        self.toolbox.register("mutate", mutation_custom_function, mu_x=0, mu_y=0, sigma_x=max_x*self.gaussian_rate, sigma_y=max_y*self.gaussian_rate, indpb=self.INDPB)
+        self.toolbox.register("select", **selections[self.selection])
     
     def register_stats(self):
         self.stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -80,20 +89,19 @@ class DeapConfig:
 
     def __run_algorithm(self):
             pop = self.toolbox.population(n=self.MU)
-            pop, logbook = self.__eaMuPlusLambda(pop, self.toolbox, self.MU, self.LAMBDA,
-                             self.CXPB, self.MUTPB, self.NGEN, self.stats, verbose=True)
+            pop, logbook = self.__eaMuPlusLambda(pop, self.toolbox, self.MU, self.LAMBDA, self.CXPB, self.MUTPB, self.NGEN, self.stats, verbose=True)
             return pop, logbook
 
     def force_stop(self):
         self.forced_stop = True
 
-    def __stop_condition(self, gen: int, NGEN: int, fitnesses: list[int]):
-        #last generation or fitness not changing for 0.2*NGEN generations
+    def __stop_condition(self, gen: int, ngen: int, fitnesses: list[int]):
+        #last generation, or fitness not changing for 0.2*NGEN generations, or forced stop from main thread
         INVARIANCE_THRESHOLD = 0.2
-        GEN_INV_THRESHOLD = int(INVARIANCE_THRESHOLD * NGEN)
+        GEN_INV_THRESHOLD = int(INVARIANCE_THRESHOLD * ngen)
 
         conditions = [
-            gen >= NGEN,
+            gen >= ngen,
             GEN_INV_THRESHOLD > 1 and (gen >= GEN_INV_THRESHOLD) and len(set(fitnesses[-GEN_INV_THRESHOLD:])) == 1,
             self.forced_stop
         ]
@@ -101,8 +109,9 @@ class DeapConfig:
         return any(conditions)
 
     #SAME IMPLEMENTATION AS IN DEAP LIBRARY BUT WITH CHUNKSIZE DEFINED IN MAP FUNCTIONS
-    def __eaMuPlusLambda(self, population, toolbox, mu, lambda_, cxpb, mutpb, ngen, stats=None,
-                         halloffame=None, verbose=None):
+    def __eaMuPlusLambda(self, population: list, toolbox: base.Toolbox, 
+                         mu: int, lambda_: int, cxpb: float, mutpb: float, ngen: int,
+                         stats: tools.Statistics = None, halloffame: tools.HallOfFame = None, verbose=True):
 
         logbook = tools.Logbook()
         logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
@@ -114,10 +123,8 @@ class DeapConfig:
 
         if halloffame is not None:
             halloffame.update(population)
-
         record = stats.compile(population) if stats is not None else {}
         logbook.record(gen=0, nevals=len(invalid_ind), **record)
-
         if verbose:
             print(logbook.stream)
 
@@ -129,6 +136,7 @@ class DeapConfig:
             fitnesses = toolbox.map(toolbox.evaluate, invalid_ind, chunksize=len(population)//self.cpu_count)
             for ind, fit in zip(invalid_ind, fitnesses):
                 ind.fitness.values = fit
+
             if halloffame is not None:
                 halloffame.update(offspring)
             population[:] = toolbox.select(population + offspring, mu)
@@ -136,9 +144,6 @@ class DeapConfig:
             logbook.record(gen=gen, nevals=len(invalid_ind), **record)
             if verbose:
                 print(logbook.stream)
-                #import EA
-                #img = EA.EA.decode(EA.EA, population[0])
-                #img.save(f'test/womhd/{self.ind_size >> 1}-IMAGEN_{gen}.png')
             best_fitnesses.append(record['min'])
             gen += 1
 

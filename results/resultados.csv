@@ -1,4 +1,4 @@
-,0.8_0.01_selTournament
-avg_best_fitness,1882668931.0
-best_historical_fitness,1747539895.0
-std_fitness,135129036.0
+,0.8_0.01_selTournament,0.8_0.01_selBest,0.8_0.01_selStochasticUniversalSampling,0.8_0.05_selTournament,0.8_0.05_selBest,0.8_0.05_selStochasticUniversalSampling,0.8_0.1_selTournament,0.8_0.1_selBest,0.8_0.1_selStochasticUniversalSampling,0.9_0.01_selTournament,0.9_0.01_selBest,0.9_0.01_selStochasticUniversalSampling,0.9_0.05_selTournament,0.9_0.05_selBest,0.9_0.05_selStochasticUniversalSampling,0.9_0.1_selTournament,0.9_0.1_selBest,0.9_0.1_selStochasticUniversalSampling
+best_historical_fitness,102657.0,107152.0,235768.0,110264.0,71474.0,180563.0,164139.0,63021.0,184243.0,80462.0,99118.0,142682.0,80121.0,97479.0,221993.0,106288.0,81130.0,191593.0
+avg_best_fitness,107729.5,113188.0,241117.5,118944.0,95116.5,181842.5,173298.0,78316.5,186926.0,101089.5,105517.5,176980.5,111535.0,112447.0,225436.5,154563.0,97624.0,198477.0
+std_fitness,5072.5,6036.0,5349.5,8680.0,23642.5,1279.5,9159.0,15295.5,2683.0,20627.5,6399.5,34298.5,31414.0,14968.0,3443.5,48275.0,16494.0,6884.0

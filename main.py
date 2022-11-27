@@ -27,7 +27,7 @@ def get_arguments() -> dict:
     parser.add_argument("--width", type=int, default=None, help="Maximum width")
     parser.add_argument("--height", type=int, default=None, help="Maximum height")
     #DELAUNAY
-    parser.add_argument("--vertex_count", type=int, default=None, help=f"")
+    parser.add_argument("--vertex_count", type=int, default=None, help=f"Number of vertices")
     parser.add_argument("--cpu_count", type=int, default=1, help="Number of CPUs to use")
     parser.add_argument("--tri_outline", type=int, default=None, help=f"Color of triangle outline")
     parser.add_argument("--edge_rate", type=float, default=0.5, help=f"Number of edges in initialized individual")

@@ -45,7 +45,7 @@ class Statistics:
                 if len(select_operator) == 2:
                     self.eac.deap_configurer.__getattribute__("toolbox").register("select", select_operator[0], tournsize=select_operator[1])
                 else:
-                    self.eac.deap_configurer.__getattribute__("toolbox").register("select", select_operator)
+                    self.eac.deap_configurer.__getattribute__("toolbox").register("select", select_operator[0])
 
                 self.eac.deap_configurer.__setattr__("CXPB", cxpb)
                 self.eac.deap_configurer.__setattr__("MUTPB", mutpb)

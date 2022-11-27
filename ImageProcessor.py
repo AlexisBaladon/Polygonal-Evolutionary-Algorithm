@@ -21,7 +21,7 @@ class ImageProcessor():
         # Image dimensions
         self.width = width
         self.height = height
-        self.vertex_count = vertex_count
+        self.vertex_count = vertex_count - 4 # 4 vertices are added to the image corners
         self.triangle_outline = tri_outline
 
         # Matrix of the original image

@@ -13,7 +13,7 @@ import multiprocessing
 class DeapConfig:
     def __init__(self, ind_size=2000,
                  INDPB=0.1, cpu_count=os.cpu_count(), selection="best", tournament_size=3,
-                 gaussian_rate=0.5, NGEN=2, MU=50, LAMBDA=50, CXPB=0.8, MUTPB=0.2, **kwargs):
+                 gaussian_rate=0.5, NGEN=2, MU=50, LAMBDA=50, CXPB=0.8, MUTPB=0.2, edge_rate=0.5, **kwargs):
 
         self.toolbox = base.Toolbox()
         self.stats = tools.Statistics()
@@ -32,12 +32,14 @@ class DeapConfig:
         self.gaussian_rate = gaussian_rate
         self.selection = selection
         self.tournament_size = tournament_size
+        #rate of edges in initialization
+        self.edge_rate = edge_rate
 
         #force stop from main thread
         self.forced_stop = False
     
     def __init_coordinates(self, init_coordinates, order_individual):
-        coordinates = init_coordinates()
+        coordinates = init_coordinates(self.edge_rate)
         coordinates = order_individual(coordinates)
         coordinates = creator.Individual(coordinates)
         return coordinates
@@ -60,7 +62,7 @@ class DeapConfig:
 
         self.toolbox.register("evaluate", fitness_custom_function)
         self.toolbox.register("mate", tools.cxTwoPoint)
-        self.toolbox.register("mutate", mutation_custom_function, mu_x=0, mu_y=0, sigma_x=max_x*self.gaussian_rate, sigma_y=max_y*self.gaussian_rate, indpb=self.INDPB)
+        self.toolbox.register("mutate", mutation_custom_function, sigma_x=max_x*self.gaussian_rate, sigma_y=max_y*self.gaussian_rate, indpb=self.INDPB)
         self.toolbox.register("select", **selections[self.selection])
     
     def register_stats(self):
@@ -108,16 +110,16 @@ class DeapConfig:
 
         return any(conditions)
 
-    #SAME IMPLEMENTATION AS IN DEAP LIBRARY BUT WITH CHUNKSIZE DEFINED IN MAP FUNCTIONS
     def __eaMuPlusLambda(self, population: list, toolbox: base.Toolbox, 
                          mu: int, lambda_: int, cxpb: float, mutpb: float, ngen: int,
                          stats: tools.Statistics = None, halloffame: tools.HallOfFame = None, verbose=True):
 
         logbook = tools.Logbook()
         logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+        parallelism_params = {} if self.cpu_count < 2 else {"chunksize": len(population)//self.cpu_count}
 
         invalid_ind = [ind for ind in population if not ind.fitness.valid]
-        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind, chunksize=len(population)//self.cpu_count)
+        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind, **parallelism_params)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
@@ -133,7 +135,7 @@ class DeapConfig:
         while not self.__stop_condition(gen, ngen, best_fitnesses):
             offspring = algorithms.varOr(population, toolbox, lambda_, cxpb, mutpb)
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-            fitnesses = toolbox.map(toolbox.evaluate, invalid_ind, chunksize=len(population)//self.cpu_count)
+            fitnesses = toolbox.map(toolbox.evaluate, invalid_ind, **parallelism_params)
             for ind, fit in zip(invalid_ind, fitnesses):
                 ind.fitness.values = fit
 

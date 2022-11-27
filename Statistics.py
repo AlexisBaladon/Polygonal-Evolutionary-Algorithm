@@ -64,7 +64,7 @@ class Statistics:
                     self.eac.deap_configurer.register_parallelism()
 
                     # devuelve lista de min fitness en cada generacion
-                    best_fitness_per_gen = self.eac.run(verbose=False)
+                    best_fitness_per_gen = self.eac.run(show_res=False)
 
                     # se guarda el min fitness de una ejecucion. ejecucion = conf_alg + seed
                     best_execution_fitness.append(min(best_fitness_per_gen))

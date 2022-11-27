@@ -30,9 +30,9 @@ class EA():
         width, height = self.image_processor.width, self.image_processor.height
         individual[::2] = np.clip(individual[::2], 0, width)
         individual[1::2] = np.clip(individual[1::2], 0, height)
-        individual = [int(x) for x in individual]
+        individual = list(map(int, individual))
         vertices = list(zip(individual[::2], individual[1::2]))
-        vertices.extend([(0,0), (0,height), (width,0), (width,height)])
+        vertices.extend([(0,0), (0,height), (width,0), (width,height)]) #Always include the corners
         return vertices
 
     def decode(self, individual):
@@ -42,7 +42,7 @@ class EA():
 
     def get_fitness(self, decoded_individual):
         individual_image_matrix = np.asarray(decoded_individual, dtype=np.uint64)
-        fitness = np.sum((individual_image_matrix - self.image_processor.original_image_matrix)**2)
+        fitness = np.sum((individual_image_matrix - self.image_processor.original_image_matrix)**2, dtype=np.uint64)
         return fitness
 
     def evalDelaunay(self, individual):

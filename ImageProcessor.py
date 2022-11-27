@@ -21,13 +21,11 @@ class ImageProcessor():
         # Image dimensions
         self.width = width
         self.height = height
-        self.vertex_count = vertex_count - 4 # 4 vertices are added to the image corners
+        self.vertex_count = vertex_count
         self.triangle_outline = tri_outline
 
         # Matrix of the original image
         self.original_image_matrix = None
-        self.idx = {}
-        self.order = 0
 
         # Edge detection
         self.edges_coordinates = None
@@ -79,10 +77,12 @@ class ImageProcessor():
 
         if self.vertex_count is None:
             image_entropy = image.entropy()
-            self.vertex_count = int(np.power(2, image_entropy+4))
+            self.vertex_count = max(int(np.power(2, image_entropy+4)), 5) # 5 is the minimum number of vertices
             if verbose:
                 print(f"Image entropy: {image_entropy}")
                 print(f"Vertex count: {self.vertex_count}")
+        else:
+            self.vertex_count -= 4 # 4 vertices are added to the image corners
 
         if show:
             image.show("Preprocessed image")

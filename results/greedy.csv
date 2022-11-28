@@ -1,0 +1,3 @@
+method,best_historical_fitness,avg_best_fitness,std_fitness,p-value
+local_search,6120122,6161281.0,41159.0,0.0
+gaussian,6120122,6385074.0,228500.19855024197,0.0

@@ -3,9 +3,13 @@ import random
 import numpy as np
 
 class AltSolver:
-    def __init__(self, evolutionary_algorithm: EA):
+    def __init__(self, evolutionary_algorithm: EA, seed: int = 0):
         self.ea = evolutionary_algorithm
+        random.seed(seed)
         pass
+
+    def update_seed(self, seed):
+        random.seed(seed)
 
     def build_ea_module(self):
         self.ea.load_image()

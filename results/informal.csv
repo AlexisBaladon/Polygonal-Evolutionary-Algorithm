@@ -1,0 +1,7 @@
+MU,select_operator,best_historical_fitness,avg_best_fitness,std_fitness,p-value
+50,selTournament,9492581.0,10686174.0,1193593.0,0.0
+50,selBest,10668815.0,11098771.0,429956.0,0.0
+50,selRoulette,14729264.0,15239719.5,510455.5,0.0
+100,selTournament,11834676.0,12149293.0,314617.0,0.0
+100,selBest,10790659.0,11551003.5,760344.5,0.0
+100,selRoulette,13776999.0,14315216.0,538217.0,0.0

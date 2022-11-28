@@ -4,7 +4,9 @@ from EA import EA
 from EAController import EAController
 from DeapConfig import DeapConfig
 from ImageProcessor import ImageProcessor
-from Statistics import Statistics
+
+from threading import Thread
+import random
 
 def get_arguments() -> dict:
     parser = argparse.ArgumentParser()
@@ -70,8 +72,31 @@ def main(args):
     verbose, show_img = args["verbose"], args["show"]
     eac.build_ea_module(verbose=verbose, show_img=show_img)
     eac.build_deap_module()
-    
-    #eac.run()
-    
-    Statistics(eac).parametric_evaluation()
-    #Statistics(eac).algorithmical_speedup()
+    return eac
+
+def handle_inputs(algorithm_thread: Thread, eac: EAController):
+    while True:
+        usr_input = input()
+        if not algorithm_thread.is_alive():
+            print("Algorithm finished")
+            break
+        if usr_input == "exit":
+            eac.exit()
+            print("Waiting for next generation to finish before exiting...")
+            break
+
+DeapConfig.register_fitness() #DEAP CONFIGURATION MUST BE OUTSIDE OF MAIN WHEN USING PARALLELISM
+
+#py main.py --input_name womhd.jpg --vertex_count 10000 --cpu_count 4 --manual_console 1 --width 500 --height 500 --output_name Bart.jpg
+if __name__ == "__main__":
+    #PARALLELISM MUST BE INSIDE MAIN
+    args = process_arguments()
+    random.seed(args["seed"])
+    eac = main(args)
+    if args["manual_console"] == 1:
+        algorithm_thread = Thread(target=eac.run, args=())
+        algorithm_thread.start()
+        handle_inputs(algorithm_thread, eac)
+        algorithm_thread.join()
+    else:
+        eac.run()

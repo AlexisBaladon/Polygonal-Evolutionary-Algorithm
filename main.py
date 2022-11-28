@@ -69,8 +69,7 @@ def main(args):
     ip = ImageProcessor(**args)
     ea = EA(ip)
     eac = EAController(ea, dc)
-    verbose, show_img = args["verbose"], args["show"]
-    eac.build_ea_module(verbose=verbose, show_img=show_img)
+    eac.build_ea_module(**args)
     eac.build_deap_module()
     return eac
 

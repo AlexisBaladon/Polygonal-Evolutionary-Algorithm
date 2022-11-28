@@ -6,7 +6,7 @@ class EAController:
         self.evolutionary_algorithm = ea
         self.deap_configurer = deap_c
 
-    def build_ea_module(self, verbose=True, show_img=False):
+    def build_ea_module(self, verbose=True, show_img=False, **kwargs):
         self.evolutionary_algorithm.load_image(verbose=verbose, show=show_img)
 
     #FITNESS MUST BE REGISTERED OUTSIDE OF MAIN WHEN USING PARALLELISM

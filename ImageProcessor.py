@@ -4,11 +4,10 @@ import numpy as np
 import cv2
 
 class ImageProcessor():
-    def __init__(self, vertex_count: int, 
-                 input_name: str, input_path="img/",
+    def __init__(self, input_name: str, 
+                 vertex_count: int = None, input_path="img/",
                  output_path="test", output_name="delaunay.jpg",
-                 width=None, height=None,
-                 tri_outline=None, **kwargs):
+                 width=None, height=None, tri_outline=None, **kwargs):
 
         # Image parameters
         self.input_path = input_path

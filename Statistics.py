@@ -181,6 +181,8 @@ class Statistics:
 
         for i in range(1,cpu_count()+1):
             self.eac.deap_configurer.__setattr__('cpu_count', i)
+            self.eac.deap_configurer.register_parallelism()
+            
             start = time()
             self.eac.run(show_res=False)
             end = time()
@@ -204,7 +206,8 @@ class Statistics:
         1) If the p-value is less than our threshold (0.05), we reject the null hypothesis.
         2) If the p-value is greater than our threshold (0.05), we fail to reject the null hypothesis.
         """
-        return kstest(sample, "norm", alternative='two-sided').pvalue
+        standarized_sample = (sample - np.mean(sample)) / np.std(sample)
+        return kstest(standarized_sample, "norm", alternative='two-sided').pvalue
 
 #TODO 
 # modularizar las evaluaciones: la estructura se repite

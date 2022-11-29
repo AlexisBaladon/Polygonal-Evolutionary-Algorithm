@@ -332,6 +332,6 @@ class Statistics:
         p_values = pd.DataFrame(columns=["method1", "method2", "p-value"], data=results)
         print(p_values)
 
-
+    
         
 

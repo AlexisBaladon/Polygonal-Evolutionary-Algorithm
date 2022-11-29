@@ -1,12 +1,14 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import random
 
 from deap import tools
-from time import time
 from itertools import product
+from time import time
 from scipy.stats import kstest
+from scipy.stats import f_oneway
 from os import cpu_count
-import random
 
 from AltSolver import AltSolver
 from EAController import EAController
@@ -21,63 +23,14 @@ class Statistics:
         self.alt_solver = altsol
         return
 
-    def informal_evaluation(self, best_config : dict, n_seed : int = 3, configuration_image_path : str = "img/ultima_cena.jpg"):
-        # setear mejor configuracion hallada
-        self.eac.deap_configurer.__setattr__("CXPB", best_config["CXPB"])
-        self.eac.deap_configurer.__setattr__("MUTPB", best_config["MUTPB"])
-        
-        p = {
-            "MU" : [50, 100],
-            "select_operator" : [
-               [tools.selTournament, 3], [tools.selBest],  [tools.selRoulette]
-            ]
-        }
-        ortogonal_combinations = list(product(p["MU"], p["select_operator"]))
-
-        # se setea la imagen que se va a utilizar para la configuracion
-        self.eac.evolutionary_algorithm.image_processor.img_in_dir = configuration_image_path
-        self.eac.evolutionary_algorithm.load_image()
-
-        values = []
-
-        # cada configuracion parametrica
-        for mu, select_operator in ortogonal_combinations:
-
-            if len(select_operator) == 2:
-                self.eac.deap_configurer.__getattribute__("toolbox").register("select", select_operator[0], tournsize=select_operator[1])
-            else:
-                self.eac.deap_configurer.__getattribute__("toolbox").register("select", select_operator[0])
-            self.eac.deap_configurer.__setattr__("MU", mu)
-
-            best_execution_fitness = []
-
-            # para cada seed
-            for s in range(1, n_seed):
-                # ejecutar el algoritmo
-                self.eac.deap_configurer.__setattr__('seed', s)
-                # si no salta error de pool not running
-                self.eac.deap_configurer.register_parallelism()
-                # devuelve lista de min fitness en cada generacion
-                best_fitness_per_gen = self.eac.run(show_res=False)
-                # se guarda el min fitness de una ejecucion. ejecucion = conf_alg + seed
-                best_execution_fitness.append(min(best_fitness_per_gen))
-
-            # se guardan los valores obtenidos para la configuracion
-            values.append([
-                mu, select_operator[0].__name__, min(best_execution_fitness), 
-                np.mean(best_execution_fitness), np.std(best_execution_fitness),
-                self.normality_test(best_execution_fitness)
-            ])
-
-        header = [
-            "MU", "select_operator", "best_historical_fitness", 
-            "avg_best_fitness", "std_fitness", "p-value"
-        ]
-        pd.DataFrame(values, columns=header).to_csv(f"results/informal.csv", index=False)
-    
+    def evaluate_all(self):
+        self.greedy_evaluation()
+        self.parametric_evaluation()
+        self.informal_evaluation()
+        self.efficiency_evaluation()
         return
 
-    def greedy_evaluation(self, instance="img/ultima_cena.jpg", n_seed=3):
+    def greedy_evaluation(self, instance="img/ultima_cena.jpg", seeds: "list[int]"=[i for i in range(1, 6)]):
         """
         van a tener que ejecutarla entre 20 y 30 veces por instancia y van a tener que reportar valores promedio y desviación estándar del mejor valor hallado de la función objetivo que sería la función de fitness.
         """
@@ -88,12 +41,15 @@ class Statistics:
         values = []
         best_execution_fitness = []
 
+        header_fitness = []
+        best_fitness_config = []
+
         max_iter = 10 #1000
         vertex_count = 200
         threshold = 100
         
         for method in ["local_search", "gaussian"]:
-            for s in range(1, n_seed):
+            for s in seeds:
                 # setear la seed del pseudo greedy
                 self.alt_solver.update_seed(s)
 
@@ -106,69 +62,127 @@ class Statistics:
                 method,
                 min(best_execution_fitness), 
                 np.mean(best_execution_fitness), np.std(best_execution_fitness),
-                kstest(best_execution_fitness, "norm", alternative='two-sided').pvalue
+                self.normality_test(best_execution_fitness)
             ])
+
+            header_fitness.append(method)
+            best_fitness_config.append(best_execution_fitness)
 
         header = [
             "method", "best_historical_fitness", "avg_best_fitness", "std_fitness", "p-value"
         ]
-        pd.DataFrame(values, columns=header).to_csv(f"results/greedy.csv", index=False)
+        pd.DataFrame(values, columns=header).to_csv(f"results/reports/test_greedy.csv", index=False)
+        
+        pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/greedy.csv", index=False)
 
         return
 
-    def parametric_evaluation(self, n_seed=30, configuration_image_path="img/ultima_cena.jpg"):    
+    def informal_evaluation(self):
+        self.evaluate_ae(
+            self.eac.run,
+            {
+                "MU" : [50, 100],
+                "select_operator" : [
+                    [tools.selTournament, {"tournsize":3}], [tools.selBest, {}],  [tools.selRoulette, {}]
+                ]
+            },
+            out_name="test_informal",
+            seeds=[1,2,3,4,5]
+        )
+
+    def parametric_evaluation(self):
+        self.evaluate_ae(
+            self.eac.run,
+            {   
+                "CXPB" : [0.8, 0.9],
+                "MUTPB" : [0.01, 0.05, 0.1]
+            },
+            out_name="test_parametrico",
+            seeds=[1,2,3,4,5]
+        )
+
+    def evaluate_ae(self, 
+        func_to_eval,
+        parameters: dict,
+        out_name: str,
+        initial_config: dict=None, 
+        image_path: str="img/ultima_cena.jpg", 
+        seeds: "list[int]"=[i for i in range(1, 30)]
+        ):
+
+        # configuracion inicial, si existe
+        if initial_config is not None:
+            for k, v in initial_config:
+                print(f"seteando config inicial {k} to ", *v)
+                self.eac.deap_configurer.__setattr__(k, *v)
 
         # se setea la imagen que se va a utilizar para la configuracion
-        self.eac.evolutionary_algorithm.image_processor.img_in_dir = configuration_image_path
+        self.eac.evolutionary_algorithm.image_processor.img_in_dir = image_path
         self.eac.evolutionary_algorithm.load_image()
 
-        p = {
-            "CXPB" : [0.8, 0.9],
-            "MUTPB" : [0.01, 0.05, 0.1],
-        }
-        ortogonal_combinations = list(product(p["CXPB"], p["MUTPB"]))
+        ortogonal_combinations = list(product(*parameters.values()))
         values = []
 
-        # cada configuracion parametrica
-        for cxpb, mutpb in ortogonal_combinations:
+        header_fitness = []
+        best_fitness_config = []
 
-            self.eac.deap_configurer.__setattr__("CXPB", cxpb)
-            self.eac.deap_configurer.__setattr__("MUTPB", mutpb)
+        # para cada configuracion parametrica
+        for config in ortogonal_combinations:
 
+
+            # se setean los parametros de la configuracion
+            for k, v in zip(parameters.keys(), config):
+                print(f"seteando config {k} ", v)
+                if type(v) is list:
+                    # formato esperado : [function, {"keyword_arg1": value, ...}]
+                    self.eac.deap_configurer.__getattribute__("toolbox").register(k, v[0], **v[1])
+                else: 
+                    self.eac.deap_configurer.__setattr__(k, v)
 
             best_execution_fitness = []
-
             # para cada seed
-            for s in range(1, n_seed):
-                # ejecutar el algoritmo
-                self.eac.deap_configurer.__setattr__('seed', s)
+            for s in seeds:
+                print(f"Evaluating seed {s}/{len(seeds)} of config {config}")
 
+                self.eac.deap_configurer.__setattr__('seed', s)
                 # si no salta error de pool not running
                 self.eac.deap_configurer.register_parallelism()
-
                 # devuelve lista de min fitness en cada generacion
-                best_fitness_per_gen = self.eac.run(show_res=False)
+                best_fitness_per_gen = func_to_eval(show_res=False)
+                print(len(best_fitness_per_gen))
 
                 # se guarda el min fitness de una ejecucion. ejecucion = conf_alg + seed
-                best_execution_fitness.append(min(best_fitness_per_gen))
+                best_execution_fitness.append(np.min(best_fitness_per_gen))
 
             # se guardan los valores obtenidos para la configuracion
+            config_values = []
+            for val in config:
+                if type(val) is list:
+                    config_values.append(val[0].__name__)
+                else:
+                    config_values.append(val)
+
             values.append([
-                cxpb, mutpb, min(best_execution_fitness), 
+                *config_values, min(best_execution_fitness), 
                 np.mean(best_execution_fitness), np.std(best_execution_fitness),
                 self.normality_test(best_execution_fitness)
             ])
 
+            header_fitness.append(str(config_values))
+            best_fitness_config.append(best_execution_fitness)
+
         header = [
-            "CXPB", "MUTPB", "best_historical_fitness", 
+            *parameters.keys(), "best_historical_fitness", 
             "avg_best_fitness", "std_fitness", "p-value"
         ]
-        pd.DataFrame(values, columns=header).to_csv(f"results/resultados.csv", index=False)
+        pd.DataFrame(values, columns=header).to_csv(f"results/reports/{out_name}.csv", index=False)
+
+        # cada columna es una configuracion y tiene n filas, donde n es la cantidad de ejecuciones (seeds)
+        pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/{out_name}.csv", index=False)
     
         return
 
-    # Estadisticas Paralelismo
-    def algorithmical_speedup(self):
+    def efficiency_evaluation(self):
         """
         Se define el speedup algorítmico como SN = T1 / TN, siendo:
             * T1 el tiempo de ejecución del algoritmo en forma serial
@@ -194,7 +208,8 @@ class Statistics:
             values.append([i, time_i, speedup, speedup * (1/i)])
 
         header = ["CPU", "time", "speedup", "efficiency"]
-        pd.DataFrame(values, columns=header).to_csv(f"results/time.csv", index=False)
+        df = pd.DataFrame(values, columns=header)
+        df.to_csv(f"results/reports/test_time.csv", index=False)
 
         return 
 
@@ -206,14 +221,19 @@ class Statistics:
         1) If the p-value is less than our threshold (0.05), we reject the null hypothesis.
         2) If the p-value is greater than our threshold (0.05), we fail to reject the null hypothesis.
         """
-        standarized_sample = (sample - np.mean(sample)) / np.std(sample)
+        standarized_sample = (sample - np.mean(sample)) / np.std(sample, ddof=1)
         return kstest(standarized_sample, "norm", alternative='two-sided').pvalue
 
-#TODO 
-# modularizar las evaluaciones: la estructura se repite
-# hacer el stats_main.py para las llamadas al modulo Statistics
-# hacer una run_all que ejecute todas las evaluaciones en el orden correcto
-# graficos?
+    def ANOVA_test(self, samples : list):
+        """
+        Null hypothesis: Groups means are equal (no variation in means of groups)
+        H0: μ1 = μ2 = ... = μp
+        Alternative hypothesis: At least, one group mean is different from other groups
+        H1: All μ are not equal
+
+        samples : should be a list of lists, where each list is a sample
+        """
+        return f_oneway(*samples).pvalue
 
     def __update_config(self, eac: EAController, config: dict):
         eac.deap_configurer = DeapConfig(**config)

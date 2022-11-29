@@ -222,7 +222,7 @@ class Statistics:
 
     def __build_eac(self, input_name: str, input_dir: str, vertex_count: int):
         dc = DeapConfig()
-        ip = ImageProcessor(input_name=input_name, input_dir=input_dir, vertex_count=vertex_count)
+        ip = ImageProcessor(input_name=input_name, input_dir=input_dir, vertex_count=vertex_count) #TODO: DESHARDCODEAR
         ea = EA(ip)
         eac = EAController(ea, dc)
         eac.build_ea_module()
@@ -299,3 +299,39 @@ class Statistics:
 
         header = ["method", "best_historical_fitness", "avg_best_fitness", "std_fitness", "p-value"]
         pd.DataFrame(results, columns=header).to_csv(f"results/greedy.csv", index=False)
+
+    def friedman_test(self, csv_path: str, method_column: str, fitness_column: str):
+        from scipy.stats import friedmanchisquare
+        df = pd.read_csv(csv_path)
+        df_pivot = df.pivot(index='seed', columns=method_column, values=fitness_column)
+        print(df)
+        print(friedmanchisquare(*df_pivot.values.T))
+    
+    #TODO: Entender tests de rangos
+    def range_test(self):
+        from itertools import combinations
+        from scipy.stats import ttest_ind
+
+        df = pd.read_csv("results/greedy.csv")
+        print(df)
+        df_pivot = df.pivot(index='seed', columns='method', values='best_historical_fitness')
+        #rank by best fitness from 1 to n without repetitions
+        df_rank = df_pivot.rank(axis=1, method='min', ascending=True)
+        print(df_rank)
+        #get avg rank with column name: "avg"
+        df_mean_rank = df_rank.mean(axis=0)
+        print(df_mean_rank)
+        #make pairs for each method
+        pairs = list(combinations(df_mean_rank.index, 2))
+        print(pairs)
+        #make pairwise test for each pair and save it in a pandas table
+        results = []
+        for pair in pairs:
+            print(pair)
+            results.append([pair[0], pair[1], ttest_ind(df_pivot[pair[0]], df_pivot[pair[1]]).pvalue])        
+        p_values = pd.DataFrame(columns=["method1", "method2", "p-value"], data=results)
+        print(p_values)
+
+
+        
+

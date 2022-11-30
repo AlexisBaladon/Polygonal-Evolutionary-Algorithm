@@ -21,7 +21,7 @@ if __name__  == "__main__":
     alts = AltSolver(eac.evolutionary_algorithm)
     stats = Statistics(eac, alts)
 
-    stats.efficiency_evaluation()
+    stats.greedy_evaluation(seeds=[1,2,3])
     # stats.greedy_evaluation()
     # una vez se tenga la configuracion optima
     # stats.efficiency_evaluation()    

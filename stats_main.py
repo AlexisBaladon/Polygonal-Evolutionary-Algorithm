@@ -1,6 +1,5 @@
 from Statistics import Statistics
 from DeapConfig import DeapConfig
-
 from AltSolver import AltSolver
 from EAController import EAController
 from ImageProcessor import ImageProcessor
@@ -15,14 +14,14 @@ if __name__  == "__main__":
     IMAGE_NAME = "ultima_cena.jpg" #VARIAR
 
     dc = DeapConfig(NGEN=100)
-    ip = ImageProcessor(IMAGE_NAME, vertex_count=100, width=50, height=50)
+    ip = ImageProcessor(IMAGE_NAME, vertex_count=1000, width=50, height=50)
     ea = EA(ip)
     eac = EAController(ea, dc)
     eac.build_deap_module()
     alts = AltSolver(eac.evolutionary_algorithm)
     stats = Statistics(eac, alts)
 
-    #stats.parametric_evaluation()
+    stats.efficiency_evaluation()
     # stats.greedy_evaluation()
     # una vez se tenga la configuracion optima
     # stats.efficiency_evaluation()    

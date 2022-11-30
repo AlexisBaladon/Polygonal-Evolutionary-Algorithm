@@ -30,7 +30,7 @@ class Statistics:
         self.efficiency_evaluation()
         return
 
-    def greedy_evaluation(self, instance="img/ultima_cena.jpg", seeds: "list[int]"=[i for i in range(1, 6)]):
+    def greedy_evaluation(self, instance="img/ultima_cena.jpg", seeds: "list[int]"=[i for i in range(30)]):
         """
         van a tener que ejecutarla entre 20 y 30 veces por instancia y van a tener que reportar valores promedio y desviación estándar del mejor valor hallado de la función objetivo que sería la función de fitness.
         """
@@ -107,7 +107,7 @@ class Statistics:
         out_name: str,
         initial_config: dict=None, 
         image_path: str="img/ultima_cena.jpg", 
-        seeds: "list[int]"=[i for i in range(1, 30)]
+        seeds: "list[int]"=[i for i in range(30)]
         ):
 
         # configuracion inicial, si existe
@@ -149,8 +149,6 @@ class Statistics:
                 self.eac.deap_configurer.register_parallelism()
                 # devuelve lista de min fitness en cada generacion
                 best_fitness_per_gen = func_to_eval(show_res=False)
-                print(len(best_fitness_per_gen))
-
                 # se guarda el min fitness de una ejecucion. ejecucion = conf_alg + seed
                 best_execution_fitness.append(np.min(best_fitness_per_gen))
 
@@ -182,7 +180,7 @@ class Statistics:
     
         return
 
-    def efficiency_evaluation(self):
+    def efficiency_evaluation(self, seed=0, instance="img/ultima_cena.jpg"):
         """
         Se define el speedup algorítmico como SN = T1 / TN, siendo:
             * T1 el tiempo de ejecución del algoritmo en forma serial
@@ -192,6 +190,11 @@ class Statistics:
             * N cantidad de procesadores
         """
         values = []
+        
+        random.seed(seed)
+        self.eac.deap_configurer.__setattr__('seed', seed)
+        self.eac.evolutionary_algorithm.image_processor.img_in_dir = instance
+        self.eac.evolutionary_algorithm.load_image()
 
         for i in range(1,cpu_count()+1):
             self.eac.deap_configurer.__setattr__('cpu_count', i)
@@ -234,6 +237,20 @@ class Statistics:
         samples : should be a list of lists, where each list is a sample
         """
         return f_oneway(*samples).pvalue
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def __update_config(self, eac: EAController, config: dict):
         eac.deap_configurer = DeapConfig(**config)

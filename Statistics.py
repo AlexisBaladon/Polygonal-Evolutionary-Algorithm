@@ -23,17 +23,10 @@ class Statistics:
         self.alt_solver = altsol
         return
 
-    def evaluate_all(self):
-        self.greedy_evaluation()
-        self.parametric_evaluation()
-        self.informal_evaluation()
-        self.efficiency_evaluation()
-        return
-
     def greedy_evaluation(self, 
         greedy_config={
-            "max_iter": 10,
-            "vertex_count": 200,
+            "max_iter": 10,#100,
+            "vertex_count": 10,#1000,
             "threshold": 100
         }, 
         instances=["img/ultima_cena.jpg", "img/Bart.jpg", "img/monalisa.jpg"], 
@@ -101,8 +94,7 @@ class Statistics:
                     [tools.selTournament, {"tournsize":3}], [tools.selBest, {}],  [tools.selRoulette, {}]
                 ]
             },
-            out_name="test_informal",
-            seeds=[1,2,3,4,5]
+            out_name="test_informal"
         )
 
     def parametric_evaluation(self):
@@ -113,7 +105,7 @@ class Statistics:
                 "MUTPB" : [0.01, 0.05, 0.1]
             },
             out_name="test_parametrico",
-            seeds=[1,2,3,4,5]
+            seeds=[1,2,3]
         )
 
     def evaluate_ae(self, 
@@ -155,17 +147,25 @@ class Statistics:
                     self.eac.deap_configurer.__setattr__(k, v)
 
             best_execution_fitness = []
+            time_execution = []
+
             # para cada seed
             for s in seeds:
-                print(f"Evaluating seed {s}/{len(seeds)} of config {config}")
+                print(f"Evaluating seed {s+1}/{len(seeds)} of config {config}")
 
                 self.eac.deap_configurer.__setattr__('seed', s)
                 # si no salta error de pool not running
                 self.eac.deap_configurer.register_parallelism()
+
+                start = time()
                 # devuelve lista de min fitness en cada generacion
                 best_fitness_per_gen = func_to_eval(show_res=False)
+                end = time()
+
                 # se guarda el min fitness de una ejecucion. ejecucion = conf_alg + seed
                 best_execution_fitness.append(np.min(best_fitness_per_gen))
+                
+                time_execution.append(end - start)
 
             # se guardan los valores obtenidos para la configuracion
             config_values = []
@@ -178,7 +178,8 @@ class Statistics:
             values.append([
                 *config_values, min(best_execution_fitness), 
                 np.mean(best_execution_fitness), np.std(best_execution_fitness),
-                self.normality_test(best_execution_fitness)
+                np.mean(time_execution),
+                self.normality_test(best_execution_fitness),
             ])
 
             header_fitness.append(str(config_values))
@@ -186,14 +187,15 @@ class Statistics:
 
         header = [
             *parameters.keys(), "best_historical_fitness", 
-            "avg_best_fitness", "std_fitness", "p-value"
+            "avg_best_fitness", "std_fitness", "avg_time", "p-value"
         ]
         pd.DataFrame(values, columns=header).to_csv(f"results/reports/{out_name}.csv", index=False)
 
         # cada columna es una configuracion y tiene n filas, donde n es la cantidad de ejecuciones (seeds)
         pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/{out_name}.csv", index=False)
-    
+
         return
+
 
     def efficiency_evaluation(self, seed=0, instance="img/ultima_cena.jpg"):
         """
@@ -253,14 +255,13 @@ class Statistics:
         """
         return f_oneway(*samples).pvalue
 
-
     def __update_config(self, eac: EAController, config: dict):
         eac.deap_configurer = DeapConfig(**config)
         eac.build_deap_module()
         return
 
     def __build_eac(self, input_name: str, input_dir: str, vertex_count: int):
-        dc = DeapConfig()
+        dc = DeapConfig(NGEN=6)
         ip = ImageProcessor(input_name=input_name, input_dir=input_dir, vertex_count=vertex_count)
         ea = EA(ip)
         eac = EAController(ea, dc)
@@ -268,245 +269,134 @@ class Statistics:
         eac.build_deap_module()
         return eac
 
-    def __get_EA_results(self, eac: EAController, seeds: list, config: dict, attributes: list, results: list):
+    def __get_EA_results(self, eac: EAController, seeds: list, config: dict, attributes: list, results: list, header_fitness: list, best_fitness_config: list):
             self.__update_config(eac, config)
+
             best_execution_fitness = []
+            time_execution = []
+            
             for seed in seeds:
                 random.seed(seed)
                 eac.deap_configurer.register_parallelism() # si no salta error de pool not running
+                # TODO : time y codo
+
+                start = time()
                 best_fitnesses = eac.run(show_res=False, logs=False, seed=seed)
+                end = time()
+
+                time_execution.append(end - start)
                 best_execution_fitness.append(min(best_fitnesses))
+
                 current_values = [eac.deap_configurer.__dict__[at] for at in attributes]
+
                 results.append([
                     *current_values, seed, min(best_fitnesses),
                     np.mean(best_execution_fitness), np.std(best_execution_fitness),
+                    np.mean(time_execution),
                     self.normality_test(best_execution_fitness)
                 ])
+        
+            header_fitness.append(str(current_values))
+            best_fitness_config.append(best_execution_fitness)
 
-    def informal_evaluation_2(self, best_config : dict, vertex_count: int, attributes: dict, image_path: str, image_name: str,  seeds: list = [1,2]):
+    def informal_evaluation_2(self, best_config : dict, vertex_count: int, attributes: dict, image_path: str, image_name: str,  seeds: list = [1,2,3,4]):
         eac = self.__build_eac(image_name, image_path, vertex_count)
 
         results = []
+        header_fitness = []
+        best_fitness_config = []
+
         for att, values in attributes.items():
             for val in values:
                 current_config = {**best_config}
                 current_config[att] = val
-                self.__get_EA_results(eac, seeds, current_config, attributes, results)
-        columns = [*(attributes.keys()), "seed", "best_historical_fitness", "avg_best_fitness", "std_fitness", "p-value"]
+                self.__get_EA_results(eac, seeds, current_config, attributes, results, header_fitness, best_fitness_config)
+
+        columns = [*(attributes.keys()), "seed", "best_historical_fitness", "avg_best_fitness", "std_fitness", "avg_time", "p-value"]
         pd.DataFrame(results, columns=columns).to_csv(f"results/informal.csv", index=False)
 
-    def parametric_evaluation2(self, vertex_count: int, attributes: dict, image_path: str, image_name: str, seeds: list = [1,2]):
-        eac = self.__build_eac(image_name, image_path, vertex_count)
-        #TODO: PASAR LISTA DE IMAGENES POR PARAMETRO Y NO UNA SOLA
+        pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/best_fit_per_config_informal.csv", index=False)
+
+    def parametric_evaluation2(self, vertex_count: int, attributes: dict, image_path: str, images: list=["ultima_cena.jpg", "fox.jpg", "monalisa.jpg"], seeds: list = [1,2,3,4]):
+        eac = self.__build_eac(images[0], image_path, vertex_count)
+        #TODO: PASAR LISTA DE IMAGENES POR PARAMETRO Y NO UNA SOLA <- ???
         results = []
+        header_fitness = []
+        best_fitness_config = []
+        
         ortogonal_combinations = list(product(*(attributes.values())))
         for combination in ortogonal_combinations:
             current_config = {}
             for i, att in enumerate(attributes.keys()):
                 current_config[att] = combination[i]
-            self.__get_EA_results(eac, seeds, current_config, attributes, results)
-        header = [*(attributes.keys()), "seed","best_historical_fitness", "avg_best_fitness", "std_fitness", "p-value"]
+            self.__get_EA_results(eac, seeds, current_config, attributes, results, 
+                header_fitness, best_fitness_config)
+        
+        header = [*(attributes.keys()), "seed","best_historical_fitness", "avg_best_fitness", "std_fitness", "avg_time", "p-value"]
         pd.DataFrame(results, columns=header).to_csv(f"results/resultados.csv", index=False)
+
+        pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/best_fit_per_config_parametric.csv", index=False)
                 
-    def greedy_evaluation_2(self, best_config: dict, greedy_config: dict, vertex_count: int, image_path: str, image_name: str, seeds: list = [1,2]):
-        eac = self.__build_eac(image_name, image_path, vertex_count)
+    def greedy_evaluation_2(self, best_config: dict, greedy_config: dict, vertex_count: int, image_path: str, images: list=["ultima_cena.jpg", "fox.jpg", "monalisa.jpg"], seeds: list = [1,2]):
+        eac = self.__build_eac(images[0], image_path, vertex_count)
         self.__update_config(eac, best_config)
         alt_solver = AltSolver(eac.evolutionary_algorithm)
 
         best_execution_fitness = []
-        results = []
         EA_ID = "EA"
 
-        for method in list(greedy_config.keys()) + [EA_ID]:
-            for seed in seeds:
-                if method == EA_ID:
+        for img in images:
+
+            alt_solver.ea.image_processor.img_in_dir = image_path + img
+            alt_solver.ea.load_image()
+            eac.evolutionary_algorithm.image_processor.img_in_dir = image_path + img
+            eac.evolutionary_algorithm.load_image()
+
+            results = []
+            header_fitness = []
+            best_fitness_config = []
+
+            for method in list(greedy_config.keys()) + [EA_ID]:
+
+                best_execution_fitness = []
+                time_execution = []
+                start = 0
+                end = 0
+
+                for seed in seeds:
                     random.seed(seed)
-                    eac.deap_configurer.register_parallelism() # si no salta error de pool not running
-                    best_fitnesses = eac.run(show_res=False, logs=False, seed=seed)
-                    best_execution_fitness.append(min(best_fitnesses))
-                else:
-                    alt_solver.update_seed(seed)
-                    _, best_eval = alt_solver.solve(**(greedy_config[method]), vertex_count=vertex_count, method=method, verbose=True)
-                    best_execution_fitness.append(best_eval.min())
+                    if method == EA_ID:
+                        eac.deap_configurer.register_parallelism() # si no salta error de pool not running
+                        
+                        start = time()
+                        best_fitnesses = eac.run(show_res=False, logs=False, seed=seed)
+                        end = time()
 
-            results.append([
-                method,
-                min(best_execution_fitness), 
-                np.mean(best_execution_fitness), np.std(best_execution_fitness),
-                kstest(best_execution_fitness, "norm", alternative='two-sided').pvalue
-            ])
+                        best_execution_fitness.append(min(best_fitnesses))
+                    else:
+                        alt_solver.update_seed(seed)
 
-        header = ["method", "best_historical_fitness", "avg_best_fitness", "std_fitness", "p-value"]
-        pd.DataFrame(results, columns=header).to_csv(f"results/greedy.csv", index=False)
+                        start = time()
+                        _, best_eval = alt_solver.solve(**(greedy_config[method]), vertex_count=vertex_count, method=method, verbose=True)
+                        end = time()
 
+                        best_execution_fitness.append(best_eval.min())
 
-    def __update_config(self, eac: EAController, config: dict):
-        eac.deap_configurer = DeapConfig(**config)
-        eac.build_deap_module()
-        return
-
-    def __build_eac(self, input_name: str, input_dir: str, vertex_count: int):
-        dc = DeapConfig()
-        ip = ImageProcessor(input_name=input_name, input_dir=input_dir, vertex_count=vertex_count)
-        ea = EA(ip)
-        eac = EAController(ea, dc)
-        eac.build_ea_module()
-        eac.build_deap_module()
-        return eac
-
-    def __get_EA_results(self, eac: EAController, seeds: list, config: dict, attributes: list, results: list):
-            self.__update_config(eac, config)
-            best_execution_fitness = []
-            for seed in seeds:
-                random.seed(seed)
-                eac.deap_configurer.register_parallelism() # si no salta error de pool not running
-                best_fitnesses = eac.run(show_res=False, logs=False, seed=seed)
-                best_execution_fitness.append(min(best_fitnesses))
-                current_values = [eac.deap_configurer.__dict__[at] for at in attributes]
+                    time_execution.append(end - start)
+                
                 results.append([
-                    *current_values, seed, min(best_fitnesses),
+                    img,
+                    method,
+                    min(best_execution_fitness), 
                     np.mean(best_execution_fitness), np.std(best_execution_fitness),
+                    np.mean(time_execution),
                     self.normality_test(best_execution_fitness)
                 ])
 
-    def informal_evaluation_2(self, best_config : dict, vertex_count: int, attributes: dict, image_path: str, image_name: str,  seeds: list = [1,2]):
-        eac = self.__build_eac(image_name, image_path, vertex_count)
+                header_fitness.append(method)
+                best_fitness_config.append(best_execution_fitness)
 
-        results = []
-        for att, values in attributes.items():
-            for val in values:
-                current_config = {**best_config}
-                current_config[att] = val
-                self.__get_EA_results(eac, seeds, current_config, attributes, results)
-        columns = [*(attributes.keys()), "seed", "best_historical_fitness", "avg_best_fitness", "std_fitness", "p-value"]
-        pd.DataFrame(results, columns=columns).to_csv(f"results/informal.csv", index=False)
-
-    def parametric_evaluation2(self, vertex_count: int, attributes: dict, image_path: str, image_name: str, seeds: list = [1,2]):
-        eac = self.__build_eac(image_name, image_path, vertex_count)
-        #TODO: PASAR LISTA DE IMAGENES POR PARAMETRO Y NO UNA SOLA
-        results = []
-        ortogonal_combinations = list(product(*(attributes.values())))
-        for combination in ortogonal_combinations:
-            current_config = {}
-            for i, att in enumerate(attributes.keys()):
-                current_config[att] = combination[i]
-            self.__get_EA_results(eac, seeds, current_config, attributes, results)
-        header = [*(attributes.keys()), "seed","best_historical_fitness", "avg_best_fitness", "std_fitness", "p-value"]
-        pd.DataFrame(results, columns=header).to_csv(f"results/resultados.csv", index=False)
-                
-    def greedy_evaluation_2(self, best_config: dict, greedy_config: dict, vertex_count: int, image_path: str, image_name: str, seeds: list = [1,2]):
-        eac = self.__build_eac(image_name, image_path, vertex_count)
-        self.__update_config(eac, best_config)
-        alt_solver = AltSolver(eac.evolutionary_algorithm)
-
-        best_execution_fitness = []
-        results = []
-        EA_ID = "EA"
-
-        for method in list(greedy_config.keys()) + [EA_ID]:
-            for seed in seeds:
-                if method == EA_ID:
-                    random.seed(seed)
-                    eac.deap_configurer.register_parallelism() # si no salta error de pool not running
-                    best_fitnesses = eac.run(show_res=False, logs=False, seed=seed)
-                    best_execution_fitness.append(min(best_fitnesses))
-                else:
-                    alt_solver.update_seed(seed)
-                    _, best_eval = alt_solver.solve(**(greedy_config[method]), vertex_count=vertex_count, method=method, verbose=True)
-                    best_execution_fitness.append(best_eval.min())
-
-            results.append([
-                method,
-                min(best_execution_fitness), 
-                np.mean(best_execution_fitness), np.std(best_execution_fitness),
-                kstest(best_execution_fitness, "norm", alternative='two-sided').pvalue
-            ])
-
-        header = ["method", "best_historical_fitness", "avg_best_fitness", "std_fitness", "p-value"]
+        header = ["image", "method", "best_historical_fitness", "avg_best_fitness", "std_fitness", "avg_time", "p-value"]
         pd.DataFrame(results, columns=header).to_csv(f"results/greedy.csv", index=False)
 
-
-    def __update_config(self, eac: EAController, config: dict):
-        eac.deap_configurer = DeapConfig(**config)
-        eac.build_deap_module()
-        return
-
-    def __build_eac(self, input_name: str, input_dir: str, vertex_count: int):
-        dc = DeapConfig()
-        ip = ImageProcessor(input_name=input_name, input_dir=input_dir, vertex_count=vertex_count) #TODO: DESHARDCODEAR
-        ea = EA(ip)
-        eac = EAController(ea, dc)
-        eac.build_ea_module()
-        eac.build_deap_module()
-        return eac
-
-    def __get_EA_results(self, eac: EAController, seeds: list, config: dict, attributes: list, results: list):
-            self.__update_config(eac, config)
-            best_execution_fitness = []
-            for seed in seeds:
-                random.seed(seed)
-                eac.deap_configurer.register_parallelism() # si no salta error de pool not running
-                best_fitnesses = eac.run(show_res=False, logs=False, seed=seed)
-                best_execution_fitness.append(min(best_fitnesses))
-                current_values = [eac.deap_configurer.__dict__[at] for at in attributes]
-                results.append([
-                    *current_values, seed, min(best_fitnesses),
-                    np.mean(best_execution_fitness), np.std(best_execution_fitness),
-                    self.normality_test(best_execution_fitness)
-                ])
-
-    def informal_evaluation_2(self, best_config : dict, vertex_count: int, attributes: dict, image_path: str, image_name: str,  seeds: list = [1,2]):
-        eac = self.__build_eac(image_name, image_path, vertex_count)
-
-        results = []
-        for att, values in attributes.items():
-            for val in values:
-                current_config = {**best_config}
-                current_config[att] = val
-                self.__get_EA_results(eac, seeds, current_config, attributes, results)
-        columns = [*(attributes.keys()), "seed", "best_historical_fitness", "avg_best_fitness", "std_fitness", "p-value"]
-        pd.DataFrame(results, columns=columns).to_csv(f"results/informal.csv", index=False)
-
-    def parametric_evaluation2(self, vertex_count: int, attributes: dict, image_path: str, image_name: str, seeds: list = [1,2]):
-        eac = self.__build_eac(image_name, image_path, vertex_count)
-        #TODO: PASAR LISTA DE IMAGENES POR PARAMETRO Y NO UNA SOLA
-        results = []
-        ortogonal_combinations = list(product(*(attributes.values())))
-        for combination in ortogonal_combinations:
-            current_config = {}
-            for i, att in enumerate(attributes.keys()):
-                current_config[att] = combination[i]
-            self.__get_EA_results(eac, seeds, current_config, attributes, results)
-        header = [*(attributes.keys()), "seed","best_historical_fitness", "avg_best_fitness", "std_fitness", "p-value"]
-        pd.DataFrame(results, columns=header).to_csv(f"results/resultados.csv", index=False)
-                
-    def greedy_evaluation_2(self, best_config: dict, greedy_config: dict, vertex_count: int, image_path: str, image_name: str, seeds: list = [1,2]):
-        eac = self.__build_eac(image_name, image_path, vertex_count)
-        self.__update_config(eac, best_config)
-        alt_solver = AltSolver(eac.evolutionary_algorithm)
-
-        best_execution_fitness = []
-        results = []
-        EA_ID = "EA"
-
-        for method in list(greedy_config.keys()) + [EA_ID]:
-            for seed in seeds:
-                if method == EA_ID:
-                    random.seed(seed)
-                    eac.deap_configurer.register_parallelism() # si no salta error de pool not running
-                    best_fitnesses = eac.run(show_res=False, logs=False, seed=seed)
-                    best_execution_fitness.append(min(best_fitnesses))
-                else:
-                    alt_solver.update_seed(seed)
-                    _, best_eval = alt_solver.solve(**(greedy_config[method]), vertex_count=vertex_count, method=method, verbose=True)
-                    best_execution_fitness.append(best_eval.min())
-
-            results.append([
-                method,
-                min(best_execution_fitness), 
-                np.mean(best_execution_fitness), np.std(best_execution_fitness),
-                kstest(best_execution_fitness, "norm", alternative='two-sided').pvalue
-            ])
-
-        header = ["method", "best_historical_fitness", "avg_best_fitness", "std_fitness", "p-value"]
-        pd.DataFrame(results, columns=header).to_csv(f"results/greedy.csv", index=False)
+        pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/greedy2.csv", index=False)

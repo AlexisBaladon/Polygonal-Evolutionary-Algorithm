@@ -42,8 +42,9 @@ class EA():
 
     def get_fitness(self, decoded_individual):
         individual_image_matrix = np.asarray(decoded_individual, dtype=np.uint64)
-        fitness = np.sum((individual_image_matrix - self.image_processor.original_image_matrix)**2, dtype=np.uint64)
-        return fitness
+        squared_diff = np.sum((individual_image_matrix - self.image_processor.original_image_matrix)**2, dtype=np.uint64)
+        w, h = self.image_processor.width, self.image_processor.height
+        return squared_diff / (w * h)
 
     def evalDelaunay(self, individual):
         decoded_individual = self.decode(individual)

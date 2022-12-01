@@ -22,7 +22,7 @@ if __name__  == "__main__":
     alts = AltSolver(eac.evolutionary_algorithm)
     stats = Statistics(eac, alts)
 
-    stats.parametric_evaluation()
+    #stats.parametric_evaluation()
     # stats.greedy_evaluation()
     # una vez se tenga la configuracion optima
     # stats.efficiency_evaluation()    
@@ -33,7 +33,7 @@ if __name__  == "__main__":
     #PARAMETRIC
     FORMAL_VERTEX_COUNT = 100
     FORMAL_ATTRIBUTES = {#"CXPB": [0.8], "MUTPB": [0.01]} #{
-        "CXPB": [0.8, 0.9], "MUTPB": [0.01, 0.05, 0.1]}
+"CXPB": [0.8, 0.9], "MUTPB": [0.01, 0.05, 0.1]}
     #stateless_stats.parametric_evaluation2(FORMAL_VERTEX_COUNT, FORMAL_ATTRIBUTES, IMAGE_RESULT_PATH, IMAGE_NAME, seeds=SEEDS)
     
 
@@ -53,3 +53,19 @@ if __name__  == "__main__":
         "gaussian": {"max_iter": 5, "threshold": 50}
     }
     #stateless_stats.greedy_evaluation_2(best_config, GREEDY_CONFIG, FORMAL_VERTEX_COUNT, IMAGE_RESULT_PATH, IMAGE_NAME, seeds=SEEDS)
+
+    #FRIEDMAN RANKING
+    CSV_PATH = "results/greedy.csv"
+    METHOD_COLUMN = "method"
+    FITNESS_COLUMN = "best_historical_fitness"
+    #stateless_stats.friedman_test(CSV_PATH, METHOD_COLUMN, FITNESS_COLUMN)
+    #stats.pairwise_tests()
+    #stats.plot_performance()
+    #stats.plot_time()
+    #stats.to_latex()
+    import numpy as np
+    data = np.array([[1,2,3], [4,5,6], [7,1,9]])
+    #get friedman rank
+
+    stats.pairwise_matrix(data)
+    stats.friedman_ranking(data)

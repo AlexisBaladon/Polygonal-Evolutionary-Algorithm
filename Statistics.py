@@ -319,13 +319,6 @@ class Statistics:
 
         header = ["method", "best_historical_fitness", "avg_best_fitness", "std_fitness", "p-value"]
         pd.DataFrame(results, columns=header).to_csv(f"results/greedy.csv", index=False)
-
-    def friedman_test(self, csv_path: str, method_column: str, fitness_column: str):
-        from scipy.stats import friedmanchisquare
-        df = pd.read_csv(csv_path)
-        df_pivot = df.pivot(index='seed', columns=method_column, values=fitness_column)
-        print(df)
-        print(friedmanchisquare(*df_pivot.values.T))
     
     #TODO: Entender tests de rangos
     def range_test(self):
@@ -335,23 +328,87 @@ class Statistics:
         df = pd.read_csv("results/greedy.csv")
         print(df)
         df_pivot = df.pivot(index='seed', columns='method', values='best_historical_fitness')
-        #rank by best fitness from 1 to n without repetitions
         df_rank = df_pivot.rank(axis=1, method='min', ascending=True)
         print(df_rank)
-        #get avg rank with column name: "avg"
         df_mean_rank = df_rank.mean(axis=0)
         print(df_mean_rank)
-        #make pairs for each method
         pairs = list(combinations(df_mean_rank.index, 2))
         print(pairs)
-        #make pairwise test for each pair and save it in a pandas table
         results = []
         for pair in pairs:
             print(pair)
-            results.append([pair[0], pair[1], ttest_ind(df_pivot[pair[0]], df_pivot[pair[1]]).pvalue])        
+            results.append([*pair, ttest_ind(df_pivot[pair[0]], df_pivot[pair[1]]).pvalue])        
         p_values = pd.DataFrame(columns=["method1", "method2", "p-value"], data=results)
         print(p_values)
 
-    
+    #TODO: Parametrizar y realizar por cada instancia
+    def pairwise_tests(self):
+        #perform post-hoc tests for each method
+        from scipy.stats import ttest_ind
+        from itertools import combinations
+
+        df = pd.read_csv("results/greedy.csv")
+        df_pivot = df.pivot(index='seed', columns='method', values='best_historical_fitness')
+        print(df_pivot)
+        results = []
+        for pair in combinations(df_pivot.columns, 2):
+            #pair_ranges = [df_pivot[pair[i]] for i in range(2)] #TODO: ESTE ES EL REAL
+            pair_ranges = [[np.random.randint(1, 4) for _ in range(30)] for _ in range(2)]
+            #TODO: FALTA ITERAR POR INSTANCIA
+            print(pair_ranges)
+            results.append([*pair, ttest_ind(*pair_ranges).pvalue])
+        p_values = pd.DataFrame(columns=["method1", "method2", "p-value"], data=results)
+        print(p_values)
+
+    def plot_performance(self):
+        df = pd.read_csv("results/greedy.csv")
+        df_pivot = df.pivot(index='seed', columns='method', values='best_historical_fitness')
+        df_pivot.plot.box()
+        plt.show()
+
+    def plot_time(self):
+        df = pd.read_csv("results/time.csv")
+        #CPU,time,speedup,efficiency
+        columns = ["time", "speedup", "efficiency"]
+        df_pivot = df.pivot(index='CPU', columns=columns[0], values='time')
+        #df_pivot.plot.bar()
+        df_pivot = df.pivot(index='CPU', columns="time", values="time")
+        df_pivot.plot.bar()
+        plt.show()
+
+    def to_latex(self):
+        df = pd.read_csv("results/greedy.csv")
+        df_pivot = df.pivot(index='seed', columns='method', values='best_historical_fitness')
+        #convert to latex with style
+        print(df_pivot.style.to_latex())
+
+    def pairwise_matrix(self, data):
+        import scikit_posthocs as sp
+        rank = data.argsort().argsort(axis=1)
+        pvalues = sp.posthoc_dunn(rank, p_adjust = 'holm')
+        plt.matshow(pvalues)
+
+        for (x, y), value in np.ndenumerate(pvalues):
+            plt.text(x, y, f"{value:.2f}", va="center", ha="center")
+            
+        plt.colorbar()
+        #plt.show()
+        print(pvalues)
+
+    def friedman_ranking(self, data):
+        from scipy.stats import friedmanchisquare
+        from scikit_posthocs import posthoc_nemenyi_friedman
+        rank = data.argsort().argsort(axis=1)
+        #perform friedman test
+        _, p_value = friedmanchisquare(*rank)
+        print(f"p-value: {p_value}")
+        #perform post-hoc test
+        pvalues = posthoc_nemenyi_friedman(rank)
+        print(pvalues)
+        #self.pairwise_matrix(data)
+
+        
+
+
         
 

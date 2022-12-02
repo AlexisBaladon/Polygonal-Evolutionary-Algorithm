@@ -13,7 +13,7 @@ import multiprocessing
 
 class DeapConfig:
     def __init__(self, INDPB=0.1, cpu_count=os.cpu_count(), selection="best", tournament_size=3,
-                 gaussian_rate=0.5, NGEN=2, MU=50, LAMBDA=50, CXPB=0.8, MUTPB=0.2, edge_rate=0.5, **kwargs):
+                 gaussian_rate=0.05, NGEN=100, MU=50, LAMBDA=50, CXPB=0.8, MUTPB=0.2, edge_rate=0.5, **kwargs):
 
         self.toolbox = base.Toolbox()
         self.stats = tools.Statistics()
@@ -106,7 +106,7 @@ class DeapConfig:
         
         conditions = [
             gen >= ngen,
-            self.forced_stop #force stop from main thread
+            self.forced_stop #user is allowed to stop the algorithm from the main thread
         ]
 
         #print(f'gen: {gen}, NGEN: {NGEN}, fitnesses: {fitnesses[-GEN_INV_THRESHOLD:]}\n')

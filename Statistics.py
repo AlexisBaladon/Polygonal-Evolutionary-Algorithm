@@ -261,8 +261,8 @@ class Statistics:
         return
 
     def __build_eac(self, input_name: str, input_dir: str, vertex_count: int):
-        dc = DeapConfig(NGEN=6)
-        ip = ImageProcessor(input_name=input_name, input_dir=input_dir, vertex_count=vertex_count)
+        dc = DeapConfig()
+        ip = ImageProcessor(input_name=input_name, input_dir=input_dir, vertex_count=vertex_count, width=300) #TODO: DESHARDCODEAR
         ea = EA(ip)
         eac = EAController(ea, dc)
         eac.build_ea_module()
@@ -276,9 +276,9 @@ class Statistics:
             time_execution = []
             
             for seed in seeds:
+                print(f"Evaluating seed {seed+1}/{len(seeds)} of config {config}")
                 random.seed(seed)
                 eac.deap_configurer.register_parallelism() # si no salta error de pool not running
-                # TODO : time y codo
 
                 start = time()
                 best_fitnesses = eac.run(show_res=False, logs=False, seed=seed)
@@ -287,14 +287,14 @@ class Statistics:
                 time_execution.append(end - start)
                 best_execution_fitness.append(min(best_fitnesses))
 
-                current_values = [eac.deap_configurer.__dict__[at] for at in attributes]
+            current_values = [eac.deap_configurer.__dict__[at] for at in attributes]
 
-                results.append([
-                    *current_values, seed, min(best_fitnesses),
-                    np.mean(best_execution_fitness), np.std(best_execution_fitness),
-                    np.mean(time_execution),
-                    self.normality_test(best_execution_fitness)
-                ])
+            results.append([
+                *current_values, min(best_fitnesses),
+                np.mean(best_execution_fitness), np.std(best_execution_fitness),
+                np.mean(time_execution),
+                self.normality_test(best_execution_fitness)
+            ])
         
             header_fitness.append(str(current_values))
             best_fitness_config.append(best_execution_fitness)
@@ -312,14 +312,13 @@ class Statistics:
                 current_config[att] = val
                 self.__get_EA_results(eac, seeds, current_config, attributes, results, header_fitness, best_fitness_config)
 
-        columns = [*(attributes.keys()), "seed", "best_historical_fitness", "avg_best_fitness", "std_fitness", "avg_time", "p-value"]
+        columns = [*(attributes.keys()), "best_historical_fitness", "avg_best_fitness", "std_fitness", "avg_time", "p-value"]
         pd.DataFrame(results, columns=columns).to_csv(f"results/informal.csv", index=False)
 
         pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/best_fit_per_config_informal.csv", index=False)
 
-    def parametric_evaluation2(self, vertex_count: int, attributes: dict, image_path: str, images: list=["ultima_cena.jpg", "fox.jpg", "monalisa.jpg"], seeds: list = [1,2,3,4]):
+    def parametric_evaluation2(self, vertex_count: int, attributes: dict, image_path: str, images: list=["ultima_cena.jpg"], seeds: list = [1,2,3,4]):
         eac = self.__build_eac(images[0], image_path, vertex_count)
-        #TODO: PASAR LISTA DE IMAGENES POR PARAMETRO Y NO UNA SOLA <- ???
         results = []
         header_fitness = []
         best_fitness_config = []
@@ -330,14 +329,14 @@ class Statistics:
             for i, att in enumerate(attributes.keys()):
                 current_config[att] = combination[i]
             self.__get_EA_results(eac, seeds, current_config, attributes, results, 
-                header_fitness, best_fitness_config)
+                                  header_fitness, best_fitness_config)
         
-        header = [*(attributes.keys()), "seed","best_historical_fitness", "avg_best_fitness", "std_fitness", "avg_time", "p-value"]
+        header = [*(attributes.keys()),"best_historical_fitness", "avg_best_fitness", "std_fitness", "avg_time", "p-value"]
         pd.DataFrame(results, columns=header).to_csv(f"results/resultados.csv", index=False)
 
         pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/best_fit_per_config_parametric.csv", index=False)
                 
-    def greedy_evaluation_2(self, best_config: dict, greedy_config: dict, vertex_count: int, image_path: str, images: list=["ultima_cena.jpg", "fox.jpg", "monalisa.jpg"], seeds: list = [1,2]):
+    def greedy_evaluation_2(self, best_config: dict, greedy_config: dict, vertex_count: int, image_path: str, images: list=["old_man.jpeg", "fox.jpg", "monalisa.jpg"], seeds: list = [1,2]):
         eac = self.__build_eac(images[0], image_path, vertex_count)
         self.__update_config(eac, best_config)
         alt_solver = AltSolver(eac.evolutionary_algorithm)
@@ -398,5 +397,100 @@ class Statistics:
 
         header = ["image", "method", "best_historical_fitness", "avg_best_fitness", "std_fitness", "avg_time", "p-value"]
         pd.DataFrame(results, columns=header).to_csv(f"results/greedy.csv", index=False)
+    
 
-        pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/greedy2.csv", index=False)
+    #TODO: Entender tests de rangos
+    def range_test(self):
+        from itertools import combinations
+        from scipy.stats import ttest_ind
+
+        df = pd.read_csv("results/greedy.csv")
+        print(df)
+        df_pivot = df.pivot(index='seed', columns='method', values='best_historical_fitness')
+        df_rank = df_pivot.rank(axis=1, method='min', ascending=True)
+        print(df_rank)
+        df_mean_rank = df_rank.mean(axis=0)
+        print(df_mean_rank)
+        pairs = list(combinations(df_mean_rank.index, 2))
+        print(pairs)
+        results = []
+        for pair in pairs:
+            print(pair)
+            results.append([*pair, ttest_ind(df_pivot[pair[0]], df_pivot[pair[1]]).pvalue])        
+        p_values = pd.DataFrame(columns=["method1", "method2", "p-value"], data=results)
+        print(p_values)
+
+    #TODO: Parametrizar y realizar por cada instancia
+    def pairwise_tests(self):
+        #perform post-hoc tests for each method
+        from scipy.stats import ttest_ind
+        from itertools import combinations
+
+        df = pd.read_csv("results/greedy.csv")
+        df_pivot = df.pivot(index='seed', columns='method', values='best_historical_fitness')
+        print(df_pivot)
+        results = []
+        for pair in combinations(df_pivot.columns, 2):
+            #pair_ranges = [df_pivot[pair[i]] for i in range(2)] #TODO: ESTE ES EL REAL
+            pair_ranges = [[np.random.randint(1, 4) for _ in range(30)] for _ in range(2)]
+            #TODO: FALTA ITERAR POR INSTANCIA
+            print(pair_ranges)
+            results.append([*pair, ttest_ind(*pair_ranges).pvalue])
+        p_values = pd.DataFrame(columns=["method1", "method2", "p-value"], data=results)
+        print(p_values)
+
+    def plot_performance(self):
+        df = pd.read_csv("results/greedy.csv")
+        df_pivot = df.pivot(index='seed', columns='method', values='best_historical_fitness')
+        df_pivot.plot.box()
+        plt.show()
+
+    def plot_time(self):
+        df = pd.read_csv("results/time.csv")
+        #CPU,time,speedup,efficiency
+        columns = ["time", "speedup", "efficiency"]
+        df_pivot = df.pivot(index='CPU', columns=columns[0], values='time')
+        #df_pivot.plot.bar()
+        df_pivot = df.pivot(index='CPU', columns="time", values="time")
+        df_pivot.plot.bar()
+        plt.show()
+
+    def to_latex(self):
+        df = pd.read_csv("results/greedy.csv")
+        df_pivot = df.pivot(index='seed', columns='method', values='best_historical_fitness')
+        #convert to latex with style
+        print(df_pivot.style.to_latex())
+
+    def pairwise_matrix(self, data):
+        import scikit_posthocs as sp
+        rank = data.argsort().argsort(axis=1)
+        pvalues = sp.posthoc_dunn(rank, p_adjust = 'holm')
+        plt.matshow(pvalues)
+
+        for (x, y), value in np.ndenumerate(pvalues):
+            plt.text(x, y, f"{value:.2f}", va="center", ha="center")
+            
+        plt.colorbar()
+        #plt.show()
+        print(pvalues)
+
+    def friedman_ranking(self, data):
+        from scipy.stats import friedmanchisquare
+        from scikit_posthocs import posthoc_nemenyi_friedman
+        rank = data.argsort().argsort(axis=1)
+        #perform friedman test
+        _, p_value = friedmanchisquare(*rank)
+        print(f"p-value: {p_value}")
+        #perform post-hoc test
+        pvalues = posthoc_nemenyi_friedman(rank)
+        print(pvalues)
+        #self.pairwise_matrix(data)
+
+        
+
+
+        
+
+
+
+        #pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/greedy2.csv", index=False)

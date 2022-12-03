@@ -32,19 +32,18 @@ if __name__  == "__main__":
     stateless_stats = Statistics(None, None)
 
     #PARAMETRIC
-    FORMAL_SEEDS = list(range(500, 500 + SEED_NUMBER))
+    CONFIG_SEEDS = list(range(500, 500 + SEED_NUMBER))
     CONFIG_IMAGES = ["ultima_cena.jpg"]
     FORMAL_VERTEX_COUNT = 5000
     FORMAL_ATTRIBUTES = {"CXPB": [0.8, 0.9], "MUTPB": [0.01, 0.05, 0.1]}
-    #stateless_stats.parametric_evaluation2(FORMAL_VERTEX_COUNT, FORMAL_ATTRIBUTES, IMAGE_RESULT_PATH, CONFIG_IMAGES, seeds=FORMAL_SEEDS)
+    #stateless_stats.parametric_evaluation2(FORMAL_VERTEX_COUNT, FORMAL_ATTRIBUTES, IMAGE_RESULT_PATH, CONFIG_IMAGES, seeds=CONFIG_SEEDS)
 
     #INFORMAL
     best_config = {"CXPB":0.9, "MUTPB":0.1}
-    INFORMAL_ATTRIBUTES = {"selection": ["best", "tournament", "roulette"]}
+    INFORMAL_ATTRIBUTES = {"tournament_size": [2,3]} #TODO: TOURNAMENT HARDCODEADO
     INFORMAL_VERTEX_COUNT = 5000
-    INFORMAL_SEEDS = list(range(1000, 1000 + SEED_NUMBER))
     INFORMAL_IMAGE = CONFIG_IMAGES[0]
-    stateless_stats.informal_evaluation_2(best_config, INFORMAL_VERTEX_COUNT, INFORMAL_ATTRIBUTES, IMAGE_RESULT_PATH, INFORMAL_IMAGE, seeds=INFORMAL_SEEDS)
+    stateless_stats.informal_evaluation_2(best_config, INFORMAL_VERTEX_COUNT, INFORMAL_ATTRIBUTES, IMAGE_RESULT_PATH, INFORMAL_IMAGE, seeds=CONFIG_SEEDS)
     
     #GREEDY
     GREEDY_CONFIG = {

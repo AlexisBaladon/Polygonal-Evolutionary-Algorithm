@@ -4,6 +4,7 @@ from deap import tools
 from deap import algorithms
 from deap.tools import HallOfFame
 
+import operator
 import random
 import pandas
 import numpy as np
@@ -12,8 +13,8 @@ import os
 import multiprocessing
 
 class DeapConfig:
-    def __init__(self, INDPB=0.1, cpu_count=os.cpu_count(), selection="best", tournament_size=3,
-                 gaussian_rate=0.05, NGEN=100, MU=50, LAMBDA=50, CXPB=0.8, MUTPB=0.2, edge_rate=0.5, **kwargs):
+    def __init__(self, INDPB=0.1, cpu_count=os.cpu_count(), selection="tournament", tournament_size=3,
+                 gaussian_rate=0.05, NGEN=75, MU=50, LAMBDA=50, CXPB=0.8, MUTPB=0.2, edge_rate=0.5, **kwargs):
 
         self.toolbox = base.Toolbox()
         self.stats = tools.Statistics()
@@ -55,7 +56,6 @@ class DeapConfig:
     def register_operators(self, fitness_custom_function, mutation_custom_function, max_x, max_y):
         selections = {
             "best"      : {"function": tools.selBest},
-            "roulette"  : {"function": tools.selRoulette},
             "tournament": {"function": tools.selTournament, "tournsize": self.tournament_size},
         }
 

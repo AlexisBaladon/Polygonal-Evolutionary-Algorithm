@@ -336,19 +336,13 @@ class Statistics:
         pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/best_fit_per_config_parametric.csv", index=False)
                 
     def greedy_evaluation_2(self, best_config: dict, greedy_config: dict, vertex_count: int, image_path: str, images: list=["old_man.jpeg", "fox.jpg", "monalisa.jpg"], seeds: list = [1,2]):
-        eac = self.__build_eac(images[0], image_path, vertex_count)
-        self.__update_config(eac, best_config)
-        alt_solver = AltSolver(eac.evolutionary_algorithm)
-
         best_execution_fitness = []
         EA_ID = "EA"
 
         for img in images:
-
-            alt_solver.ea.image_processor.img_in_dir = image_path + img
-            alt_solver.ea.load_image()
-            eac.evolutionary_algorithm.image_processor.img_in_dir = image_path + img
-            eac.evolutionary_algorithm.load_image()
+            eac = self.__build_eac(img, image_path, vertex_count)
+            self.__update_config(eac, best_config)
+            alt_solver = AltSolver(eac.evolutionary_algorithm)
 
             results = []
             header_fitness = []

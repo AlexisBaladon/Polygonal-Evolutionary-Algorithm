@@ -80,8 +80,7 @@ class ImageProcessor():
             if verbose:
                 print(f"Image entropy: {image_entropy}")
                 print(f"Vertex count: {self.vertex_count}")
-        else:
-            self.vertex_count -= 4 # 4 vertices are added to the image corners
+        self.vertex_count -= 4 # 4 vertices are added to the image corners
 
         if show:
             image.show("Preprocessed image")

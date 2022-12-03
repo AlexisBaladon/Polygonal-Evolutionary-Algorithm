@@ -262,7 +262,7 @@ class Statistics:
 
     def __build_eac(self, input_name: str, input_dir: str, vertex_count: int):
         dc = DeapConfig()
-        ip = ImageProcessor(input_name=input_name, input_dir=input_dir, vertex_count=vertex_count, width=300) #TODO: DESHARDCODEAR
+        ip = ImageProcessor(input_name=input_name, input_dir=input_dir, vertex_count=vertex_count, width=300)
         ea = EA(ip)
         eac = EAController(ea, dc)
         eac.build_ea_module()
@@ -314,7 +314,6 @@ class Statistics:
 
         columns = [*(attributes.keys()), "best_historical_fitness", "avg_best_fitness", "std_fitness", "avg_time", "p-value"]
         pd.DataFrame(results, columns=columns).to_csv(f"results/informal.csv", index=False)
-
         pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/best_fit_per_config_informal.csv", index=False)
 
     def parametric_evaluation2(self, vertex_count: int, attributes: dict, image_path: str, images: list=["ultima_cena.jpg"], seeds: list = [1,2,3,4]):
@@ -397,47 +396,6 @@ class Statistics:
 
         header = ["image", "method", "best_historical_fitness", "avg_best_fitness", "std_fitness", "avg_time", "p-value"]
         pd.DataFrame(results, columns=header).to_csv(f"results/greedy.csv", index=False)
-    
-
-    #TODO: Entender tests de rangos
-    def range_test(self):
-        from itertools import combinations
-        from scipy.stats import ttest_ind
-
-        df = pd.read_csv("results/greedy.csv")
-        print(df)
-        df_pivot = df.pivot(index='seed', columns='method', values='best_historical_fitness')
-        df_rank = df_pivot.rank(axis=1, method='min', ascending=True)
-        print(df_rank)
-        df_mean_rank = df_rank.mean(axis=0)
-        print(df_mean_rank)
-        pairs = list(combinations(df_mean_rank.index, 2))
-        print(pairs)
-        results = []
-        for pair in pairs:
-            print(pair)
-            results.append([*pair, ttest_ind(df_pivot[pair[0]], df_pivot[pair[1]]).pvalue])        
-        p_values = pd.DataFrame(columns=["method1", "method2", "p-value"], data=results)
-        print(p_values)
-
-    #TODO: Parametrizar y realizar por cada instancia
-    def pairwise_tests(self):
-        #perform post-hoc tests for each method
-        from scipy.stats import ttest_ind
-        from itertools import combinations
-
-        df = pd.read_csv("results/greedy.csv")
-        df_pivot = df.pivot(index='seed', columns='method', values='best_historical_fitness')
-        print(df_pivot)
-        results = []
-        for pair in combinations(df_pivot.columns, 2):
-            #pair_ranges = [df_pivot[pair[i]] for i in range(2)] #TODO: ESTE ES EL REAL
-            pair_ranges = [[np.random.randint(1, 4) for _ in range(30)] for _ in range(2)]
-            #TODO: FALTA ITERAR POR INSTANCIA
-            print(pair_ranges)
-            results.append([*pair, ttest_ind(*pair_ranges).pvalue])
-        p_values = pd.DataFrame(columns=["method1", "method2", "p-value"], data=results)
-        print(p_values)
 
     def plot_performance(self):
         df = pd.read_csv("results/greedy.csv")

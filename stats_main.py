@@ -28,21 +28,23 @@ DeapConfig.register_fitness() # register fitness outside main
 
 if __name__  == "__main__":        
     IMAGE_RESULT_PATH = "img/"
+    SEED_NUMBER = 30
     stateless_stats = Statistics(None, None)
 
     #PARAMETRIC
-    FORMAL_SEED_NUMBER = 30
-    FORMAL_SEEDS = list(range(500, 500 + FORMAL_SEED_NUMBER))
-    FORMAL_IMAGES = ["ultima_cena.jpg"]
+    FORMAL_SEEDS = list(range(500, 500 + SEED_NUMBER))
+    CONFIG_IMAGES = ["ultima_cena.jpg"]
     FORMAL_VERTEX_COUNT = 5000
     FORMAL_ATTRIBUTES = {"CXPB": [0.8, 0.9], "MUTPB": [0.01, 0.05, 0.1]}
-    stateless_stats.parametric_evaluation2(FORMAL_VERTEX_COUNT, FORMAL_ATTRIBUTES, IMAGE_RESULT_PATH, FORMAL_IMAGES, seeds=FORMAL_SEEDS)
+    #stateless_stats.parametric_evaluation2(FORMAL_VERTEX_COUNT, FORMAL_ATTRIBUTES, IMAGE_RESULT_PATH, CONFIG_IMAGES, seeds=FORMAL_SEEDS)
 
     #INFORMAL
-    best_config = {"CXPB":0.8, "MUTPB":0.01} #TODO: obtenerla de la evaluación formal
-    INFORMAL_ATTRIBUTES = {"MU": [50, 100], "selection": ["best", "tournament", "roulette"]}
-    INFORMAL_VERTEX_COUNT = 100
-    #stateless_stats.informal_evaluation_2(best_config, INFORMAL_VERTEX_COUNT, INFORMAL_ATTRIBUTES, IMAGE_RESULT_PATH, IMAGE_NAME, seeds=SEEDS)
+    best_config = {"CXPB":0.9, "MUTPB":0.1}
+    INFORMAL_ATTRIBUTES = {"selection": ["best", "tournament", "roulette"]}
+    INFORMAL_VERTEX_COUNT = 5000
+    INFORMAL_SEEDS = list(range(1000, 1000 + SEED_NUMBER))
+    INFORMAL_IMAGE = CONFIG_IMAGES[0]
+    stateless_stats.informal_evaluation_2(best_config, INFORMAL_VERTEX_COUNT, INFORMAL_ATTRIBUTES, IMAGE_RESULT_PATH, INFORMAL_IMAGE, seeds=INFORMAL_SEEDS)
     
     #GREEDY
     GREEDY_CONFIG = {

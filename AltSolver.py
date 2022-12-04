@@ -1,6 +1,7 @@
 from EA import EA
 import random
 import numpy as np
+import time
 
 class AltSolver:
     def __init__(self, evolutionary_algorithm: EA, seed: int = 0):
@@ -24,7 +25,7 @@ class AltSolver:
             raise Exception('Invalid method')
         return deltas
 
-    def solve(self, method: str, max_iter: int, vertex_count: int, threshold = 500, verbose = True):
+    def solve(self, method: str, max_iter: int, vertex_count: int, threshold = 500, max_time = 60, verbose = True):
         ind_size = vertex_count * 2
         max_x, max_y = self.ea.image_processor.width-1, self.ea.image_processor.height-1
         edges = self.ea.image_processor.edges_coordinates
@@ -35,7 +36,8 @@ class AltSolver:
             initial_eval = min_eval
 
         i = 0
-        while i < max_iter:
+        start_time = time.time()
+        while i < max_iter and time.time() - start_time < max_time:
             ind_gene = random.randint(0, ind_size-1)
             best_delta = 0
             deltas = self.__get_deltas(method, threshold)
@@ -52,8 +54,9 @@ class AltSolver:
                 min_individual[ind_gene] -= delta
             min_individual[ind_gene] += best_delta 
             if verbose:
-                print(f'Iteration {i}/{max_iter} finished with fitness {min_eval}')
+                print(f'Iteration {i}/{max_iter} finished with fitness {min_eval} at time {time.time() - start_time:.2f}s')
             i += 1
         if verbose:
             print(f'Initial fitness: {initial_eval} - Final fitness: {min_eval}')
+            print(f"Time elapsed: {time.time() - start_time}")
         return min_individual, min_eval

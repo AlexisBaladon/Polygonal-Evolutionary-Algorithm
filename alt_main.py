@@ -6,6 +6,7 @@ from AltSolver import AltSolver
 
 def get_arguments() -> dict:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--seed", type=int, default=0, help="Seed for random number generator")
     #IMAGE PROCESSING
     parser.add_argument("--input_path", type=str, default="./img", help=f"")
     parser.add_argument("--input_name", type=str, default="monalisa.jpg", required=True, help=f"")
@@ -20,6 +21,8 @@ def get_arguments() -> dict:
     parser.add_argument("--method", type=str, default="gaussian", help=f"gaussian or local_search")
     parser.add_argument("--threshold", type=int, default=5, help=f"Threshold for local search or standard deviation for gaussian")
     parser.add_argument("--max_iter", type=int, default=100, help=f"Maximum number of iterations")
+    parser.add_argument("--max_time", type=int, default=60, help=f"Maximum number of seconds")
+    parser.add_argument("--verbose", type=int, default=1, help=f"Prints information about the process")
     return vars(parser.parse_args())
 
 def check_preconditions(args):
@@ -53,8 +56,9 @@ def main(args):
     ea = EA(ip)
     alt_solver = AltSolver(ea)
     alt_solver.build_ea_module()
-    method, max_iter, threshold, vertex_count = args["method"], args["max_iter"], args["threshold"], args["vertex_count"]
-    best_individual, best_eval = alt_solver.solve(method, max_iter, vertex_count, threshold, verbose=True)
+    alt_solver.update_seed(args["seed"])
+    method, max_iter, threshold, vertex_count, verbose = args["method"], args["max_iter"], args["threshold"], args["vertex_count"], args["verbose"]
+    best_individual, best_eval = alt_solver.solve(method, max_iter, vertex_count, threshold, verbose= verbose)
     img = ea.decode(best_individual)
     img.show()
 

@@ -43,7 +43,7 @@ if __name__  == "__main__":
     INFORMAL_ATTRIBUTES = {"tournament_size": [2,3]} #TODO: TOURNAMENT HARDCODEADO
     INFORMAL_VERTEX_COUNT = 5000
     INFORMAL_IMAGE = CONFIG_IMAGES[0]
-    stateless_stats.informal_evaluation_2(best_config, INFORMAL_VERTEX_COUNT, INFORMAL_ATTRIBUTES, IMAGE_RESULT_PATH, INFORMAL_IMAGE, seeds=CONFIG_SEEDS)
+    #stateless_stats.informal_evaluation_2(best_config, INFORMAL_VERTEX_COUNT, INFORMAL_ATTRIBUTES, IMAGE_RESULT_PATH, INFORMAL_IMAGE, seeds=CONFIG_SEEDS)
     
     #GREEDY
     GREEDY_CONFIG = {

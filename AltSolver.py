@@ -25,9 +25,9 @@ class AltSolver:
             raise Exception('Invalid method')
         return deltas
 
-    def solve(self, method: str, max_iter: int, vertex_count: int, threshold = 500, max_evals = 60, verbose = True):
-        ind_size = vertex_count * 2
+    def solve(self, method: str, max_iter: int, threshold = 500, max_evals = 60, verbose = True):
         max_x, max_y = self.ea.image_processor.width-1, self.ea.image_processor.height-1
+        ind_size = self.ea.image_processor.vertex_count * 2
         edges = self.ea.image_processor.edges_coordinates
         min_individual = self.ea.init_coordinates(max_x, max_y, ind_size, edges)
         min_eval, = self.ea.evalDelaunay(min_individual)
@@ -36,13 +36,14 @@ class AltSolver:
             initial_eval = min_eval
 
         i = 0
-        eval_count = 0
+        eval_count = 1
         while i < max_iter and eval_count < max_evals:
             ind_gene = random.randint(0, ind_size-1)
             best_delta = 0
             deltas = self.__get_deltas(method, threshold)
             for delta in deltas:
-                if not (0 <= min_individual[ind_gene] + delta <= 255) or delta==0: 
+                limit = max_x if ind_gene % 2 == 0 else max_y
+                if not (0 <= min_individual[ind_gene] + delta <= limit) or delta==0: 
                     continue
                 min_individual[ind_gene] += delta
                 eval_candidate, = self.ea.evalDelaunay(min_individual)

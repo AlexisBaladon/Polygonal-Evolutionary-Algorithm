@@ -21,13 +21,10 @@ class DeapConfig:
         self.cpu_count = cpu_count
         
         self.NGEN = NGEN
-        # population size
         self.MU = MU
-        # number of children to produce at each generation
         self.LAMBDA = LAMBDA
         self.CXPB = CXPB
         self.MUTPB = MUTPB
-        # probability of mutating a gene
         self.INDPB = INDPB
         self.gaussian_rate = gaussian_rate
         self.selection = selection

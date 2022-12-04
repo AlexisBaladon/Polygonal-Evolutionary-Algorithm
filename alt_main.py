@@ -57,8 +57,8 @@ def main(args):
     alt_solver = AltSolver(ea)
     alt_solver.build_ea_module()
     alt_solver.update_seed(args["seed"])
-    method, max_iter, threshold, vertex_count, max_evals, verbose = args["method"], args["max_iter"], args["threshold"], args["vertex_count"], args["max_evals"], args["verbose"]
-    best_individual, best_eval = alt_solver.solve(method, max_iter, vertex_count, threshold, max_evals, verbose= verbose)
+    method, max_iter, threshold, max_evals, verbose = args["method"], args["max_iter"], args["threshold"], args["max_evals"], args["verbose"]
+    best_individual, best_eval = alt_solver.solve(method, max_iter, threshold, max_evals, verbose= verbose)
     img = ea.decode(best_individual)
     img.show()
 

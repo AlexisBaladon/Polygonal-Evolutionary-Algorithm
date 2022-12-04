@@ -29,7 +29,7 @@ DeapConfig.register_fitness() # register fitness outside main
 if __name__  == "__main__":        
     IMAGE_RESULT_PATH = "img/"
     SEED_NUMBER = 30
-    stateless_stats = Statistics(None, None)
+    stateless_stats = Statistics()
 
     #PARAMETRIC
     CONFIG_SEEDS = list(range(500, 500 + SEED_NUMBER))
@@ -69,3 +69,6 @@ if __name__  == "__main__":
         },
     }
     stateless_stats.greedy_evaluation_2(best_config, GREEDY_CONFIG, IMAGE_RESULT_PATH, IMAGES, seeds=GREEDY_SEEDS)
+
+    #EFFICIENCY
+    stateless_stats.efficiency_evaluation(seed=0, images= IMAGES, image_path=IMAGE_RESULT_PATH)

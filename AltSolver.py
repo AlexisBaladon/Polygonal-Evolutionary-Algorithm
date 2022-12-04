@@ -25,7 +25,7 @@ class AltSolver:
             raise Exception('Invalid method')
         return deltas
 
-    def solve(self, method: str, max_iter: int, vertex_count: int, threshold = 500, max_time = 60, verbose = True):
+    def solve(self, method: str, max_iter: int, vertex_count: int, threshold = 500, max_evals = 60, verbose = True):
         ind_size = vertex_count * 2
         max_x, max_y = self.ea.image_processor.width-1, self.ea.image_processor.height-1
         edges = self.ea.image_processor.edges_coordinates
@@ -36,8 +36,8 @@ class AltSolver:
             initial_eval = min_eval
 
         i = 0
-        start_time = time.time()
-        while i < max_iter and time.time() - start_time < max_time:
+        eval_count = 0
+        while i < max_iter and eval_count < max_evals:
             ind_gene = random.randint(0, ind_size-1)
             best_delta = 0
             deltas = self.__get_deltas(method, threshold)
@@ -46,6 +46,7 @@ class AltSolver:
                     continue
                 min_individual[ind_gene] += delta
                 eval_candidate, = self.ea.evalDelaunay(min_individual)
+                eval_count += 1
                 if eval_candidate < min_eval:
                     min_eval = eval_candidate
                     best_delta = delta
@@ -54,9 +55,9 @@ class AltSolver:
                 min_individual[ind_gene] -= delta
             min_individual[ind_gene] += best_delta 
             if verbose:
-                print(f'Iteration {i}/{max_iter} finished with fitness {min_eval} at time {time.time() - start_time:.2f}s')
+                print(f'Iteration {i}/{max_iter} finished with fitness {min_eval}')
+                print(f'Current eval count: {eval_count}')
             i += 1
         if verbose:
             print(f'Initial fitness: {initial_eval} - Final fitness: {min_eval}')
-            print(f"Time elapsed: {time.time() - start_time}")
         return min_individual, min_eval

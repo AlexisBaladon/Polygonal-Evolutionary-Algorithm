@@ -260,9 +260,9 @@ class Statistics:
         eac.build_deap_module()
         return
 
-    def __build_eac(self, input_name: str, input_dir: str, vertex_count: int):
+    def __build_eac(self, input_name: str, input_dir: str, vertex_count: int, width=500):
         dc = DeapConfig()
-        ip = ImageProcessor(input_name=input_name, input_dir=input_dir, vertex_count=vertex_count, width=300)
+        ip = ImageProcessor(input_name=input_name, input_dir=input_dir, vertex_count=vertex_count, width=width)
         ea = EA(ip)
         eac = EAController(ea, dc)
         eac.build_ea_module()
@@ -345,7 +345,7 @@ class Statistics:
         for img in images:
             print(f"Evaluating image {img}")
             vertex_count = images.get("vertex_count", 100)
-            eac = self.__build_eac(img, image_path, vertex_count)
+            eac = self.__build_eac(img, image_path, vertex_count, width=images.get("width", 500))
             self.__update_config(eac, best_config)
             alt_solver = AltSolver(eac.evolutionary_algorithm)
 
@@ -381,7 +381,7 @@ class Statistics:
                     self.normality_test(best_execution_fitness)
                 ])
 
-                header_fitness.append(method)
+                header_fitness.append(f"{method}-{img}")
                 best_fitness_config.append(best_execution_fitness)
 
         header = ["image", "method", "best_historical_fitness", "avg_best_fitness", "std_fitness", "avg_time", "p-value"]

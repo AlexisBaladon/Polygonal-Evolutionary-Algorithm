@@ -28,7 +28,7 @@ DeapConfig.register_fitness() # register fitness outside main
 
 if __name__  == "__main__":        
     IMAGE_RESULT_PATH = "img/"
-    SEED_NUMBER = 30
+    SEED_NUMBER = 2
     stateless_stats = Statistics(None, None)
 
     #PARAMETRIC
@@ -47,7 +47,19 @@ if __name__  == "__main__":
     
     #GREEDY
     GREEDY_CONFIG = {
-        "local_search": {"max_iter": 5, "threshold": 3},
-        "gaussian": {"max_iter": 5, "threshold": 50}
+        "local_search": {"max_iter": 100000, "threshold": 3, "max_time": 1},
+        "gaussian": {"max_iter": 100000, "threshold": 50, "max_time": 1}
     }
-    stateless_stats.greedy_evaluation_2(best_config, GREEDY_CONFIG, FORMAL_VERTEX_COUNT, IMAGE_RESULT_PATH, seeds=SEEDS)
+    GREEDY_SEEDS = list(range(1000, 1000 + SEED_NUMBER))
+    IMAGES = {
+        "fox.jpg": {
+            "vertex_count": 2500,
+        },
+        "monalisa.jpg": {
+            "vertex_count": 5000,
+        },
+        "old_man.jpeg": {
+            "vertex_count": 6000,
+        },
+    }
+    stateless_stats.greedy_evaluation_2(best_config, GREEDY_CONFIG, IMAGE_RESULT_PATH, IMAGES, seeds=GREEDY_SEEDS)

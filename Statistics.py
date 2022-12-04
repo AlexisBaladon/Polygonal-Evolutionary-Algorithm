@@ -335,18 +335,19 @@ class Statistics:
 
         pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/best_fit_per_config_parametric.csv", index=False)
                 
-    def greedy_evaluation_2(self, best_config: dict, greedy_config: dict, vertex_count: int, image_path: str, images: list=["old_man.jpeg", "fox.jpg", "monalisa.jpg"], seeds: list = [1,2]):
+    def greedy_evaluation_2(self, best_config: dict, greedy_config: dict, image_path: str, images: dict, seeds: list = [1,2]):
         best_execution_fitness = []
+        results = []
+        header_fitness = []
+        best_fitness_config = []
         EA_ID = "EA"
 
         for img in images:
+            print(f"Evaluating image {img}")
+            vertex_count = images.get("vertex_count", 100)
             eac = self.__build_eac(img, image_path, vertex_count)
             self.__update_config(eac, best_config)
             alt_solver = AltSolver(eac.evolutionary_algorithm)
-
-            results = []
-            header_fitness = []
-            best_fitness_config = []
 
             for method in list(greedy_config.keys()) + [EA_ID]:
 
@@ -356,24 +357,19 @@ class Statistics:
                 end = 0
 
                 for seed in seeds:
+                    print(f"Evaluating seed {seed+1}/{len(seeds)} of method {method}")
                     random.seed(seed)
                     if method == EA_ID:
                         eac.deap_configurer.register_parallelism() # si no salta error de pool not running
-                        
                         start = time()
                         best_fitnesses = eac.run(show_res=False, logs=False, seed=seed)
                         end = time()
-
                         best_execution_fitness.append(min(best_fitnesses))
                     else:
-                        alt_solver.update_seed(seed)
-
                         start = time()
-                        _, best_eval = alt_solver.solve(**(greedy_config[method]), vertex_count=vertex_count, method=method, verbose=True)
+                        _, best_eval = alt_solver.solve(**(greedy_config[method]), vertex_count=vertex_count, method=method, verbose=False)
                         end = time()
-
                         best_execution_fitness.append(best_eval.min())
-
                     time_execution.append(end - start)
                 
                 results.append([
@@ -390,6 +386,7 @@ class Statistics:
 
         header = ["image", "method", "best_historical_fitness", "avg_best_fitness", "std_fitness", "avg_time", "p-value"]
         pd.DataFrame(results, columns=header).to_csv(f"results/greedy.csv", index=False)
+        pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/best_fit_per_config_greedy.csv", index=False)
 
     def plot_performance(self):
         df = pd.read_csv("results/greedy.csv")

@@ -29,9 +29,9 @@ class DeapConfig:
         self.gaussian_rate = gaussian_rate
         self.selection = selection
         self.tournament_size = tournament_size
+
         #rate of edges in initialization
         self.edge_rate = edge_rate
-
         #force stop from main thread
         self.forced_stop = False
     

@@ -9,7 +9,7 @@ def get_arguments() -> dict:
     parser.add_argument("--seed", type=int, default=0, help="Seed for random number generator")
     #IMAGE PROCESSING
     parser.add_argument("--input_path", type=str, default="./img", help=f"")
-    parser.add_argument("--input_name", type=str, default="monalisa.jpg", required=True, help=f"")
+    parser.add_argument("--input_name", type=str, default="fox.jpg", required=True, help=f"")
     parser.add_argument("--output_path", type=str, default="./", help=f"")
     parser.add_argument("--output_name", type=str, default="monalisa.jpg", help=f"")
     parser.add_argument("--width", type=int, default=None, help="Maximum width")

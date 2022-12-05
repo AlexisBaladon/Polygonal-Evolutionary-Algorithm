@@ -33,8 +33,8 @@ class Statistics:
         values = []
         random.seed(seed)
         for img in images:
-            vertex_count = images.get("vertex_count", 100)
-            eac = self.__build_eac(img, image_path, vertex_count, width=images.get("width", 500))
+            vertex_count = images[img].get("vertex_count", 100)
+            eac = self.__build_eac(img, image_path, vertex_count, width=images[img].get("width", 500))
             for i in range(1,cpu_count()+1):
                 print(f"Testing {img} with {i} CPUs")
                 config = {"cpu_count": i}
@@ -165,13 +165,12 @@ class Statistics:
 
         for img in images:
             print(f"Evaluating image {img}")
-            vertex_count = images.get("vertex_count", 100)
-            eac = self.__build_eac(img, image_path, vertex_count, width=images.get("width", 500))
+            vertex_count = images[img].get("vertex_count", 100)
+            eac = self.__build_eac(img, image_path, vertex_count, width=images[img].get("width", 500))
             self.__update_config(eac, best_config)
             alt_solver = AltSolver(eac.evolutionary_algorithm)
 
-            for method in list(greedy_config.keys()): #+ [EA_ID]: TODO: PEGAR EA EN CSV
-
+            for method in [EA_ID] + list(greedy_config.keys()):
                 best_execution_fitness = []
                 time_execution = []
                 start = 0
@@ -207,9 +206,9 @@ class Statistics:
                 header_fitness.append(f"{method}-{img}")
                 best_fitness_config.append(best_execution_fitness)
 
-        header = ["image", "method", "best_historical_fitness", "avg_best_fitness", "std_fitness", "avg_time", "p-value"]
-        pd.DataFrame(results, columns=header).to_csv(f"results/greedy.csv", index=False)
-        pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/best_fit_per_config_greedy.csv", index=False)
+                header = ["image", "method", "best_historical_fitness", "avg_best_fitness", "std_fitness", "avg_time", "p-value"]
+                pd.DataFrame(results, columns=header).to_csv(f"results/greedy.csv", index=False)
+                pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/best_fit_per_config_greedy.csv", index=False)
 
     def plot_performance(self):
         df = pd.read_csv("results/greedy.csv")

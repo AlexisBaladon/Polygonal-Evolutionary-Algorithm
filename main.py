@@ -13,7 +13,7 @@ def get_arguments() -> dict:
     #DEAP CONFIGURATION
     parser.add_argument("--seed", type=int, default=64, help="Seed")
     parser.add_argument("--INDPB", type=float, default=0.1, help="Probability of mutating a gene")
-    parser.add_argument("--CXPB", type=float, default=0.8, help="Crossover probability")
+    parser.add_argument("--CXPB", type=float, default=0.9, help="Crossover probability")
     parser.add_argument("--MUTPB", type=float, default=0.1, help="Mutation probability")
     parser.add_argument("--NGEN", type=int, default=100, help="Number of generations")
     parser.add_argument("--MU", type=int, default=50, help="Population size")

@@ -56,7 +56,7 @@ if __name__  == "__main__":
     GREEDY_SEEDS = list(range(1000, 1000 + SEED_NUMBER))
     IMAGES = {
         "fox.jpg": {
-            "vertex_count": 2000,
+            "vertex_count": 1500,
             "width": 300,
         },
         "monalisa_sqr.jpg": {

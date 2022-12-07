@@ -111,7 +111,7 @@ class Statistics:
             current_values = [eac.deap_configurer.__dict__[at] for at in attributes]
 
             results.append([
-                *current_values, min(best_fitnesses),
+                *current_values, min(best_execution_fitness),
                 np.mean(best_execution_fitness), np.std(best_execution_fitness),
                 np.mean(time_execution),
                 self.normality_test(best_execution_fitness)

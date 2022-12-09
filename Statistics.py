@@ -207,54 +207,27 @@ class Statistics:
                 best_fitness_config.append(best_execution_fitness)
 
                 header = ["image", "method", "best_historical_fitness", "avg_best_fitness", "std_fitness", "avg_time", "p-value"]
-                pd.DataFrame(results, columns=header).to_csv(f"results/greedy.csv", index=False)
+                pd.DataFrame(results, columns=header).to_csv(f"results/comparison.csv", index=False)
                 pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/best_fit_per_config_greedy.csv", index=False)
 
-    def plot_performance(self):
-        df = pd.read_csv("results/greedy.csv")
-        df_pivot = df.pivot(index='seed', columns='method', values='best_historical_fitness')
-        df_pivot.plot.box()
+    def plot_best_historical_fitness(self):
+        df = pd.read_csv("results/comparison.csv")
+        df_pivot = df.pivot(index='image', columns='method', values='best_historical_fitness')
+        #normalize values
+        df_pivot = df_pivot.apply(lambda x: x/x.max(), axis=1)
+        #plot with horizontal x axis labels
+        df_pivot.plot.bar(rot=0)
         plt.show()
 
     def plot_time(self):
-        df = pd.read_csv("results/time.csv")
-        #CPU,time,speedup,efficiency
-        columns = ["time", "speedup", "efficiency"]
-        df_pivot = df.pivot(index='CPU', columns=columns[0], values='time')
-        #df_pivot.plot.bar()
-        df_pivot = df.pivot(index='CPU', columns="time", values="time")
+        df = pd.read_csv("results/reports/test_time.csv")
+        df_with_images = pd.DataFrame(columns=["CPU", "time", "image"])
+        for idx, image in enumerate(["fox.jpg", "monalisa_sqr.jpg", "old_man.jpeg"]):
+            row = df.iloc[4*idx:4*idx+4]
+            df_with_images = df_with_images.concat(pd.DataFrame({"CPU": row["CPU"], "time": row["time"], "image": image}))
+
+        print(df_with_images)
+        df_pivot = df_with_images.pivot(index='CPU', columns='image', values='time')
+
         df_pivot.plot.bar()
         plt.show()
-
-    def to_latex(self):
-        df = pd.read_csv("results/greedy.csv")
-        df_pivot = df.pivot(index='seed', columns='method', values='best_historical_fitness')
-        #convert to latex with style
-        print(df_pivot.style.to_latex())
-
-    def pairwise_matrix(self, data):
-        import scikit_posthocs as sp
-        rank = data.argsort().argsort(axis=1)
-        pvalues = sp.posthoc_dunn(rank, p_adjust = 'holm')
-        plt.matshow(pvalues)
-
-        for (x, y), value in np.ndenumerate(pvalues):
-            plt.text(x, y, f"{value:.2f}", va="center", ha="center")
-            
-        plt.colorbar()
-        #plt.show()
-        print(pvalues)
-
-    def friedman_ranking(self, data):
-        from scipy.stats import friedmanchisquare
-        from scikit_posthocs import posthoc_nemenyi_friedman
-        rank = data.argsort().argsort(axis=1)
-        #perform friedman test
-        _, p_value = friedmanchisquare(*rank)
-        print(f"p-value: {p_value}")
-        #perform post-hoc test
-        pvalues = posthoc_nemenyi_friedman(rank)
-        print(pvalues)
-        #self.pairwise_matrix(data)
-
-        #pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/greedy2.csv", index=False)

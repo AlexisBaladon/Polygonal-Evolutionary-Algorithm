@@ -20,7 +20,7 @@ def get_arguments() -> dict:
     parser.add_argument("--MU", type=int, default=50, help="Population size")
     parser.add_argument("--LAMBDA", type=int, default=50, help="Number of children to produce at each generation")
     parser.add_argument("--selection", type=str, default="best", help="Selection method (best, roulette, tournament)")
-    parser.add_argument("--tournament_size", type=int, default=3, help="Tournament size")
+    parser.add_argument("--tournament_size", type=int, default=2, help="Tournament size")
     parser.add_argument("--gaussian_rate", type=float, default=0.05, help="Gaussian rate. Multiplied by the max value of the mutated gene (coordinate)")
     #IMAGE PROCESSING
     parser.add_argument("--input_path", type=str, default="./img", help=f"")

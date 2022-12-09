@@ -120,7 +120,7 @@ class Statistics:
             header_fitness.append(str(current_values))
             best_fitness_config.append(best_execution_fitness)
 
-    def informal_evaluation_2(self, best_config : dict, vertex_count: int, attributes: dict, image_path: str, image_name: str,  seeds: list = [1,2,3,4]):
+    def informal_evaluation(self, best_config : dict, vertex_count: int, attributes: dict, image_path: str, image_name: str,  seeds: list = [1,2,3,4]):
         eac = self.__build_eac(image_name, image_path, vertex_count)
 
         results = []
@@ -137,7 +137,7 @@ class Statistics:
         pd.DataFrame(results, columns=columns).to_csv(f"results/informal.csv", index=False)
         pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/best_fit_per_config_informal.csv", index=False)
 
-    def parametric_evaluation2(self, vertex_count: int, attributes: dict, image_path: str, images: list=["ultima_cena.jpg"], seeds: list = [1,2,3,4]):
+    def parametric_evaluation(self, vertex_count: int, attributes: dict, image_path: str, images: list=["ultima_cena.jpg"], seeds: list = [1,2,3,4]):
         eac = self.__build_eac(images[0], image_path, vertex_count)
         results = []
         header_fitness = []
@@ -156,7 +156,7 @@ class Statistics:
 
         pd.DataFrame(np.transpose(np.array(best_fitness_config)), columns=header_fitness).to_csv(f"results/best_fitness_execution/best_fit_per_config_parametric.csv", index=False)
                 
-    def greedy_evaluation_2(self, best_config: dict, greedy_config: dict, image_path: str, images: dict, seeds: list = [1,2]):
+    def comparison_evaluation(self, best_config: dict, greedy_config: dict, image_path: str, images: dict, seeds: list = [1,2]):
         best_execution_fitness = []
         results = []
         header_fitness = []

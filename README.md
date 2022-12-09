@@ -1,92 +1,107 @@
-# polygonal-genetic-algorithm
+Integrantes:
+ *      Guido Dinello
+ *      Alexis Baladón
 
+===========================================================================
 
+### Programas principales:
+A continuación se presentan los scripts de ejecución proveídos en este directorio.
 
-## Getting started
+- main.py: Este es el programa principal del algoritmo implementado. En él se podrá ejecutar el programa con cualquier configuración deseada.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+- alt_main.py, Es el programa principal de los métodos local-search y de mutación gaussiana utilizados como línea base contra el algoritmo evolutivo.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- stats_main.py, Es el programa principal utilizado para ejecutar los tests estadísticos reportados en el informe final.
 
-## Add your files
+### Ejecución:
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+Para ejecutar cualquiera de estos tres scripts basta con utilizar los comandos especificados a continuación utilizando el comando py o python3 dependiendo del sistema operativo en uso.
+
+- Para obtener la descripción completa de las distintas flags utilizar:
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.fing.edu.uy/alexis.baladon/polygonal-genetic-algorithm.git
-git branch -M main
-git push -uf origin main
+py main.py -h
 ```
 
-## Integrate with your tools
+```
+py alt_main.py -h
+```
 
-- [ ] [Set up project integrations](https://gitlab.fing.edu.uy/alexis.baladon/polygonal-genetic-algorithm/-/settings/integrations)
+De todas formas, al utilizar un parámetro de forma equivocada el main debería informar el error en caso de ser en la entrada.
 
-## Collaborate with your team
+- Un ejemplo de ejecución de cada algoritmo es presentado a continuación:
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+```
+py main.py --input_path ./img --input_name imagen.jpg --vertex_count 5000
+```
 
-## Test and Deploy
+Esto aplicará el algoritmo a la imagen en el directorio y nombre correspondientes con una cantidad de vértices igual a la incluida luego de --vertex_count.
+Aquí los parámetros obligatorios son solo los primeros dos. El número de vértices es un parámetro que se recomienda usar, aunque en caso de no hacerlo se asigna un valor según la entropía de la imagen.
 
-Use the built-in continuous integration in GitLab.
+```
+py alt_main.py --input_name womhd.jpg --vertex_count 200 --method gaussian --threshold 100 --max_iter 1000 --max_evals 1000
+```
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+Esto aplicará el algoritmo de comparación en modalidad de mutación gaussiana. Es posible utilizar los parámetros --method local_search o --method gaussian para seleccionar el método a utilizar. El parámetro --threshold es el tamaño de la vecindad del local-search y la desviación estándar de la mutación gaussiana, mientras que --max_iter es la cantidad máxima de iteraciones a realizar. --max_evals es la cantidad máxima de evaluaciones de fitness a realizar.
 
-***
 
-# Editing this README
+Se recomienda utilizar el parámetro --verbose 1 para ver el progreso de la ejecución.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+===========================================================================
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+Para ejecutar los tests estadísticos realizados debe realizarse:
 
-## Name
-Choose a self-explaining name for your project.
+```
+py stats_main.py -h
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+Esto podría tardar horas o incluso días.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+===========================================================================
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Detalles que no son mencionados en informe:
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+Existen parámetros utilizados para depuración los cuales podrían ser de ayuda:
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+```
+py main.py --input_path ./img --input_name imagen.jpg --vertex_count 5000 --show 1 --verbose 1
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+show y verbose permiten visualizar imagenes generadas de forma intermédia y detalles sobre la ejecución.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+```
+py main.py --input_path ./img --input_name imagen.jpg --vertex_count 5000 --manual_console 1
+```
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+Esta flag crea un hilo en simultáneo al algoritmo que espera por una entrada y permite cancelar la ejecución escribiendo "exit\n".
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+```
+py main.py --input_path ./img --input_name imagen.jpg --vertex_count 5000 --tri_outline black
+```
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+Esta flag con el valor de "black" o "white" le da contorno a los triángulos utilizados, permitiendo visualizar la distribución de triángulos con mayor claridad. Sin embargo, esto afecta directamente al cálculo del fitness.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+```
+py main.py --input_path ./img --input_name imagen.jpg --vertex_count 5000 --width 500
+```
 
-## License
-For open source projects, say how it is licensed.
+Especificar solo el tamaño del ancho o alto ajusta la otra automáticamente.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+### Detalles de implementación:
+
+Para el algoritmo evolutivo son utilizados los siguientes archivos:
+
+- main.py: Es el programa principal del algoritmo evolutivo. En él se podrá ejecutar el programa con cualquier configuración deseada.
+- EAController.py: Contiene la clase EAController, la cual es la encargada de controlar el algoritmo evolutivo.
+- DeapConfig.py: Encapsula todo operador o clase utilizada de la librería DEAP.
+- EA.py: Contiene toda la lógica específica al algoritmo evolutivo y al problema en cuestión.
+- ImageProcessor.py: Contiene toda la lógica de procesamiento de imágenes, incluyendo la creación de imágenes polinómicas, la detección de bordes y el denoising.
+
+Para los métodos de resolución alternativos son utilizados los siguientes archivos:
+
+- alt_main.py: Es el programa principal de los métodos local-search y de mutación gaussiana utilizados como línea base contra el algoritmo evolutivo.
+- AltSolver.py: Contiene la clase AltSolver, la cual es la encargada de controlar los métodos de resolución alternativos.
+
+Para los tests estadísticos son utilizados los siguientes archivos:
+- stats_main.py: Es el programa principal de los tests estadísticos.
+- Statistics.py: Contiene la clase Statistics, en la cual son implementados los tests estadísticos (configuración formal e informal, comparación y medición de eficiencia computacional).

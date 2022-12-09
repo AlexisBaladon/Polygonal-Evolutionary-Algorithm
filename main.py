@@ -32,7 +32,7 @@ def get_arguments() -> dict:
     #DELAUNAY
     parser.add_argument("--vertex_count", type=int, default=None, help=f"Number of vertices")
     parser.add_argument("--cpu_count", type=int, default=1, help="Number of CPUs to use")
-    parser.add_argument("--tri_outline", type=int, default=None, help=f"Color of triangle outline")
+    parser.add_argument("--tri_outline", type=str, default=None, help=f"Color of triangle outline")
     parser.add_argument("--edge_rate", type=float, default=0.5, help=f"Number of edges in initialized individual")
     #CONSOLE
     parser.add_argument("--verbose", type=int, default=1, help=f"Prints information to console")
@@ -103,7 +103,7 @@ def handle_inputs(algorithm_thread: Thread, eac: EAController):
 
 DeapConfig.register_fitness() #DEAP CONFIGURATION MUST BE OUTSIDE OF MAIN WHEN USING PARALLELISM
 
-#py main.py --input_name womhd.jpg --vertex_count 10000 --cpu_count 4 --manual_console 1 --width 500 --height 500 --output_name Bart.jpg
+#py main.py --input_name womhd.jpg --vertex_count 10000 --cpu_count 4 --manual_console 1 --width 500 --height 500 --output_name delaunay.jpg
 if __name__ == "__main__":
     args = process_arguments()
     random.seed(args["seed"])

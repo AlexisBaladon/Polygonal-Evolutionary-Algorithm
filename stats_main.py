@@ -1,7 +1,7 @@
 from Statistics import Statistics
 from DeapConfig import DeapConfig
 
-DeapConfig.register_fitness() # register fitness outside main
+DeapConfig.register_fitness() # register fitness must be outside main
 
 if __name__  == "__main__":        
     IMAGE_RESULT_PATH = "img/"
@@ -13,14 +13,14 @@ if __name__  == "__main__":
     CONFIG_IMAGES = ["ultima_cena.jpg"]
     FORMAL_VERTEX_COUNT = 5000
     FORMAL_ATTRIBUTES = {"CXPB": [0.8, 0.9], "MUTPB": [0.01, 0.05, 0.1]}
-    #stats.parametric_evaluation(FORMAL_VERTEX_COUNT, FORMAL_ATTRIBUTES, IMAGE_RESULT_PATH, CONFIG_IMAGES, seeds=CONFIG_SEEDS)
+    stats.parametric_evaluation(FORMAL_VERTEX_COUNT, FORMAL_ATTRIBUTES, IMAGE_RESULT_PATH, CONFIG_IMAGES, seeds=CONFIG_SEEDS)
 
     #INFORMAL
     best_config = {"CXPB":0.9, "MUTPB":0.1}
-    INFORMAL_ATTRIBUTES = {"tournament_size": [2,3]} #TODO: TOURNAMENT HARDCODEADO
+    INFORMAL_ATTRIBUTES = {"tournament_size": [2,3]}
     INFORMAL_VERTEX_COUNT = 5000
     INFORMAL_IMAGE = CONFIG_IMAGES[0]
-    #stats.informal_evaluation(best_config, INFORMAL_VERTEX_COUNT, INFORMAL_ATTRIBUTES, IMAGE_RESULT_PATH, INFORMAL_IMAGE, seeds=CONFIG_SEEDS)
+    stats.informal_evaluation(best_config, INFORMAL_VERTEX_COUNT, INFORMAL_ATTRIBUTES, IMAGE_RESULT_PATH, INFORMAL_IMAGE, seeds=CONFIG_SEEDS)
     
     #COMPARISON
     LAMBDA = 50

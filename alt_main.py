@@ -1,5 +1,6 @@
 import argparse
 import sys
+import os
 from EA import EA
 from ImageProcessor import ImageProcessor
 from AltSolver import AltSolver
@@ -26,17 +27,21 @@ def get_arguments() -> dict:
     return vars(parser.parse_args())
 
 def check_preconditions(args):
+    #Chek domains
     if args["width"] is not None and args["width"] < 0:
         raise Exception("Invalid image width")
     if args["height"] is not None and args["height"] < 0:
         raise Exception("Invalid image height")
     if args["vertex_count"] < 5:
         raise Exception("Invalid vertex count, must be at least 5")
-    #TODO: Check if input file exists
-    #TODO: Check if output file exists
-    #TODO: Check if output path exists
-    #TODO: Check if input path exists
-    #TODO: Check if input file is an image
+
+    #Check directories
+    if not os.path.isdir(args["input_path"]):
+        raise Exception(f"Input path {args['input_path']} does not exist")
+    if not os.path.isfile(args["input_path"] + "/" + args["input_name"]):
+        raise Exception(f"Input file {args['input_name']} does not exist in {args['input_path']}")
+    if not os.path.isdir(args["output_path"]):
+        raise Exception("Output path does not exist")
     return args
 
 def process_arguments():
@@ -44,13 +49,12 @@ def process_arguments():
         args = get_arguments()
         args = check_preconditions(args)
     except Exception as e:
-        print(e.with_traceback()) #Remove traceback in production
+        print(str(e))
         sys.exit(1)
     return args
 
 #command example
 #py alt_main.py --input_name womhd.jpg --vertex_count 200 --width 250 --height 250 --method gaussian --threshold 100 --max_iter 1000
-
 def main(args):
     ip = ImageProcessor(**args)
     ea = EA(ip)
@@ -58,7 +62,7 @@ def main(args):
     alt_solver.build_ea_module()
     alt_solver.update_seed(args["seed"])
     method, max_iter, threshold, max_evals, verbose = args["method"], args["max_iter"], args["threshold"], args["max_evals"], args["verbose"]
-    best_individual, best_eval = alt_solver.solve(method, max_iter, threshold, max_evals, verbose= verbose)
+    best_individual, _ = alt_solver.solve(method, max_iter, threshold, max_evals, verbose= verbose)
     img = ea.decode(best_individual)
     img.show()
 

@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import random
 
-from deap import tools
 from itertools import product
 from time import time
 from scipy.stats import kstest
@@ -213,9 +212,7 @@ class Statistics:
     def plot_best_historical_fitness(self):
         df = pd.read_csv("results/comparison.csv")
         df_pivot = df.pivot(index='image', columns='method', values='best_historical_fitness')
-        #normalize values
         df_pivot = df_pivot.apply(lambda x: x/x.max(), axis=1)
-        #plot with horizontal x axis labels
         df_pivot.plot.bar(rot=0)
         plt.show()
 

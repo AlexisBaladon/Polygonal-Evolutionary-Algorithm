@@ -6,21 +6,22 @@ class EAController:
         self.evolutionary_algorithm = ea
         self.deap_configurer = deap_c
 
-    def build_ea_module(self, verbose=True, show_img=False, **kwargs):
-        self.evolutionary_algorithm.load_image(verbose=verbose, show=show_img)
+    def build_ea_module(self, verbose=True, show=False, **kwargs):
+        self.evolutionary_algorithm.load_image(verbose=verbose, show=show)
 
     #FITNESS MUST BE REGISTERED OUTSIDE OF MAIN WHEN USING PARALLELISM
     def build_deap_module(self):
-        width, height = self.evolutionary_algorithm.image_processor.width, self.evolutionary_algorithm.image_processor.height
-        edges_coordinates = self.evolutionary_algorithm.image_processor.edges_coordinates
-        ind_size = self.evolutionary_algorithm.image_processor.vertex_count * 2
-        fitness_function, mutation_function = self.evolutionary_algorithm.evalDelaunay, self.evolutionary_algorithm.mutGaussianCoordinate
-        init_coordinates = lambda edge_rate: self.evolutionary_algorithm.init_coordinates(width-1, height-1, ind_size, edges_coordinates, edge_rate=edge_rate)
-        self.deap_configurer.register_population(init_coordinates, self.evolutionary_algorithm.order_individual)
-        self.deap_configurer.register_operators(fitness_function, mutation_function, width-1, height-1)
-        self.deap_configurer.register_stats()
-        if self.deap_configurer.cpu_count > 1:
-            self.deap_configurer.register_parallelism() 
+        ea, ip, dc = self.evolutionary_algorithm, self.evolutionary_algorithm.image_processor, self.deap_configurer
+        width, height = ip.width, ip.height
+        edges_coordinates = ip.edges_coordinates
+        ind_size = ip.vertex_count * 2
+        fitness_function, mutation_function = ea.evalDelaunay, ea.mutGaussianCoordinate
+        init_coordinates = lambda edge_rate: ea.init_coordinates(width-1, height-1, ind_size, edges_coordinates, edge_rate=edge_rate)
+        dc.register_population(init_coordinates, ea.order_individual)
+        dc.register_operators(fitness_function, mutation_function, width-1, height-1)
+        dc.register_stats()
+        if dc.cpu_count > 1:
+            dc.register_parallelism() 
         
     def run(self, show_res=True, logs=True, seed=0):
         is_parallel = bool(self.deap_configurer.cpu_count > 1)

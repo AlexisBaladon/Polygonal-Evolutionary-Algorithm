@@ -34,6 +34,16 @@ def check_preconditions(args):
         raise Exception("Invalid image height")
     if args["vertex_count"] < 5:
         raise Exception("Invalid vertex count, must be at least 5")
+    if args["method"] not in ["gaussian", "local_search"]:
+        raise Exception("Invalid method. Try (gaussian or local_search)")
+    if args["threshold"] < 1:
+        raise Exception("Threshold must be at least 1")
+    if args["max_iter"] < 1:
+        raise Exception("Max iter must be at least 1")
+    if args["max_evals"] < 1:
+        raise Exception("Max evals must be at least 1")
+    if args["verbose"] not in [0, 1]:
+        raise Exception("Verbose must be 0 or 1")
 
     #Check directories
     if not os.path.isdir(args["input_path"]):

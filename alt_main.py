@@ -16,7 +16,7 @@ def get_arguments() -> dict:
     parser.add_argument("--width", type=int, default=None, help="Maximum width")
     parser.add_argument("--height", type=int, default=None, help="Maximum height")
     #DELAUNAY
-    parser.add_argument("--vertex_count", type=int, default=50, required=True, help=f"")
+    parser.add_argument("--vertex_count", type=int, default=50, required=True, help=f"Number of vertex")
     parser.add_argument("--tri_outline", type=int, default=None, help=f"Color of triangle outline")
     #METHOD
     parser.add_argument("--method", type=str, default="gaussian", help=f"gaussian or local_search")

@@ -9,9 +9,11 @@ A continuación se presentan los scripts de ejecución proveídos en este direct
 
 - main.py: Este es el programa principal del algoritmo implementado. En él se podrá ejecutar el programa con cualquier configuración deseada.
 
-- alt_main.py, Es el programa principal de los métodos local-search y de mutación gaussiana utilizados como línea base contra el algoritmo evolutivo.
+- alt_main.py: Es el programa principal de los métodos local-search y de mutación gaussiana utilizados como línea base contra el algoritmo evolutivo.
 
-- stats_main.py, Es el programa principal utilizado para ejecutar los tests estadísticos reportados en el informe final.
+- stats_main.py: Es el programa principal utilizado para ejecutar los tests estadísticos reportados en el informe final.
+
+- analysys.ipynb: Aquí se realizan todos los tests y evaluaciones mostradas en el informe.
 
 ### Ejecución:
 

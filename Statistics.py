@@ -214,6 +214,7 @@ class Statistics:
         df_pivot = df.pivot(index='image', columns='method', values='best_historical_fitness')
         df_pivot = df_pivot.apply(lambda x: x/x.max(), axis=1)
         df_pivot.plot.bar(rot=0)
+        plt.savefig("results/plots/best_historical_fitness.png", format="png")
         plt.show()
 
     def plot_time(self):
@@ -221,10 +222,11 @@ class Statistics:
         df_with_images = pd.DataFrame(columns=["CPU", "time", "image"])
         for idx, image in enumerate(["fox.jpg", "monalisa_sqr.jpg", "old_man.jpeg"]):
             row = df.iloc[4*idx:4*idx+4]
-            df_with_images = df_with_images.concat(pd.DataFrame({"CPU": row["CPU"], "time": row["time"], "image": image}))
+            df2 = pd.DataFrame({"CPU": row["CPU"], "time": row["time"], "image": image})
+            df_with_images = pd.concat([df_with_images, df2], axis=0)
 
-        print(df_with_images)
         df_pivot = df_with_images.pivot(index='CPU', columns='image', values='time')
 
         df_pivot.plot.bar()
+        plt.savefig("results/plots/time.png", format="png")
         plt.show()

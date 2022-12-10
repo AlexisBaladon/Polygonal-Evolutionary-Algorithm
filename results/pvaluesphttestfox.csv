@@ -1,0 +1,4 @@
+Config1,Config2,p-value
+EA-fox.jpg,local_search-fox.jpg,2.1911451567932085e-11
+EA-fox.jpg,gaussian-fox.jpg,4.3377229392693934e-07
+local_search-fox.jpg,gaussian-fox.jpg,8.437700058872385e-14

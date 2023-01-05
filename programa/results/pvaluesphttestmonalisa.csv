@@ -1,0 +1,4 @@
+Config1,Config2,p-value
+EA-monalisa_sqr.jpg,local_search-monalisa_sqr.jpg,2.8250085237276685e-27
+EA-monalisa_sqr.jpg,gaussian-monalisa_sqr.jpg,0.3197411455158578
+local_search-monalisa_sqr.jpg,gaussian-monalisa_sqr.jpg,3.97539463531148e-16

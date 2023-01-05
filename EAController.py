@@ -40,3 +40,4 @@ class EAController:
                 hall_of_fame=hall_of_fame)
         return best_fitnesses
 
+

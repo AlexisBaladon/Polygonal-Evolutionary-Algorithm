@@ -1,11 +1,7 @@
 # Aproximación de imágenes con polígonos mediante triangulación de Delaunay
 
-# Características:
-- Configuración paramétrica
-- Comparación con otros métodos y evaluación de resultados mediante pruebas estadísticas y visualización (dado que el algoritmo estocástico).
-- Pruebas y generación de gráficas automatizadas con semillas fijadas para reproducir resultados.
-- Multiprocesamiento
-- Denoising y detección de bordes
+
+![gif](./readme/results/girl.png)
 
 # Librerías
 
@@ -42,11 +38,16 @@ Son utilizadas las librerías más populares dentro de la ciencia de datos:
 
 # Resultados
 
-![gif](./readme/results/girl.png)
-
-![faces](./readme/results/extra_faces1.png.png)
-![animals](./readme/results/extra_animals1.png.png)
+![faces](./readme/results/extra_faces1.png)
+![animals](./readme/results/extra_animals1.png)
 ![gif](./readme/results/girl.gif)
 
 ![graph](./readme/results/time.png)
 
+
+# Características:
+- Configuración paramétrica
+- Comparación con otros métodos y evaluación de resultados mediante pruebas estadísticas y visualización (dado que el algoritmo estocástico).
+- Pruebas y generación de gráficas automatizadas con semillas fijadas para reproducir resultados.
+- Multiprocesamiento
+- Denoising y detección de bordes

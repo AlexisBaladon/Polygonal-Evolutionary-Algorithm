@@ -1,7 +1,7 @@
 # Aproximación de imágenes con polígonos mediante triangulación de Delaunay
 
 
-![gif](./readme/results/girl.png)
+![gif](./readme/results/girl.gif)
 
 # Librerías
 
@@ -40,10 +40,6 @@ Son utilizadas las librerías más populares dentro de la ciencia de datos:
 
 ![faces](./readme/results/extra_faces1.png)
 ![animals](./readme/results/extra_animals1.png)
-![gif](./readme/results/girl.gif)
-
-![graph](./readme/results/time.png)
-
 
 # Características:
 - Configuración paramétrica

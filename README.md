@@ -1,49 +1,51 @@
-# Aproximación de imágenes con polígonos mediante triangulación de Delaunay
+# Image Approximation with Polygons using Delaunay Triangulation
 
 
 ![gif](./readme/results/girl.gif)
 
-# Librerías
 
-Son utilizadas las librerías más populares dentro de la ciencia de datos:
+# Features:
+
+- Parametric configuration
+- Comparison with other methods and result evaluation through statistical tests and visualization (due to the stochastic nature of the algorithm).
+- Automated testing and graph generation with fixed seeds for result reproducibility.
+- Multiprocessing
+- Denoising and edge detection
+
+# Libraries
+
+Software built using the most popular libraries in the field of Data Science:
 
 ### Algoritmos evolutivos
 
-- [DEAP] - Provee funcionalidades base para instanciar problemas de algoritmos evolutivos.
-- [multiprocessing] - Paralelización en cálculo de fitness (Arquitectura master-slave)
+- [DEAP] - Provides basic functionalities for instantiating evolutionary algorithm problems.
+- [multiprocessing] - Parallelization in fitness calculation (master-slave architecture)
 
 ![DEAP](./readme/icons/DEAP.png)
 ![multiprocessing](./readme/icons/multiprocessing.png)
-### Manipulación de imágenes
+### Image Processing
 
-- [openCV] - Para algoritmos de denoising y detección de bordes.
-- [PILLOW] - Para generar y modificar imágenes de forma dinámica (genotipo y fenotipo de individuos).
-- [numpy] - Simplifica operaciones de álgebra lineal utilizando código de C para aumentar su eficiencia.
+- [OpenCV] - For denoising and edge detection algorithms.
+- [PILLOW] - For dynamically generating and modifying images (genotype and phenotype of individuals).
+- [NumPy] - Simplifies linear algebra operations using C code for increased efficiency.
 
 ![openCV](./readme/icons/openCV.png)
 ![PILLOW](./readme/icons/PILLOW.png)
 ![numpy](./readme/icons/numpy.png)
 
-### Análisis de resultados
-- [scipy] - Evaluación. Pruebas estadísticas con resultados obtenidas.
-- [scikit_posthocs] - Análisis de resultados con distribución normal mediante pruebas de pares.
-- [pandas] - Manipulación de datos.
-- [matplotlib] - Visualización de datos.
-- [jupyter] - Generación de gráficas y análisis de resultados.
+### Analysis of Results
+
+- [SciPy] - Evaluation. Statistical tests with obtained results.
+- [scikit_posthocs] - Results analysis with normal distribution using pairwise tests.
+- [Pandas] - Data manipulation.
+- [Matplotlib] - Data visualization.
 
 ![scipy](./readme/icons/scipy.png)
 ![scikit_posthocs](./readme/icons/scikit_posthocs.png)
 ![pandas](./readme/icons/pandas.png)
 ![matplotlib](./readme/icons/matplotlib.png)
 
-# Resultados
+# Results
 
 ![faces](./readme/results/extra_faces1.png)
 ![animals](./readme/results/extra_animals1.png)
-
-# Características:
-- Configuración paramétrica
-- Comparación con otros métodos y evaluación de resultados mediante pruebas estadísticas y visualización (dado que el algoritmo estocástico).
-- Pruebas y generación de gráficas automatizadas con semillas fijadas para reproducir resultados.
-- Multiprocesamiento
-- Denoising y detección de bordes

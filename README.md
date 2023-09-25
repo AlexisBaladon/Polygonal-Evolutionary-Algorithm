@@ -49,3 +49,7 @@ Software built using the most popular libraries in the field of Data Science:
 
 ![faces](./readme/results/extra_faces1.png)
 ![animals](./readme/results/extra_animals1.png)
+
+# Data Source
+
+All images where taken from https://www.pexels.com/es-es/

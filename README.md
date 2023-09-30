@@ -16,7 +16,7 @@
 
 Software built using the most popular libraries in the field of Data Science:
 
-### Algoritmos evolutivos
+### Evolutionary Algorithms
 
 - [DEAP] - Provides basic functionalities for instantiating evolutionary algorithm problems.
 - [multiprocessing] - Parallelization in fitness calculation (master-slave architecture)

@@ -4,40 +4,38 @@ import random
 import base64
 import io
 
-from flask import Flask
 from PIL import Image
 
+from api import app
 from src.models.evolutionary_algorithm.ea_methods import EA
 from src.models.evolutionary_algorithm.ea_handler import EAHandler
 from src.lib.deap_config import DeapConfig
 from src.utils.image_processor import ImageProcessor
 
 def get_arguments() -> dict:
-    mock_arguments = {
-        "seed": 0,
-        "INDPB": 0.1,
-        "CXPB": 0.9,
-        "MUTPB": 0.1,
-        "NGEN": 1,
-        "MU": 50,
-        "LAMBDA": 50,
-        "selection": "best",
-        "tournament_size": 2,
-        "gaussian_rate": 0.05,
-        "input_path": "./data/inputs",
-        "input_name": "fox.jpg",
-        "output_path": "./data/outputs/executions",
-        "output_name": "polygonal_evolutionary_algorithm_result.png",
-        "width": 250,
-        "height": 250,
-        "vertex_count": None,
-        "cpu_count": 4,
-        "tri_outline": None,
-        "edge_rate": 0.5,
-        "verbose": 1,
-        "show": 0,
-        "manual_console": 0
-    }
+    mock_arguments = {"seed": 0,
+                      "INDPB": 0.1,
+                      "CXPB": 0.9,
+                      "MUTPB": 0.1,
+                      "NGEN": 1,
+                      "MU": 50,
+                      "LAMBDA": 50,
+                      "selection": "best",
+                      "tournament_size": 2,
+                      "gaussian_rate": 0.05,
+                      "input_path": "./data/inputs",
+                      "input_name": "fox.jpg",
+                      "output_path": "./data/outputs/executions",
+                      "output_name": "polygonal_evolutionary_algorithm_result.png",
+                      "width": 250,
+                      "height": 250,
+                      "vertex_count": None,
+                      "cpu_count": 4,
+                      "tri_outline": None,
+                      "edge_rate": 0.5,
+                      "verbose": 1,
+                      "show": 0,
+                      "manual_console": 0}
 
     return mock_arguments
 
@@ -92,8 +90,6 @@ def main(args):
     return eac
 
 DeapConfig.register_fitness() #DEAP CONFIGURATION MUST BE OUTSIDE OF MAIN WHEN USING PARALLELISM
-
-app = Flask(__name__)
 
 @app.route("/")
 def index():

@@ -32,7 +32,7 @@ class EAHandler:
         if dc.cpu_count > 1:
             dc.register_parallelism() 
         
-    def run(self, show_res=True, logs=True, seed=0):
+    def run(self, show_res=False, logs=False, seed=0):
         is_parallel = bool(self.deap_configurer.cpu_count > 1)
         algorithm_output = self.deap_configurer.run_algorithm(parallel=is_parallel)
         population, log_info, hall_of_fame, best_fitnesses = algorithm_output

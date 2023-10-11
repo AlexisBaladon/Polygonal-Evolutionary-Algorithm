@@ -1,7 +1,3 @@
-import base64
-from io import BytesIO
-from PIL import Image
-
 from flask import Blueprint, request
 
 from api.modules.transform import transform_controller
@@ -9,7 +5,7 @@ from api.modules.transform import transform_controller
 transform_blueprint = Blueprint("transform", __name__)
 
 @transform_blueprint.route("", methods=['GET'])
-def transform():
+def image_to_transform():
         return """
     <!DOCTYPE html>
         <html>
@@ -27,5 +23,5 @@ def transform():
 """
 
 @transform_blueprint.route("", methods=['POST'])
-def transform():
-    transform_controller.transform(request)
+def transformed_image():
+    return transform_controller.transform(request)

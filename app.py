@@ -5,8 +5,9 @@ import base64
 import io
 
 from PIL import Image
+from flask import Blueprint
 
-from api import app
+from api import app, router
 from src.models.evolutionary_algorithm.ea_methods import EA
 from src.models.evolutionary_algorithm.ea_handler import EAHandler
 from src.lib.deap_config import DeapConfig
@@ -91,14 +92,16 @@ def main(args):
 
 DeapConfig.register_fitness() #DEAP CONFIGURATION MUST BE OUTSIDE OF MAIN WHEN USING PARALLELISM
 
+main_blueprint = Blueprint('main', __name__)
+router.register_blueprint(main_blueprint)
+
 @app.route("/")
 def index():
     args = process_arguments()
     seed = args["seed"]; random.seed(seed)
     eac = main(args)
-    eac.run()
-    saved_image = Image.open(eac.evolutionary_algorithm.image_processor.img_out_dir)
-    # get base64 image
+    #eac.run()
+    saved_image = Image.open(eac.evolutionary_algorithm.image_processor.img_in_dir)
     img_byte_arr = io.BytesIO()
     saved_image.save(img_byte_arr, format='PNG')
     img_byte_arr = img_byte_arr.getvalue()
@@ -108,3 +111,4 @@ def index():
 
 if __name__ == "__main__":
     app.run(debug=True)
+

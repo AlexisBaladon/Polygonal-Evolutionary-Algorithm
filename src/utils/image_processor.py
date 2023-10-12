@@ -1,4 +1,6 @@
 import os
+import io
+import base64
 
 from PIL import Image, ImageDraw
 from scipy.spatial import Delaunay
@@ -104,3 +106,14 @@ class ImageProcessor():
                                                      vertices_centroid[0]])
             draw.polygon(triangle, fill=color, outline=self.triangle_outline)
         return im
+    
+    def encode_image(self, image: Image.Image):
+        image_bytes = io.BytesIO()
+        image.save(image_bytes, format='PNG')
+        image_bytes = image_bytes.getvalue()
+        image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+        return image_base64
+
+    def decode_image(self, image_data: bytes):
+        image = Image.open(io.BytesIO(image_data))
+        return image

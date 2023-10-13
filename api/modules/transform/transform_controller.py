@@ -1,9 +1,11 @@
 import os
 import random
+from typing import Callable
 
 from PIL import Image
 from flask import Request
 
+from api.lib import sockets
 from src.lib.deap_config import DeapConfig
 from src.models.evolutionary_algorithm.ea_handler import EAHandler
 from src.models.evolutionary_algorithm.ea_methods import EA
@@ -57,8 +59,7 @@ def get_form_arguments(form):
     vertex_count = form.get("vertex_count", None)
     vertex_count = parse_value_signature(vertex_count, int)
 
-    tri_outline = form.get("tri_outline", None)
-    tri_outline = parse_value_signature(tri_outline, int)
+    tri_outline = None
     edge_rate = form.get("edge_rate", 0.5)
     edge_rate = parse_value_signature(edge_rate, float)
 
@@ -88,14 +89,14 @@ def get_form_arguments(form):
         "manual_console": manual_console
     }
 
-def transform_image(args):
+def transform_image(args: dict, image_added_callback: Callable):
     dc = DeapConfig(**args)
     ip = ImageProcessor(**args)
     ea = EA(ip)
     eac = EAHandler(ea, dc)
     eac.build_ea_module(**args)
     eac.build_deap_module()
-    eac.run()
+    eac.run(image_added_callback=image_added_callback)
     return eac
 
 def transform(request: Request):
@@ -108,18 +109,65 @@ def transform(request: Request):
             get_arguments = lambda: get_form_arguments(request.form)
             args = argument_checker.process_arguments(get_arguments=get_arguments)
             print(args)
+
             input_dir = os.path.join(args["input_path"], args["input_name"])
             seed = args["seed"]; random.seed(seed)
-            
+
             image_processor = ImageProcessor(**args)
+            evolutionary_algorithm = EA(image_processor)
+
+            evolutionary_algorithm.load_image()
             decoded_image = image_processor.decode_image(image_data)
             decoded_image.save(input_dir)
-            eac = transform_image(args)
-            image = Image.open(eac.evolutionary_algorithm.image_processor.img_out_dir)
-            image_base64 = image_processor.encode_image(image)
 
-            img_tag = f"<img src='data:image/{image_file.content_type};base64,{image_base64}' width='250px'>"
+            image = Image.open(image_processor.img_out_dir)
+            image_base64 = image_processor.encode_image(image)
+            sockets.emit('added_image', image_base64)
+
+            def image_added_callback(image):
+                image = evolutionary_algorithm.decode(image)
+                image = image_processor.encode_image(image)
+                sockets.emit('added_image', image)
+                return
+
+            import threading
+            t = threading.Thread(target=transform_image, args=(args, image_added_callback))
+            t.start()
+
+            #img_tag = f"<img src='data:image/{image_file.content_type};base64,{image_base64}' width='250px'>"
+            img_tag = create_response()
             return img_tag
         except Exception as e:
-            return str(e)
+            return str(e.with_traceback())
     return "No image received :("
+
+def create_response():
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Image Processing</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+        <script type="text/javascript">
+            var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+            socket.on('connect', function() {
+                console.log('Connected');
+            });
+
+            socket.on('added_image', function(image_data) {
+                console.log('Image updated');
+                // Get the image element by its ID
+                var img = document.getElementById('image-container');
+                
+                // Set the src attribute to the new image data
+                img.src = 'data:image/png;base64,' + image_data;
+            });
+        </script>
+    </head>
+    <body>
+        <!-- Add an image element with an ID -->
+        <img id="image-container" src="" width="250px" height="auto">
+    </body>
+    </html>
+    """

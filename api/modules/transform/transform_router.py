@@ -10,6 +10,23 @@ def image_to_transform():
     <!DOCTYPE html>
         <html>
         <head>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+            <script type="text/javascript">
+                var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+                socket.on('connect', function() {
+                    console.log('Connected');
+
+                    // Handle WebSocket events
+                    socket.on('update', function(data) {
+                        // Process the update received from the server
+                        console.log('Update received:', data);
+                        // Update the client's UI as needed
+                    });
+                });
+
+                // Your code to initiate the image processing and send WebSocket events
+            </script>
             <title>Image Submission Form</title>
         </head>
         <style>
@@ -53,7 +70,7 @@ def image_to_transform():
                     <div>
                         <div>
                             <label for="NGEN">NGEN:</label>
-                            <input type="number" name="NGEN" value="5" step="1">
+                            <input type="number" name="NGEN" value="50" step="1">
                         </div>
                     </div>
                     <div>
@@ -97,13 +114,6 @@ def image_to_transform():
                         <div>
                             <label for="vertex_count">vertex_count:</label>
                             <input type="number" name="vertex_count" value="None">
-                        </div>
-                        <div>
-                            <label for="tri_outline">Outlines in triangles:</label>
-                            <select name="tri_outline">
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                            </select>
                         </div>
                         <div>
                             <label for="edge_rate">edge_rate:</label>

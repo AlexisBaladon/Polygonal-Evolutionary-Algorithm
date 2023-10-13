@@ -35,6 +35,7 @@ class EA():
         individual = list(map(int, individual))
         vertices = list(zip(individual[::2], individual[1::2]))
         vertices.extend([(0,0), (0,height), (width,0), (width,height)]) #Always include the corners
+        vertices = np.array(vertices)
         return vertices
 
     def decode(self, individual):

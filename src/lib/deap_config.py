@@ -103,16 +103,16 @@ class DeapConfig:
             hall_of_fame_dir = os.path.join(self.log_dir, f'{file_name}_{seed}.csv')
             df_hall_of_fame.to_csv(hall_of_fame_dir, index=False)
     
-    def run_algorithm(self, parallel=True):
+    def run_algorithm(self, image_added_callback=lambda *_: None, parallel=True):
         if parallel:
             with self.process_pool:
-                population, logbook, hof, best_fitnesses = self.__run_algorithm()
+                population, logbook, hof, best_fitnesses = self.__run_algorithm(image_added_callback=image_added_callback)
         else:
-            population, logbook, hof, best_fitnesses = self.__run_algorithm()
+            population, logbook, hof, best_fitnesses = self.__run_algorithm(image_added_callback=image_added_callback)
 
         return population, logbook, hof, best_fitnesses
 
-    def __run_algorithm(self):
+    def __run_algorithm(self, image_added_callback=lambda *_: None):
             pop = self.toolbox.population(n=self.MU)
             pop, logbook, hof, best_fitnesses = self.__eaMuPlusLambda(pop, 
                                                                       self.toolbox, 
@@ -121,7 +121,8 @@ class DeapConfig:
                                                                       self.CXPB, 
                                                                       self.MUTPB, 
                                                                       self.NGEN, 
-                                                                      self.stats, 
+                                                                      stats=self.stats, 
+                                                                      image_added_callback=image_added_callback,
                                                                       verbose=True)
             return pop, logbook, hof, best_fitnesses
 
@@ -143,7 +144,8 @@ class DeapConfig:
                          mu: int, lambda_: int, cxpb: float, 
                          mutpb: float, ngen: int, 
                          stats: tools.Statistics = None, 
-                         halloffame: tools.HallOfFame = HallOfFame(1), 
+                         halloffame: tools.HallOfFame = HallOfFame(1),
+                         image_added_callback= lambda *_: None,
                          verbose=True):
 
         logbook = tools.Logbook()
@@ -168,6 +170,7 @@ class DeapConfig:
 
         gen = 1
         best_fitnesses = [record['min']]
+        image_added_callback(population[0])
 
         while not self.__stop_condition(gen, ngen):
             offspring = algorithms.varOr(population, toolbox, 
@@ -192,6 +195,7 @@ class DeapConfig:
 
             min_loss = record['min']
             best_fitnesses.append(min_loss)
+            image_added_callback(population[0])
             gen += 1
 
         return population, logbook, halloffame, best_fitnesses

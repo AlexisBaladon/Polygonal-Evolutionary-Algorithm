@@ -1,5 +1,110 @@
 <!DOCTYPE html>
 <html>
+<style>
+    body {
+        color: #364954;
+        background: #bdc3c7;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to right, #fafafa, #C0C0C0);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to right, #fafafa, #C0C0C0); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+        font-family: "Roboto", sans-serif;
+    }
+    #menu {
+        background: #fafafa;
+        justify-self: center;
+        margin-top: 50px;
+        padding: 25px;
+        width: 300px;
+        height: fit-content;
+        overflow: hidden;
+        margin: 25px;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
+
+        border-radius: 5px;
+        box-shadow: 0 0 10px 0 rgba(0,0,0,0.2);
+    }
+    #menu img {
+        width: 100%;
+        border-radius: 5px;
+        box-shadow: 0 0 10px 0 rgba(0,0,0,0.2);
+    }
+
+    #parameters-container, .variable-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .variable-list {
+        font-size: small;
+        padding: 5px;
+    }
+    
+    .variable {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .variable:last-child {
+        border-bottom: none;
+    }
+    
+    strong {
+        display: inline-block;
+        width: 150px;
+        font-weight: bold;
+    }
+    body div {
+        display: flex;
+        flex-direction: row;
+    }
+    #individual-container {
+        margin-top: 40px;
+        text-align: center;
+        width: 100%;
+        
+    }
+
+    #individual-container h1 {
+        margin-top: 0;
+    }
+
+    .individual-image {
+        width: 175px;
+        margin: 10px 20px 10px 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px 0 rgba(0,0,0,0.2);
+        transition: transform .3s;
+    }
+    .individual-image:hover {
+        cursor: pointer;
+        transform: scale(1.25);
+    }
+
+    #loader-container {
+        width: 100%;
+        justify-content: center;
+        display: flex;
+        margin-top: 50px;
+    }
+
+    .loader {
+        border: 16px solid #f3f3f3;
+        border-top: 16px solid #364954;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+</style>
 <head>
     <title>Image Processing</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
@@ -7,9 +112,10 @@
         var socket = io.connect('http://' + document.domain + ':' + location.port);
 
         function appendImage(imageData) {
-            var imageContainer = document.getElementById('image-container');
+            var imageContainer = document.getElementById('individual-container');
             let imageObject = document.createElement('img');
             imageObject.src = 'data:image/png;base64,' + imageData;
+            imageObject.className = 'individual-image'
             imageContainer.appendChild(imageObject)
         }
 
@@ -17,31 +123,98 @@
             console.log('Connected');
         });
 
-        socket.on('new_epoch', function() {
-            var imageContainer = document.getElementById('image-container');
-
-            while (imageContainer.firstChild) {
-                imageContainer.removeChild(imageContainer.firstChild);
-            }
-        })
-
         socket.on('added_image', function(imageData) {
-            var imageContainer = document.getElementById('image-container');
-            if (imageContainer.children.length == 0) {
+            var imageContainer = document.getElementById('individual-container');
+
+            var generationTitleElement = imageContainer.getElementsByTagName('h1')
+            if (generationTitleElement.length == 0) {
+                while (imageContainer.children.length > 0) {
+                    imageContainer.removeChild(imageContainer.children[0]);
+                }
+
+                let generationTitle = document.createElement('h1');
+                generationTitle.innerHTML = 'Generation: 1';
+                imageContainer.appendChild(generationTitle);
+            }
+            else {
+                splittedGenerationTitle = generationTitleElement[0].innerHTML.split(' ')
+                var generationTitle = splittedGenerationTitle[0];
+                var generation = parseInt(splittedGenerationTitle[1]);
+                generationTitleElement[0].innerHTML = generationTitle + ' ' + (generation + 1);
+            }
+
+            imageElements = Array.from(imageContainer.getElementsByTagName('img'));
+            if (imageElements.length == 0) {
                 imageData.forEach((img) => appendImage(img))
             }
             else {
-                var imageContainer = document.getElementById('image-container');
-                let imageObjects = Array.from(imageContainer.children);
-                imageObjects.forEach((imageObject, i) => {
-                    imageObject.src = 'data:image/png;base64,' + imageData[i];
+                imageElements.forEach((imageElement, i) => {
+                    imageElement.src = 'data:image/png;base64,' + imageData[i];
                 })
             }
         });
     </script>
 </head>
 <body>
-    <div id="image-container">
+    <div>
+        <aside id="menu">
+            <div id="image-container">
+                <img src="data:image/png;base64,{{input_image}}" alt="Image">
+            </div>
+            <div id="parameters-container">
+                <div class="variable-list">
+                    <h1>Parameters</h1>
+                    <div class="variable">
+                        <strong>Width:</strong> {{ width | default("Default", true)}}
+                    </div>
+                    <div class="variable">
+                        <strong>Height:</strong> {{ height  | default("Default", true)}}
+                    </div>
+                    <div class="variable">
+                        <strong>Vertex Count:</strong> {{ vertex_count | default("Auto", true) }}
+                    </div>
+                    <div class="variable">
+                        <strong>Seed:</strong> {{ seed }}
+                    </div>
+                    <div class="variable">
+                        <strong>INDPB:</strong> {{ INDPB }}
+                    </div>
+                    <div class="variable">
+                        <strong>CXPB:</strong> {{ CXPB }}
+                    </div>
+                    <div class="variable">
+                        <strong>MUTPB:</strong> {{ MUTPB }}
+                    </div>
+                    <div class="variable">
+                        <strong>NGEN:</strong> {{ NGEN }}
+                    </div>
+                    <div class="variable">
+                        <strong>MU:</strong> {{ MU }}
+                    </div>
+                    <div class="variable">
+                        <strong>LAMBDA:</strong> {{ LAMBDA }}
+                    </div>
+                    <div class="variable">
+                        <strong>Selection:</strong> {{ selection }}
+                    </div>
+                    <div class="variable">
+                        <strong>Tournament Size:</strong> {{ tournament_size }}
+                    </div>
+                    <div class="variable">
+                        <strong>Gaussian Rate:</strong> {{ gaussian_rate }}
+                    </div>
+                    <div class="variable">
+                        <strong>Edge Rate:</strong> {{ edge_rate }}
+                    </div>
+                </div>
+            </div>
+        </aside>
+        <main id="individual-container">
+            <h2>Loading...</h2>
+            <div id="loader-container">
+                <div class="loader"></div>
+            </div>
+        </main>
     </div>
 </body>
 </html>

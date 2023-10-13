@@ -130,6 +130,7 @@ def transform(request: Request):
 
             image_data = image_file.read()
             decoded_image = ImageProcessor.decode_image(image_data)
+            base64_image = ImageProcessor.encode_image(decoded_image)
 
             image_processor_args = {**args, 'input_image': decoded_image}
             image_processor = ImageProcessor(**image_processor_args)
@@ -140,7 +141,11 @@ def transform(request: Request):
             thread = threading.Thread(target=transform_image, args=thread_args) # Should i join?
             thread.start()
 
-            return render_template('transform/transform_template.html')
+            context = {**args, 
+                       'width': decoded_image.width,
+                       'height': decoded_image.height,
+                       'input_image': base64_image}
+            return render_template('transform/transform_template.html', **context)
         except Exception as e:
             return str(e.with_traceback())
     return "No image received :("

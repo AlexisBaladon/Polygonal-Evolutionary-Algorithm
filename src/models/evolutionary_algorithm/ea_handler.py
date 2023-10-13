@@ -41,7 +41,10 @@ class EAHandler:
         # Save files
         best_individual = population[0]
         img = self.evolutionary_algorithm.decode(best_individual)
-        img.save(self.evolutionary_algorithm.image_processor.img_out_dir)
+
+        out_dir = self.evolutionary_algorithm.image_processor.img_out_dir
+        if out_dir is not None:
+            img.save(out_dir)
 
         if show_res:
             img.show("Result")

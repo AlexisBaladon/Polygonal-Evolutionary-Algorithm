@@ -22,8 +22,6 @@ def parse_value_signature(value, signature):
         return None
 
 def get_form_arguments(form):
-    output_path = "./data/outputs/executions"
-    output_name = "polygonal_evolutionary_algorithm_result.png"
     cpu_count = os.cpu_count()
     verbose = 1
     show = 0
@@ -74,8 +72,6 @@ def get_form_arguments(form):
         "selection": selection,
         "tournament_size": tournament_size,
         "gaussian_rate": gaussian_rate,
-        "output_path": output_path,
-        "output_name": output_name,
         "width": width,
         "height": height,
         "vertex_count": vertex_count,

@@ -8,19 +8,23 @@ import numpy as np
 import cv2
 
 class ImageProcessor():
-    def __init__(self, input_name: str, 
+    def __init__(self, input_name=None, 
                  vertex_count: int = None, 
                  input_path=os.path.join('data', 'inputs'),
                  output_path=os.path.join('results', 'experiments', 'formal', 'images'), 
                  output_name="delaunay.jpg",
-                 width=None, height=None, tri_outline=None, **kwargs):
+                 width=None, height=None, tri_outline=None,
+                 input_image: Image.Image=None, **kwargs):
 
         # Image parameters
         self.input_path = input_path
         self.input_name = input_name
         self.output_path = output_path
         self.output_name = output_name
-        self.img_in_dir = os.path.join(self.input_path, self.input_name)
+        self.input_image = input_image
+        
+        if input_image is None:
+            self.img_in_dir = os.path.join(self.input_path, self.input_name)
         self.img_out_dir = os.path.join(self.output_path, self.output_name)
 
         # Image dimensions
@@ -77,7 +81,12 @@ class ImageProcessor():
 
     def read_image(self, verbose=False, show=False, 
                    edge_detection=True, denoise=True):
-        image = Image.open(self.img_in_dir).convert("RGB")
+        image = self.input_image
+
+        if image is None:
+            image = Image.open(self.img_in_dir)
+        image = image.convert("RGB")
+
         image = self.__tune_image(image, denoise, edge_detection, show=show)
         self.width, self.height = image.size
         self.original_image_matrix = np.asarray(image, dtype=np.uint64)
@@ -107,13 +116,15 @@ class ImageProcessor():
             draw.polygon(triangle, fill=color, outline=self.triangle_outline)
         return im
     
-    def encode_image(self, image: Image.Image):
+    @staticmethod
+    def encode_image(image: Image.Image):
         image_bytes = io.BytesIO()
         image.save(image_bytes, format='PNG')
         image_bytes = image_bytes.getvalue()
         image_base64 = base64.b64encode(image_bytes).decode('utf-8')
         return image_base64
 
-    def decode_image(self, image_data: bytes):
+    @staticmethod
+    def decode_image(image_data: bytes):
         image = Image.open(io.BytesIO(image_data))
         return image

@@ -5,6 +5,7 @@ import threading
 
 from PIL import Image
 from flask import Request, render_template
+import socketio
 
 from api.lib import sockets
 from src.lib.deap_config import DeapConfig
@@ -21,8 +22,6 @@ def parse_value_signature(value, signature):
         return None
 
 def get_form_arguments(form):
-    input_path = "./data/inputs"
-    input_name = "input.png"
     output_path = "./data/outputs/executions"
     output_name = "polygonal_evolutionary_algorithm_result.png"
     cpu_count = os.cpu_count()
@@ -75,8 +74,6 @@ def get_form_arguments(form):
         "selection": selection,
         "tournament_size": tournament_size,
         "gaussian_rate": gaussian_rate,
-        "input_path": input_path,
-        "input_name": input_name,
         "output_path": output_path,
         "output_name": output_name,
         "width": width,
@@ -90,25 +87,34 @@ def get_form_arguments(form):
         "manual_console": manual_console
     }
 
-def transform_image(args: dict, image_added_callback: Callable):
+def transform_image(args: dict, ea: EA, image_added_callback: Callable):
     dc = DeapConfig(**args)
-    ip = ImageProcessor(**args)
-    ea = EA(ip)
     eac = EAHandler(ea, dc)
     eac.build_ea_module(**args)
     eac.build_deap_module()
     eac.run(image_added_callback=image_added_callback)
     return eac
 
-def load_image(ea: EA, ip: ImageProcessor, input_dir: str, image_data: bytes):
-    ea.load_image()
-    decoded_image = ip.decode_image(image_data)
-    decoded_image.save(input_dir)
-    return
+def get_image_callback(ea: EA):
+    def image_added_callback(images: list[Image.Image]):
+        encoded_images = []
+
+        for image in images:
+            image = ea.decode(image)
+            image = ea.image_processor.encode_image(image)
+            encoded_images.append(image)
+            
+        sockets.emit('added_image', encoded_images)
+        return
+    
+    return image_added_callback
+
+# @socketio.on('disconnect')
+# def handle_disconnect():
 
 def transform(request: Request):
     image_file = request.files['image']
-
+    
     if image_file is not None:
         try:
             argument_checker = ArgumentChecker()
@@ -117,32 +123,18 @@ def transform(request: Request):
             print(args)
 
             seed = args["seed"]
-            input_path = args["input_path"]
-            input_name = args["input_name"]
-            input_dir = os.path.join(input_path, input_name)
             random.seed(seed)
 
-            image_processor = ImageProcessor(**args)
+            image_data = image_file.read()
+            decoded_image = ImageProcessor.decode_image(image_data)
+
+            image_processor_args = {**args, 'input_image': decoded_image}
+            image_processor = ImageProcessor(**image_processor_args)
             evolutionary_algorithm = EA(image_processor)
 
-            image_data = image_file.read()
-            load_image(evolutionary_algorithm, 
-                        image_processor,
-                        input_dir, 
-                        image_data)  
-            
-            def image_added_callback(images: list[Image.Image]):
-                encoded_images = []
-                for image in images:
-                    image = evolutionary_algorithm.decode(image)
-                    image = image_processor.encode_image(image)
-                    encoded_images.append(image)
-                    
-                sockets.emit('added_image', encoded_images)
-                return
-
-            thread_args = (args, image_added_callback)
-            thread = threading.Thread(target=transform_image, args=thread_args)
+            image_added_callback = get_image_callback(evolutionary_algorithm)
+            thread_args = (args, evolutionary_algorithm, image_added_callback)
+            thread = threading.Thread(target=transform_image, args=thread_args) # Should i join?
             thread.start()
 
             return render_template('transform/transform_template.html')

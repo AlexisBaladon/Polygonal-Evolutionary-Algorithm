@@ -1,99 +1,274 @@
 <!DOCTYPE html>
 <html>
 <style>
+    h1 {
+        text-align: center;
+        font-size: 25px;
+        padding: 15px;
+        color: #040404
+    }
+    input[name="image"] {
+        width: 390px;
+    }
     form div {
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
-        margin: 10px 0 10px 0;
+        justify-content: space-evenly;
+        margin: 5px 0 5px 0;
     }
+    body {
+        background: #bdc3c7;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to right, #E4F4F1, #bdc3c7);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to right, #E4F4F1, #bdc3c7); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+        font-family: "Roboto", sans-serif;
+    }
+    body > div {
+        background: #f8f8f8;
+        width: fit-content;
+        padding: 15px;
+        margin-bottom: 30px
+    }
+    body div {
+        width: fit-content;
+        padding: 5px 5px 5px 5px;
+    }
+    #image-elements {
+        display: flex;
+        flex-direction: row;
+    }
+    #image-parameters {
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
+    }
+    #size-row, #file-row {
+        display: flex;
+        flex-direction: row;
+    }
+    #image-elements label {
+        width: fit-content;
+    }
+    #container {
+        display: flex;
+        flex-direction: row;
+        margin-right: auto; 
+        justify-content: space-between;
+        margin-left: auto; margin-right: auto;
+
+        border-radius: 5px;
+        padding: 7.5px;
+        box-shadow: 0 0 5px 0 rgba(0,0,0,0.2);
+        
+
+    }
+    form {
+        width: fit-content;
+        justify-content: center; 
+        display: flex; 
+        flex-direction: column; 
+    }
+    .sub-group {
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+    }
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 2.5px;
+        margin-right: 10px;
+        text-align: start;
+        width: 150px;
+    }
+    input[type="number"], input[type="text"] {
+        width: 100px;
+        box-shadow: 0 0 1px 0 rgba(0,0,0,0.2);
+    
+    }
+    select {
+        width: 112px;
+    }
+
+    input[type="file"],
+    input[type="number"], 
+    input[type="text"],
+    select {
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        font-size: 12px;
+    }
+    input[type="file"]:focus,
+    input[type="number"]:focus,
+    input[type="text"]:focus,
+    select:focus {
+        border-color: #364954;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        outline: none;
+    }
+    button {
+        background-color: #364954;
+        color: #fff;
+        padding: 10px 7.5px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    button:hover {
+        background-color: #2B3033;
+    }
+
+    /* Image */
+    .image-preview {
+        width: 300px;
+        margin: 15px 15px 0 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 0;
+        overflow: hidden;
+        box-shadow: 0 0 5px 0 rgba(0,0,0,0.2);
+    }
+
+    #image-preview {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
 </style>
 <body>
-    <h1>Submit an Image</h1>
-    <div style="justify-content: center; display: flex; width: 100%">
-        <form method="POST" enctype="multipart/form-data"
-            action="/transform"
-            style="width: 250px; justify-content: center; 
-            display: flex; flex-direction: column; 
-            width: 800px;
-        ">
-            <div>
-                <label for="image">Image:</label>
-                <input type="file" name="image" accept="image/*" required >
-            </div>
-            <div>
-                <label for="seed">Seed:</label>
-                <input type="number" name="seed" value="0" step="1">
-            </div>
-            <div>
-                <div>
-                    <label for="INDPB">INDPB:</label>
-                    <input type="number" name="INDPB" value="0.1" step="0.1">
+    <h1>Polygonal Evolutionary Algorithm</h1>
+    <div id="container" >
+        <div style="justify-content: center; display: flex; width: 100%">
+            <form method="POST" enctype="multipart/form-data" action="/transform">
+                <div id="image-elements">
+                    <div class="image-preview">
+                        <img id="image-preview" src="{{url_for('static', filename='default.png')}}" alt="Image Preview">
+                    </div>
+                    <div id="image-parameters">
+                        <div id="file-row">
+                            <div class="sub-group">
+                                <label for="image">Image</label>
+                                <input id="image" type="file" name="image" accept="image/*" required>
+                            </div>
+                        </div>
+                        <div id="size-row" class="form-group">
+                            
+                            <div class="sub-group">
+                                <label for="width">Width</label>
+                                <input type="text" name="width" value="Default">
+                            </div>
+                            <div class="sub-group">
+                                <label for="height">Height</label>
+                                <input type="text" name="height" value="Default">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label for="CXPB">CXPB:</label>
-                    <input type="number" name="CXPB" value="0.9" step="0.1">
+
+                <div class="form-group">
+                    <div class="sub-group">
+                        <label for="NGEN">NGEN</label>
+                        <input type="number" name="NGEN" min="1" value="50" step="1">
+                    </div>
+                    <div class="sub-group">
+                        <label for="vertex_count">Vertex Count</label>
+                        <input type="text" name="vertex_count" value="Default">
+                      </div>
+                      <div class="sub-group">
+                          <label for="seed">Seed</label>
+                          <input type="number" name="seed" value="0" step="1">
+                      </div>
                 </div>
-                <div>
-                    <label for="MUTPB">MUTPB:</label>
-                    <input type="number" name="MUTPB" value="0.1" step="0.1">
+              
+
+                <div class="form-group">
+                  <div class="sub-group">
+                    <label for="INDPB">INDPB</label>
+                    <input type="number" name="INDPB" min="0.1" max="1" value="0.1" step="0.1">
+                  </div>
+                  <div class="sub-group">
+                    <label for="CXPB">CXPB</label>
+                    <input type="number" name="CXPB" min="0" max="1" value="0.9" step="0.1">
+                  </div>
+                  <div class="sub-group">
+                    <label for="MUTPB">MUTPB</label>
+                    <input type="number" name="MUTPB" min="0" max="1" value="0.1" step="0.1">
+                  </div>
                 </div>
-            </div>
-            <div>
-                <div>
-                    <label for="NGEN">NGEN:</label>
-                    <input type="number" name="NGEN" value="50" step="1">
+
+                <div class="form-group">
+                    
+                    <div class="sub-group">
+                        <label for="MU">μ</label>
+                        <input type="number" name="MU" min="1" value="50" step="1">
+                    </div>
+                    <div class="sub-group">
+                        <label for="LAMBDA">λ</label>
+                        <input type="number" name="LAMBDA" min="1" value="50" step="1">
+                    </div>
                 </div>
-            </div>
-            <div>
-                <div>
-                    <label for="MU">MU:</label>
-                    <input type="number" name="MU" value="50" step="1">
+              
+                <div class="form-group">
+                    <div class="sub-group">
+                        <label for="selection">Selection</label>
+                        <select name="selection">
+                          <option value="best">Best</option>
+                          <option value="tournament">Tournament</option>
+                        </select>
+                    </div>
+                    <div class="sub-group">
+                        <label for="tournament_size">Tournament Size</label>
+                        <input type="number" name="tournament_size" min="1" value="2" step="1">
+                    </div>
                 </div>
-                <div>
-                    <label for="LAMBDA">LAMBDA:</label>
-                    <input type="number" name="LAMBDA" value="50" step="1">
+              
+              
+                <div class="form-group">
+                    <div class="sub-group">
+                    <label for="gaussian_rate">Gaussian Rate</label>
+                    <input type="number" name="gaussian_rate" min="0.01" max="1" value="0.05" step="0.01">
+                    </div>
+                
+                
+                    <div class="sub-group">
+                    <label for="edge_rate">Edge Rate</label>
+                    <input type="number" name="edge_rate" min="0"  max="1" value="0.5" step="0.1">
+                    </div>
                 </div>
-            </div>
-            <div>
-                <div>
-                    <label for="selection">selection:</label>
-                    <select name="selection">
-                        <option value="best">best</option>
-                        <option value="tournament">tournament</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="tournament_size">tournament_size:</label>
-                    <input type="number" name="tournament_size" value="2" step="1">
-                </div>
-                <div>
-                    <label for="gaussian_rate">gaussian_rate:</label>
-                    <input type="number" name="gaussian_rate" value="0.05" step="0.1">
-                </div>
-            </div>
-            <div>
-                <div>
-                    <label for="width">width:</label>
-                    <input type="number" name="width" value="None">
-                </div>
-                <div>
-                    <label for="height">height:</label>
-                    <input type="number" name="height" value="None">
-                </div>
-            </div>
-            <div>
-                <div>
-                    <label for="vertex_count">vertex_count:</label>
-                    <input type="number" name="vertex_count" value="None">
-                </div>
-                <div>
-                    <label for="edge_rate">edge_rate:</label>
-                    <input type="number" name="edge_rate" value="0.5" step="0.1">
-                </div>
-            </div>
-            <button type="submit">Submit</button>
-        </form>
+              
+                <button type="submit">Submit</button>
+            </form>
+        </div>
     </div>
 </body>
+
+<script>
+    const imageInput = document.getElementById('image');
+    // Get the image preview element
+    const imagePreview = document.getElementById('image-preview');
+
+    // Listen for changes in the file input
+    imageInput.addEventListener('change', function () {
+    const file = imageInput.files[0];
+
+    if (file) {
+        // Create a FileReader
+        const reader = new FileReader();
+
+        // When the file is loaded, set the image source to display it in the preview
+        reader.onload = function (e) {
+        imagePreview.src = e.target.result;
+        };
+
+        // Read the file as a data URL
+        reader.readAsDataURL(file);
+    } else {
+        // Clear the preview if no file is selected
+        imagePreview.src = '';
+    }
+    });
+</script>
 </html>

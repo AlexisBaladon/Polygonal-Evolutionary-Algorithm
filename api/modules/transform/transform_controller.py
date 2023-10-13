@@ -100,39 +100,50 @@ def transform_image(args: dict, image_added_callback: Callable):
     eac.run(image_added_callback=image_added_callback)
     return eac
 
+def load_image(ea: EA, ip: ImageProcessor, input_dir: str, image_data: bytes):
+    ea.load_image()
+    decoded_image = ip.decode_image(image_data)
+    decoded_image.save(input_dir)
+    return
+
 def transform(request: Request):
     image_file = request.files['image']
 
     if image_file is not None:
         try:
             argument_checker = ArgumentChecker()
-            image_data = image_file.read()
             get_arguments = lambda: get_form_arguments(request.form)
             args = argument_checker.process_arguments(get_arguments=get_arguments)
             print(args)
 
-            input_dir = os.path.join(args["input_path"], args["input_name"])
-            seed = args["seed"]; random.seed(seed)
+            seed = args["seed"]
+            input_path = args["input_path"]
+            input_name = args["input_name"]
+            input_dir = os.path.join(input_path, input_name)
+            random.seed(seed)
 
             image_processor = ImageProcessor(**args)
             evolutionary_algorithm = EA(image_processor)
 
-            evolutionary_algorithm.load_image()
-            decoded_image = image_processor.decode_image(image_data)
-            decoded_image.save(input_dir)
-
-            image = Image.open(image_processor.img_out_dir)
-            image_base64 = image_processor.encode_image(image)
-            sockets.emit('added_image', image_base64)
-
-            def image_added_callback(image):
-                image = evolutionary_algorithm.decode(image)
-                image = image_processor.encode_image(image)
-                sockets.emit('added_image', image)
+            image_data = image_file.read()
+            load_image(evolutionary_algorithm, 
+                        image_processor,
+                        input_dir, 
+                        image_data)  
+            
+            def image_added_callback(images: list[Image.Image]):
+                encoded_images = []
+                for image in images:
+                    image = evolutionary_algorithm.decode(image)
+                    image = image_processor.encode_image(image)
+                    encoded_images.append(image)
+                    
+                sockets.emit('added_image', encoded_images)
                 return
 
-            t = threading.Thread(target=transform_image, args=(args, image_added_callback))
-            t.start()
+            thread_args = (args, image_added_callback)
+            thread = threading.Thread(target=transform_image, args=thread_args)
+            thread.start()
 
             return render_template('transform/transform_template.html')
         except Exception as e:

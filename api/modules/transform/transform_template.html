@@ -6,22 +6,42 @@
     <script type="text/javascript">
         var socket = io.connect('http://' + document.domain + ':' + location.port);
 
+        function appendImage(imageData) {
+            var imageContainer = document.getElementById('image-container');
+            let imageObject = document.createElement('img');
+            imageObject.src = 'data:image/png;base64,' + imageData;
+            imageContainer.appendChild(imageObject)
+        }
+
         socket.on('connect', function() {
             console.log('Connected');
         });
 
-        socket.on('added_image', function(image_data) {
-            console.log('Image updated');
-            // Get the image element by its ID
-            var img = document.getElementById('image-container');
-            
-            // Set the src attribute to the new image data
-            img.src = 'data:image/png;base64,' + image_data;
+        socket.on('new_epoch', function() {
+            var imageContainer = document.getElementById('image-container');
+
+            while (imageContainer.firstChild) {
+                imageContainer.removeChild(imageContainer.firstChild);
+            }
+        })
+
+        socket.on('added_image', function(imageData) {
+            var imageContainer = document.getElementById('image-container');
+            if (imageContainer.children.length == 0) {
+                imageData.forEach((img) => appendImage(img))
+            }
+            else {
+                var imageContainer = document.getElementById('image-container');
+                let imageObjects = Array.from(imageContainer.children);
+                imageObjects.forEach((imageObject, i) => {
+                    imageObject.src = 'data:image/png;base64,' + imageData[i];
+                })
+            }
         });
     </script>
 </head>
 <body>
-    <!-- Add an image element with an ID -->
-    <img id="image-container" src="" width="250px" height="auto">
+    <div id="image-container">
+    </div>
 </body>
 </html>

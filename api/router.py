@@ -9,4 +9,4 @@ def register_blueprint(blueprint: Blueprint, url_prefix=None, app=app):
 
 def initialize():
     register_blueprint(main_blueprint)
-    register_blueprint(transform_blueprint, url_prefix='/api/transform')
+    register_blueprint(transform_blueprint, url_prefix='/transform')

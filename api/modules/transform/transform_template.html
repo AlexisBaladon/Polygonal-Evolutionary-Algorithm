@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Processing</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+    <script type="text/javascript">
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('connect', function() {
+            console.log('Connected');
+        });
+
+        socket.on('added_image', function(image_data) {
+            console.log('Image updated');
+            // Get the image element by its ID
+            var img = document.getElementById('image-container');
+            
+            // Set the src attribute to the new image data
+            img.src = 'data:image/png;base64,' + image_data;
+        });
+    </script>
+</head>
+<body>
+    <!-- Add an image element with an ID -->
+    <img id="image-container" src="" width="250px" height="auto">
+</body>
+</html>

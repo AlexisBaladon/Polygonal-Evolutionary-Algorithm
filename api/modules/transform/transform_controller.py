@@ -1,9 +1,10 @@
 import os
 import random
 from typing import Callable
+import threading
 
 from PIL import Image
-from flask import Request
+from flask import Request, render_template
 
 from api.lib import sockets
 from src.lib.deap_config import DeapConfig
@@ -130,44 +131,10 @@ def transform(request: Request):
                 sockets.emit('added_image', image)
                 return
 
-            import threading
             t = threading.Thread(target=transform_image, args=(args, image_added_callback))
             t.start()
 
-            #img_tag = f"<img src='data:image/{image_file.content_type};base64,{image_base64}' width='250px'>"
-            img_tag = create_response()
-            return img_tag
+            return render_template('transform/transform_template.html')
         except Exception as e:
             return str(e.with_traceback())
     return "No image received :("
-
-def create_response():
-    return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Image Processing</title>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
-        <script type="text/javascript">
-            var socket = io.connect('http://' + document.domain + ':' + location.port);
-
-            socket.on('connect', function() {
-                console.log('Connected');
-            });
-
-            socket.on('added_image', function(image_data) {
-                console.log('Image updated');
-                // Get the image element by its ID
-                var img = document.getElementById('image-container');
-                
-                // Set the src attribute to the new image data
-                img.src = 'data:image/png;base64,' + image_data;
-            });
-        </script>
-    </head>
-    <body>
-        <!-- Add an image element with an ID -->
-        <img id="image-container" src="" width="250px" height="auto">
-    </body>
-    </html>
-    """

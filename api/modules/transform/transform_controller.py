@@ -5,7 +5,6 @@ import threading
 
 from PIL import Image
 from flask import Request, render_template
-import socketio
 
 from api.lib import sockets
 from src.lib.deap_config import DeapConfig
@@ -13,6 +12,7 @@ from src.models.evolutionary_algorithm.ea_handler import EAHandler
 from src.models.evolutionary_algorithm.ea_methods import EA
 from src.utils.image_processor import ImageProcessor
 from src.utils.argument_checker import ArgumentChecker
+from api.lib.sockets import socketio
 
 def parse_value_signature(value, signature):
     try:
@@ -85,9 +85,11 @@ def get_form_arguments(form):
 
 def transform_image(args: dict, ea: EA, image_added_callback: Callable):
     dc = DeapConfig(**args)
+    global eac
     eac = EAHandler(ea, dc)
     eac.build_ea_module(**args)
     eac.build_deap_module()
+
     eac.run(image_added_callback=image_added_callback)
     return eac
 
@@ -105,8 +107,13 @@ def get_image_callback(ea: EA):
     
     return image_added_callback
 
-# @socketio.on('disconnect')
-# def handle_disconnect():
+eac: EAHandler = None # TODO: Not thread safe.
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
+    if eac is not None:
+        eac.exit()
 
 def transform(request: Request):
     image_file = request.files['image']

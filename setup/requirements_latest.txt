@@ -8,3 +8,5 @@ scikit_posthocs
 scipy
 statsmodels
 ipykernel
+Flask
+Flask-SocketIO

@@ -3,11 +3,12 @@
 <style>
     h1 {
         text-align: center;
-        font-size: 25px;
+        font-size: 40px;
         padding: 15px 15px 0 15px;
         color: #040404;
 
         margin-bottom: 5px;
+        font-weight: 900;
     }
     input[name="image"] {
         width: 390px;
@@ -38,6 +39,7 @@
     #image-elements {
         display: flex;
         flex-direction: row;
+        justify-content: start;
     }
     #image-parameters {
         display: flex;
@@ -125,7 +127,8 @@
 
     /* Image */
     .image-preview {
-        width: 300px;
+        max-height: 250px;
+        max-width: 350px;
         margin: 15px 15px 0 10px;
         border: 1px solid #ccc;
         border-radius: 5px;
@@ -180,7 +183,7 @@
 <body>
     <h1>Polygonal Evolutionary Algorithm</h1>
     <div id="description">
-        <p>Create a family of images using only triangles! 👨‍👨‍👧‍👧</p>
+        <p>Create a family of images using only triangles.</p>
     </div>
     <div id="container" >
         <div style="justify-content: center; display: flex; width: 100%">
@@ -320,7 +323,7 @@
                         <input type="number" name="edge_rate" min="0"  max="1" value="0.5" step="0.1">
                     </div>
                 </div>
-                <button type="submit">Submit</button>
+                <button type="submit"><strong>Transform</strong></button>
             </form>
         </div>
     </div>

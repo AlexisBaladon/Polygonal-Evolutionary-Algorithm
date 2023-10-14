@@ -39,10 +39,15 @@ def get_form_arguments(form):
 
     NGEN = form.get("NGEN", 5)
     NGEN = parse_value_signature(NGEN, int)
+    NGEN = None if NGEN is None else min(NGEN, 100) # NGEN > 100 would cause the system to overload
+
     MU = form.get("MU", 50)
     MU = parse_value_signature(MU, int)
+    MU = None if MU is None else min(MU, 100) # MU > 100 would cause the system to overload
+
     LAMBDA = form.get("LAMBDA", 50)
     LAMBDA = parse_value_signature(LAMBDA, int)
+    LAMBDA = None if LAMBDA is None else min(LAMBDA, 100) # LAMBDA > 100 would cause the system to overload
 
     selection = form.get("selection", "best")
     tournament_size = form.get("tournament_size", 2)
@@ -54,8 +59,10 @@ def get_form_arguments(form):
     width = parse_value_signature(width, int)
     height = form.get("height", None)
     height = parse_value_signature(height, int)
+
     vertex_count = form.get("vertex_count", None)
     vertex_count = parse_value_signature(vertex_count, int)
+    vertex_count = None if vertex_count is None else min(vertex_count, 20_000) # vertex_count > 20_000 would cause the system to overload
 
     tri_outline = None
     edge_rate = form.get("edge_rate", 0.5)
@@ -84,14 +91,17 @@ def get_form_arguments(form):
     }
 
 def transform_image(args: dict, ea: EA, image_added_callback: Callable):
-    dc = DeapConfig(**args)
-    global eac
-    eac = EAHandler(ea, dc)
-    eac.build_ea_module(**args)
-    eac.build_deap_module()
+    try:
+        dc = DeapConfig(**args)
+        global eac
+        eac = EAHandler(ea, dc)
+        eac.build_ea_module(**args)
+        eac.build_deap_module()
 
-    eac.run(image_added_callback=image_added_callback)
-    return eac
+        eac.run(image_added_callback=image_added_callback)
+    except Exception as e:
+        print("Something wrong happened while initializing the EA; ", e)
+        eac.exit()
 
 def get_image_callback(ea: EA):
     def image_added_callback(individuals_data: dict[str, Union[list[Image.Image], list[int]]]):

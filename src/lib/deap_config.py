@@ -170,7 +170,8 @@ class DeapConfig:
 
         gen = 1
         best_fitnesses = [record['min']]
-        image_added_callback(population[:])
+        image_added_callback({"population": population[:],
+                              "fitness": fitnesses[:]})
 
         while not self.__stop_condition(gen, ngen):
             offspring = algorithms.varOr(population, toolbox, 
@@ -195,7 +196,8 @@ class DeapConfig:
 
             min_loss = record['min']
             best_fitnesses.append(min_loss)
-            image_added_callback(population[:])
+            image_added_callback({"population": population[:],
+                                  "fitness": fitnesses[:]})
             gen += 1
 
         return population, logbook, halloffame, best_fitnesses

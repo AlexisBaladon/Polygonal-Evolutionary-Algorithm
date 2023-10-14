@@ -1,6 +1,6 @@
 import os
 import random
-from typing import Callable
+from typing import Callable, Union
 import threading
 
 from PIL import Image
@@ -94,13 +94,14 @@ def transform_image(args: dict, ea: EA, image_added_callback: Callable):
     return eac
 
 def get_image_callback(ea: EA):
-    def image_added_callback(images: list[Image.Image]):
-        encoded_images = []
+    def image_added_callback(individuals_data: dict[str, Union[list[Image.Image], list[int]]]):
+        encoded_images = {"images": [], "fitness": individuals_data["fitness"]}
+        images = individuals_data["population"]
 
         for image in images:
             image = ea.decode(image)
             image = ea.image_processor.encode_image(image)
-            encoded_images.append(image)
+            encoded_images["images"].append(image)
             
         sockets.emit('added_image', encoded_images)
         return

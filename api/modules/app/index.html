@@ -17,9 +17,9 @@
         margin: 5px 0 5px 0;
     }
     body {
-        background: #bdc3c7;  /* fallback for old browsers */
-        background: -webkit-linear-gradient(to right, #E4F4F1, #bdc3c7);  /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(to right, #E4F4F1, #bdc3c7); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        background: #fafafa;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to right, #fafafa, #bdc3c7);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to right, #fafafa, #bdc3c7); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 
         font-family: "Roboto", sans-serif;
     }
@@ -137,6 +137,23 @@
         max-height: 100%;
     }
 
+    .sub-group {
+        position: relative;
+    }
+
+    .info-popup {
+        display: none;
+        position: absolute;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        padding: 10px;
+        z-index: 1;
+    }
+
+    label:hover + .info-popup, .info-popup:hover {
+        display: block;
+    }
+
 </style>
 <body>
     <h1>Polygonal Evolutionary Algorithm</h1>
@@ -170,71 +187,118 @@
 
                 <div class="form-group">
                     <div class="sub-group">
-                        <label for="NGEN">NGEN</label>
+                        <label for="NGEN">NGEN ℹ</label>
+                        <div class="info-popup">
+                            <strong>NGEN</strong><br>
+                            👨‍👩‍👧‍👦 Maximum Number of generations.
+                        </div>
                         <input type="number" name="NGEN" min="1" value="50" step="1">
                     </div>
                     <div class="sub-group">
-                        <label for="vertex_count">Vertex Count</label>
+                        <label for="vertex_count">Vertex Count ℹ</label>
+                        <div class="info-popup">
+                            <strong>Vertex Count</strong><br>
+                            🔻 Number of vertices of each individual
+                        </div>
                         <input type="text" name="vertex_count" value="auto">
                       </div>
                       <div class="sub-group">
-                          <label for="seed">Seed</label>
+                          <label for="seed">Seed ℹ</label>
+                          <div class="info-popup">
+                            <strong>Seed</strong><br>
+                            🌱 Each image is generated randomly, but each seed returns the same result.
+                        </div>
                           <input type="number" name="seed" value="0" step="1">
                       </div>
                 </div>
               
 
                 <div class="form-group">
-                  <div class="sub-group">
-                    <label for="INDPB">INDPB</label>
-                    <input type="number" name="INDPB" min="0.1" max="1" value="0.1" step="0.1">
-                  </div>
-                  <div class="sub-group">
-                    <label for="CXPB">CXPB</label>
-                    <input type="number" name="CXPB" min="0" max="1" value="0.9" step="0.1">
-                  </div>
-                  <div class="sub-group">
-                    <label for="MUTPB">MUTPB</label>
-                    <input type="number" name="MUTPB" min="0" max="1" value="0.1" step="0.1">
-                  </div>
+                    <div class="sub-group">
+                        <label for="MUTPB">MUTPB ℹ</label>
+                        <div class="info-popup">
+                            <strong>MUTPB</strong><br>
+                            🦎 Probability of an individual to mutate at each generation.
+                        </div>
+                        <input type="number" name="MUTPB" min="0" max="1" value="0.1" step="0.1">
+                    </div>
+                    <div class="sub-group">
+                        <label for="INDPB">INDPB ℹ</label>
+                        <div class="info-popup">
+                            <strong>INDPB</strong><br>
+                            🐸 Rate of genes of the individual that will be mutated.
+                        </div>
+                        <input type="number" name="INDPB" min="0.1" max="1" value="0.1" step="0.1">
+                    </div>
+                    <div class="sub-group">
+                        <label for="gaussian_rate">Gaussian Rate ℹ</label>
+                        <div class="info-popup">
+                            <strong>Gaussian Rate</strong><br>
+                            🐉 Standard deviation of gaussian mutation (how much the mutation affects the individual). Number of vertices of each individual
+                        </div>
+                        <input type="number" name="gaussian_rate" min="0.01" max="1" value="0.05" step="0.01">
+                    </div>
                 </div>
 
                 <div class="form-group">
                     
                     <div class="sub-group">
-                        <label for="MU">μ</label>
+                        <label for="CXPB">CXPB ℹ</label>
+                        <div class="info-popup">
+                            <strong>CXPB</strong><br>
+                            👫 Probability of one individual mating with other on each generation.
+                        </div>
+                        <input type="number" name="CXPB" min="0" max="1" value="0.9" step="0.1">
+                    </div>
+                    <div class="sub-group">
+                        <label for="MU">μ ℹ</label>
+                        <div class="info-popup">
+                            <strong>μ</strong><br>
+                            👫 Number of individuals to select for the next generation.
+                        </div>
+                        <div class="info-popup"></div>
                         <input type="number" name="MU" min="1" value="50" step="1">
                     </div>
                     <div class="sub-group">
-                        <label for="LAMBDA">λ</label>
+                        <label for="LAMBDA">λ ℹ</label>
+                        <div class="info-popup">
+                            <strong>λ</strong><br>
+                            👨‍👦‍👦 Number of individuals to generate on each generation.
+                        </div>
                         <input type="number" name="LAMBDA" min="1" value="50" step="1">
                     </div>
                 </div>
               
                 <div class="form-group">
                     <div class="sub-group">
-                        <label for="selection">Selection</label>
+                        <label for="selection">Selection ℹ</label>
+                        <div class="info-popup">
+                            <strong>Selection</strong><br>
+                            💪🏻 Keep the best individuals, or make the fight in a torunament!
+                        </div>
                         <select name="selection">
                           <option value="best">Best</option>
                           <option value="tournament">Tournament</option>
                         </select>
                     </div>
                     <div class="sub-group">
-                        <label for="tournament_size">Tournament Size</label>
+                        <label for="tournament_size">Tournament Size ℹ</label>
+                        <div class="info-popup">
+                            <strong>Tournament Size</strong><br>
+                            ⚔ Size of tournament (only if selection=tournament)
+                        </div>
                         <input type="number" name="tournament_size" min="1" value="2" step="1">
                     </div>
                 </div>
               
               
                 <div class="form-group">
-                    <div class="sub-group">
-                    <label for="gaussian_rate">Gaussian Rate</label>
-                    <input type="number" name="gaussian_rate" min="0.01" max="1" value="0.05" step="0.01">
-                    </div>
+                    
                 
                 
                     <div class="sub-group">
-                    <label for="edge_rate">Edge Rate</label>
+                    <label for="edge_rate">Edge Rate ℹ</label>
+                    <div class="info-popup">🏐 This is the rate of vertices that will be initialized in edges from the image.</div>
                     <input type="number" name="edge_rate" min="0"  max="1" value="0.5" step="0.1">
                     </div>
                 </div>

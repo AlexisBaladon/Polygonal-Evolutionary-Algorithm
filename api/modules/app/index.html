@@ -4,8 +4,10 @@
     h1 {
         text-align: center;
         font-size: 25px;
-        padding: 15px;
-        color: #040404
+        padding: 15px 15px 0 15px;
+        color: #040404;
+
+        margin-bottom: 5px;
     }
     input[name="image"] {
         width: 390px;
@@ -27,7 +29,7 @@
         background: #f8f8f8;
         width: fit-content;
         padding: 15px;
-        margin-bottom: 30px
+        margin-bottom: 50px
     }
     body div {
         width: fit-content;
@@ -154,15 +156,38 @@
         display: block;
     }
 
+    #tournament-size-subgroup {
+        display: none
+    }
+
+    #description {
+        width: 100%;
+        background: none;
+        text-align: center;
+        font-size: 15px;
+        padding: 15px 15px 0px 15px;
+        color: #040404
+    }
+
+    #description p {
+        margin: 10px
+    }
+
 </style>
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+</head>
 <body>
     <h1>Polygonal Evolutionary Algorithm</h1>
+    <div id="description">
+        <p>Create a family of images using only triangles! 👨‍👨‍👧‍👧</p>
+    </div>
     <div id="container" >
         <div style="justify-content: center; display: flex; width: 100%">
             <form method="POST" enctype="multipart/form-data" action="/transform">
                 <div id="image-elements">
                     <div class="image-preview">
-                        <img id="image-preview" src="{{url_for('static', filename='default.png')}}" alt="Image Preview">
+                        <img id="image-preview" src="{{url_for('static', filename='images/default.png')}}" alt="Image Preview">
                     </div>
                     <div id="image-parameters">
                         <div id="file-row">
@@ -281,7 +306,7 @@
                           <option value="tournament">Tournament</option>
                         </select>
                     </div>
-                    <div class="sub-group">
+                    <div id="tournament-size-subgroup" class="sub-group">
                         <label for="tournament_size">Tournament Size ℹ</label>
                         <div class="info-popup">
                             <strong>Tournament Size</strong><br>
@@ -289,20 +314,12 @@
                         </div>
                         <input type="number" name="tournament_size" min="1" value="2" step="1">
                     </div>
-                </div>
-              
-              
-                <div class="form-group">
-                    
-                
-                
                     <div class="sub-group">
-                    <label for="edge_rate">Edge Rate ℹ</label>
-                    <div class="info-popup">🏐 This is the rate of vertices that will be initialized in edges from the image.</div>
-                    <input type="number" name="edge_rate" min="0"  max="1" value="0.5" step="0.1">
+                        <label for="edge_rate">Edge Rate ℹ</label>
+                        <div class="info-popup">🏐 This is the rate of vertices that will be initialized in edges from the image.</div>
+                        <input type="number" name="edge_rate" min="0"  max="1" value="0.5" step="0.1">
                     </div>
                 </div>
-              
                 <button type="submit">Submit</button>
             </form>
         </div>
@@ -328,5 +345,18 @@
         imagePreview.src = '';
     }
     });
+
+    // Event handler for tournament size
+
+    const selection = document.getElementsByName('selection')[0];
+    selection.onchange = function() {
+        const tournamentSize = document.getElementById('tournament-size-subgroup');
+        if (selection.value === 'tournament') {
+            tournamentSize.style.display = 'flex';
+        } else {
+            tournamentSize.style.display = 'none';
+        }
+    }
+
 </script>
 </html>

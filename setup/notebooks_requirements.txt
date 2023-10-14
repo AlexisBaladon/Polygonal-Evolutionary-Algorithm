@@ -1,4 +1,0 @@
-pandas==1.5.1
-scikit-posthocs==0.7.0
-statsmodels==0.13.5
-ipykernel==6.19.2

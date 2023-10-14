@@ -94,8 +94,8 @@
         border: 16px solid #f3f3f3;
         border-top: 16px solid #364954;
         border-radius: 50%;
-        width: 60px;
-        height: 60px;
+        width: 30px;
+        height: 30px;
         animation: spin 2s linear infinite;
     }
 
@@ -104,12 +104,49 @@
         100% { transform: rotate(360deg); }
     }
 
+    .loading-bar {
+        width: 100%;
+        height: 20px;
+        background-color: #ccc;
+        }
+
+    .progress {
+        margin: 15px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px 0 rgba(0,0,0,0.2);
+        text-align: center;
+        height: 40px;
+        width: 0;
+        background-color: #364954;
+        transition: width 0.3s; /* Add a smooth transition effect */
+    }
+
+    #progress-label {
+        width: 100%;
+        display: block;
+        margin-top: 10px;
+        text-align: center;
+        color: #364954;
+        font-weight: bold;
+    }
+
+    #start-button {
+        display: block;
+        margin: 20px auto;
+    }
+
 </style>
 <head>
     <title>Image Processing</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
     <script type="text/javascript">
         var socket = io.connect('http://' + document.domain + ':' + location.port);
+        var currentGeneration = 1
+        var generations = null
+
+        function initializeGenerations(n) {
+            generations = n
+        }
 
         function appendImage(imageData) {
             var imageContainer = document.getElementById('individual-container');
@@ -119,28 +156,58 @@
             imageContainer.appendChild(imageObject)
         }
 
+        function createProgressBar() {
+            var container = document.getElementById('individual-container')
+            var progressBarContainer = document.createElement('div');
+            progressBarContainer.className = 'loading-bar';
+            var progressBar = document.createElement('div');
+            progressBar.className = 'progress';
+            progressBar.id = 'progress'
+            
+            var progressLabel = document.createElement('span');
+            progressLabel.id = 'progress-label'
+            progressLabel.textContent = 'Generation: ' + currentGeneration.toString() + '/' + generations.toString();
+
+            container.appendChild(progressLabel)
+            container.appendChild(progressBar)
+        }
+
+        function updateProgressBar() {
+            const progress = document.getElementById('progress');
+            const progressLabel = document.getElementById('progress-label');
+
+            function updateProgress() {
+                console.log(currentGeneration, generations)
+                if (currentGeneration <= generations) {
+                    const percentage = (currentGeneration / generations) * 100;
+                    progress.style.width = percentage + '%';
+                    currentGeneration++;
+                    progressLabel.textContent = 'Generation: ' + currentGeneration.toString() + '/' + generations.toString();
+                    // requestAnimationFrame(updateProgress);
+                }
+            }
+
+            updateProgress();
+        }
+
+
         socket.on('connect', function() {
             console.log('Connected');
         });
 
         socket.on('added_image', function(imageData) {
             var imageContainer = document.getElementById('individual-container');
+            var generationTitleElement = document.getElementById('progress');
 
-            var generationTitleElement = imageContainer.getElementsByTagName('h1')
-            if (generationTitleElement.length == 0) {
+            if (generationTitleElement == null) {
                 while (imageContainer.children.length > 0) {
                     imageContainer.removeChild(imageContainer.children[0]);
                 }
 
-                let generationTitle = document.createElement('h1');
-                generationTitle.innerHTML = 'Generation: 1';
-                imageContainer.appendChild(generationTitle);
+                createProgressBar()
             }
             else {
-                splittedGenerationTitle = generationTitleElement[0].innerHTML.split(' ')
-                var generationTitle = splittedGenerationTitle[0];
-                var generation = parseInt(splittedGenerationTitle[1]);
-                generationTitleElement[0].innerHTML = generationTitle + ' ' + (generation + 1);
+                updateProgressBar()
             }
 
             imageElements = Array.from(imageContainer.getElementsByTagName('img'));
@@ -153,9 +220,10 @@
                 })
             }
         });
+
     </script>
 </head>
-<body>
+<body onload="initializeGenerations({{NGEN}})">
     <div>
         <aside id="menu">
             <div id="image-container">

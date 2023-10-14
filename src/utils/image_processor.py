@@ -93,7 +93,7 @@ class ImageProcessor():
 
         if self.vertex_count is None:
             image_entropy = image.entropy()
-            self.vertex_count = max(int(np.power(2, image_entropy+2)), 5) # 5 is the minimum number of vertices
+            self.vertex_count = max(int(np.power(2, image_entropy+3)), 5) # 5 is the minimum number of vertices
 
             if verbose:
                 print(f"Image entropy: {image_entropy}")

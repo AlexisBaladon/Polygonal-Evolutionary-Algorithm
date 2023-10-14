@@ -98,7 +98,7 @@ def transform_image(args: dict, ea: EA, image_added_callback: Callable):
         eac.build_ea_module(**args)
         eac.build_deap_module()
 
-        eac.run(image_added_callback=image_added_callback)
+        eac.run(image_added_callback=image_added_callback, save=False)
     except Exception as e:
         print("Something wrong happened while initializing the EA; ", e)
         eac.exit()

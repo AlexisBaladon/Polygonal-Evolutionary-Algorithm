@@ -32,7 +32,7 @@ class EAHandler:
         if dc.cpu_count > 1:
             dc.register_parallelism() 
         
-    def run(self, image_added_callback=lambda *_: None, show_res=False, logs=False, seed=0):
+    def run(self, image_added_callback=lambda *_: None, show_res=False, logs=False, seed=0, save=True):
         is_parallel = bool(self.deap_configurer.cpu_count > 1)
         algorithm_output = self.deap_configurer.run_algorithm(image_added_callback=image_added_callback,
                                                               parallel=is_parallel)
@@ -43,7 +43,7 @@ class EAHandler:
         img = self.evolutionary_algorithm.decode(best_individual)
 
         out_dir = self.evolutionary_algorithm.image_processor.img_out_dir
-        if out_dir is not None:
+        if save:
             img.save(out_dir)
 
         if show_res:

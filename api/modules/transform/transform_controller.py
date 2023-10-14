@@ -93,7 +93,6 @@ def get_form_arguments(form):
 def transform_image(args: dict, ea: EA, image_added_callback: Callable):
     try:
         dc = DeapConfig(**args)
-        global eac
         eac = EAHandler(ea, dc)
         eac.build_ea_module(**args)
         eac.build_deap_module()
@@ -118,13 +117,12 @@ def get_image_callback(ea: EA):
     
     return image_added_callback
 
-eac: EAHandler = None # TODO: Not thread safe.
 
 @socketio.on('disconnect')
 def handle_disconnect():
     print('Client disconnected')
-    if eac is not None:
-        eac.exit()
+    # if eac is not None:
+    #     eac.exit()
 
 def transform(request: Request):
     image_file = request.files['image']

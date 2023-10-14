@@ -93,10 +93,12 @@ class ImageProcessor():
 
         if self.vertex_count is None:
             image_entropy = image.entropy()
-            self.vertex_count = max(int(np.power(2, image_entropy+4)), 5) # 5 is the minimum number of vertices
+            self.vertex_count = max(int(np.power(2, image_entropy+2)), 5) # 5 is the minimum number of vertices
+
             if verbose:
                 print(f"Image entropy: {image_entropy}")
                 print(f"Vertex count: {self.vertex_count}")
+
         self.vertex_count -= 4 # 4 vertices are added to the image corners
 
         if show:

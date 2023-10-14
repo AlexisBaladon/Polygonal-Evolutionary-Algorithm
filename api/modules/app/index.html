@@ -17,9 +17,9 @@
         margin: 5px 0 5px 0;
     }
     body {
-        background: #fafafa;  /* fallback for old browsers */
-        background: -webkit-linear-gradient(to right, #fafafa, #bdc3c7);  /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(to right, #fafafa, #bdc3c7); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        background: #fafafa;
+        background: -webkit-linear-gradient(to right, #fafafa, #bdc3c7);
+        background: linear-gradient(to right, #fafafa, #bdc3c7);
 
         font-family: "Roboto", sans-serif;
     }
@@ -192,7 +192,7 @@
                             <strong>NGEN</strong><br>
                             👨‍👩‍👧‍👦 Maximum Number of generations.
                         </div>
-                        <input type="number" name="NGEN" min="1" value="50" step="1">
+                        <input type="number" name="NGEN" min="1" max="100" value="50" step="1">
                     </div>
                     <div class="sub-group">
                         <label for="vertex_count">Vertex Count ℹ</label>
@@ -311,26 +311,20 @@
 
 <script>
     const imageInput = document.getElementById('image');
-    // Get the image preview element
     const imagePreview = document.getElementById('image-preview');
 
-    // Listen for changes in the file input
     imageInput.addEventListener('change', function () {
     const file = imageInput.files[0];
 
     if (file) {
-        // Create a FileReader
         const reader = new FileReader();
 
-        // When the file is loaded, set the image source to display it in the preview
         reader.onload = function (e) {
         imagePreview.src = e.target.result;
         };
 
-        // Read the file as a data URL
         reader.readAsDataURL(file);
     } else {
-        // Clear the preview if no file is selected
         imagePreview.src = '';
     }
     });

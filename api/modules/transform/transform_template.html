@@ -3,9 +3,9 @@
 <style>
     body {
         color: #364954;
-        background: #bdc3c7;  /* fallback for old browsers */
-        background: -webkit-linear-gradient(to right, #fafafa, #C0C0C0);  /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(to right, #fafafa, #C0C0C0); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        background: #bdc3c7; 
+        background: -webkit-linear-gradient(to right, #fafafa, #C0C0C0);
+        background: linear-gradient(to right, #fafafa, #C0C0C0);
 
         font-family: "Roboto", sans-serif;
     }
@@ -75,7 +75,7 @@
     }
 
     h2 {
-        margin-top: 250px;
+        margin-top: 150px;
     }
 
     #loader-container {
@@ -216,7 +216,7 @@
 
             var imageOverlay = document.createElement('div');
             imageOverlay.className = 'overlay';
-            imageOverlay.textContent = 'Fitness: ' + fitness.toString().slice(0, 6);
+            imageOverlay.textContent = 'Loss: ' + fitness.toString().slice(0, 6);
             
             var hoverImageContainer = document.createElement('div');
             hoverImageContainer.className = 'hover-image-container';
@@ -300,7 +300,7 @@
                 })
                 var overlays = Array.from(imageContainer.getElementsByClassName('overlay'));
                 overlays.forEach((overlay, i) => {
-                    overlay.textContent = 'Fitness: ' + fitnesses[i].toString().slice(0, 6);
+                    overlay.textContent = 'Loss: ' + fitnesses[i].toString().slice(0, 6);
                 })
             }
         });

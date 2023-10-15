@@ -11,3 +11,4 @@ ipykernel
 Flask
 Flask-SocketIO
 gunicorn
+eventlet

@@ -154,7 +154,7 @@ class DeapConfig:
                              {"chunksize": len(population)//self.cpu_count}
 
         invalid_ind = [ind for ind in population if not ind.fitness.valid]
-        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind, **parallelism_params)
+        fitnesses = list(toolbox.map(toolbox.evaluate, invalid_ind, **parallelism_params))
 
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
@@ -177,9 +177,9 @@ class DeapConfig:
             offspring = algorithms.varOr(population, toolbox, 
                                          lambda_, cxpb, mutpb)
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-            fitnesses = toolbox.map(toolbox.evaluate, 
-                                    invalid_ind, 
-                                    **parallelism_params)
+            fitnesses = list(toolbox.map(toolbox.evaluate, 
+                                         invalid_ind, 
+                                         **parallelism_params))
 
             for ind, fit in zip(invalid_ind, fitnesses):
                 ind.fitness.values = fit

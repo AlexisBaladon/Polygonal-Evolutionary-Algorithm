@@ -13,6 +13,7 @@ from src.models.evolutionary_algorithm.ea_methods import EA
 from src.utils.image_processor import ImageProcessor
 from src.utils.argument_checker import ArgumentChecker
 from api.lib.sockets import socketio
+from api import config
 
 def parse_value_signature(value, signature):
     try:
@@ -22,7 +23,7 @@ def parse_value_signature(value, signature):
         return None
 
 def get_form_arguments(form):
-    cpu_count = os.cpu_count()
+    cpu_count = 1 if config.production else os.cpu_count()
     verbose = 1
     show = 0
     manual_console = 0

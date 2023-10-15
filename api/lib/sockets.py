@@ -4,9 +4,9 @@ from api import app, config
 
 def create_socket_app(development=False):
     if development:
-        socketio = SocketIO(app, async_mode="threading")
+        socketio = SocketIO(app, async_mode="threading", cors_allowed_origins="*")
     else:
-        socketio = SocketIO(app, async_mode='threading')
+        socketio = SocketIO(app, async_mode='threading', cors_allowed_origins="*")
     return socketio
 
 socketio = create_socket_app(development=not config.production)

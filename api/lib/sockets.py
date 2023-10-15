@@ -1,4 +1,15 @@
-from api import socketio
+from flask_socketio import SocketIO
+
+from api import app, config
+
+def create_socket_app(development=False):
+    if development:
+        socketio = SocketIO(app, async_mode="threading")
+    else:
+        socketio = SocketIO(app, async_mode='eventlet')
+    return socketio
+
+socketio = create_socket_app(development=config.production)
 
 def emit(id: str, message: bytes = None):
     if message is not None:

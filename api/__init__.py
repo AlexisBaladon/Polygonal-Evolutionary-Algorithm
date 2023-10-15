@@ -1,10 +1,16 @@
 from flask import Flask
-from flask_socketio import SocketIO
 
-app = Flask(__name__, 
-            template_folder='modules', 
-            static_url_path='/static')
-app.config['SECRET_KEY'] = 'secret'
-socketio = SocketIO(app, async_mode="threading")
+from api import config
+
+def create_app(development=False):
+    app = Flask(__name__, 
+                template_folder='modules', 
+                static_url_path='/static')
+    
+    app.config['DEBUG'] = development
+    app.config['SECRET_KEY'] = 'secret'
+    return app
+
+app = create_app(development=not config.production)
 
 from api import modules

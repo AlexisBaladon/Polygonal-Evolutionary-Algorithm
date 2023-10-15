@@ -1,0 +1,11 @@
+*.pdf
+README.md
+*main.py
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+notebooks
+README
+results
+data

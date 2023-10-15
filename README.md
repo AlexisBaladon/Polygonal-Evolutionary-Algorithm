@@ -1,9 +1,5 @@
 # Image Approximation with Polygons using Delaunay Triangulation
 
-
-![gif](./readme/results/girl.gif)
-
-
 # Features:
 
 - Parametric configuration

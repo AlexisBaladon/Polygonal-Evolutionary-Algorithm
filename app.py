@@ -14,7 +14,7 @@ if __name__ == "__main__":
     host = "0.0.0.0"
 
     if production:
-        socketio.run(app, host=host, port=port, debug=False)
+        socketio.run(app, host=host, port=port, debug=False, allow_unsafe_werkzeug=True)
     else:
         socketio.run(app, host=host, port=port, debug=True)
 

@@ -8,7 +8,7 @@ def create_app(development=False):
                 static_url_path='/static')
     
     app.config['DEBUG'] = development
-    app.config['SECRET_KEY'] = 'secret'
+    app.config['SECRET_KEY'] = config.secret_key
     return app
 
 app = create_app(development=not config.production)

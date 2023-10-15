@@ -10,3 +10,5 @@ statsmodels==0.13.5
 ipykernel==6.19.2
 Flask==2.3.2
 Flask-SocketIO==5.3.6
+eventlet==0.33.3
+gunicorn==21.2.0

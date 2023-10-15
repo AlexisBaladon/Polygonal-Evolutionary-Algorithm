@@ -103,7 +103,7 @@ def transform_image(args: dict, ea: EA, image_added_callback: Callable):
         eac.exit()
 
 def get_image_callback(ea: EA):
-    def image_added_callback(individuals_data: dict[str, Union[list[Image.Image], list[int]]]):
+    def image_added_callback(individuals_data: dict):
         encoded_images = {"images": [], "fitness": individuals_data["fitness"]}
         images = individuals_data["population"]
 

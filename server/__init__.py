@@ -1,6 +1,6 @@
 from flask import Flask
 
-from api import config
+from server import config
 
 def create_app(development=False):
     app = Flask(__name__, 
@@ -13,4 +13,4 @@ def create_app(development=False):
 
 app = create_app(development=not config.production)
 
-from api import modules
+from server import modules

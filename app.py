@@ -1,12 +1,10 @@
-from api import app, router, config
+from server import app, router, config
 
-from api.lib.sockets import socketio
+from server.lib.sockets import socketio
 from src.lib.deap_config import DeapConfig
 
 DeapConfig.register_fitness() #DEAP CONFIGURATION MUST BE OUTSIDE OF MAIN WHEN USING PARALLELISM
-
 router.initialize()
-
 
 if __name__ == "__main__":
     production = config.production

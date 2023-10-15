@@ -1,6 +1,6 @@
 from flask_socketio import SocketIO
 
-from api import app, config
+from server import app, config
 
 def create_socket_app(development=False):
     if development:

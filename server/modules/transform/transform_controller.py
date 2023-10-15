@@ -6,14 +6,14 @@ import threading
 from PIL import Image
 from flask import Request, render_template
 
-from api.lib import sockets
+from server.lib import sockets
 from src.lib.deap_config import DeapConfig
 from src.models.evolutionary_algorithm.ea_handler import EAHandler
 from src.models.evolutionary_algorithm.ea_methods import EA
 from src.utils.image_processor import ImageProcessor
 from src.utils.argument_checker import ArgumentChecker
-from api.lib.sockets import socketio
-from api import config
+from server.lib.sockets import socketio
+from server import config
 
 def parse_value_signature(value, signature):
     try:

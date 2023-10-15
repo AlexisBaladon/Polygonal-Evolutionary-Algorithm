@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 
-from api.modules.transform import transform_controller
+from server.modules.transform import transform_controller
 
 transform_blueprint = Blueprint("transform", __name__)
 

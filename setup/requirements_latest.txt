@@ -10,3 +10,4 @@ statsmodels
 ipykernel
 Flask
 Flask-SocketIO
+gunicorn

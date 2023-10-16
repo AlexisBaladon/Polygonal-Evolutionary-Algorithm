@@ -1,6 +1,5 @@
 from server import app, router, config
 
-from server.lib.sockets import socketio
 from src.lib.deap_config import DeapConfig
 
 DeapConfig.register_fitness() #DEAP CONFIGURATION MUST BE OUTSIDE OF MAIN WHEN USING PARALLELISM
@@ -12,7 +11,7 @@ if __name__ == "__main__":
     host = "0.0.0.0"
 
     if production:
-        socketio.run(app, host=host, port=port, debug=False)
+        ""
     else:
-        socketio.run(app, host=host, port=port, debug=True)
+        app.run(host=host, port=port, debug=True, threaded=True)
 

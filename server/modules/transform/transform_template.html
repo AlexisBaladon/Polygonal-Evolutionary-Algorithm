@@ -188,9 +188,7 @@
 <head>
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <title>Image Processing</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js" crossorigin="anonymous"></script>
     <script type="text/javascript">
-        var socket = io.connect(null, {port: 5000, rememberTransport: false});
         var currentGeneration = 1
         var generations = null
 
@@ -256,11 +254,8 @@
             updateProgress();
         }
 
-        socket.on('connect', function() {
-            console.log('Connected');
-        });
-
-        socket.on('added_image', function(imageData) {
+        
+        function receiveData(imageData) {
             fitnesses = imageData.fitness.map((x) => x[0])
             imageData = imageData.images
 
@@ -301,7 +296,25 @@
                     overlay.textContent = 'Loss: ' + fitnesses[i].toString().slice(0, 6);
                 })
             }
-        });
+        };
+
+        function getNextGeneration() {
+            fetch('/transform', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                timeout: 600000 //high timeout as this is an intensive operation
+            })
+            .then(response => response.json())
+            .then(data => {
+                receiveData(data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
 
     </script>
 </head>

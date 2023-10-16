@@ -12,3 +12,4 @@ Flask
 Flask-SocketIO
 gunicorn
 eventlet
+python-dotenv

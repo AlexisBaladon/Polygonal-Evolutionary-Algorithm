@@ -13,3 +13,5 @@ Flask-Socketio==4.3.2
 gunicorn
 eventlet
 Flask-Cors
+Flask-Redis
+Celery

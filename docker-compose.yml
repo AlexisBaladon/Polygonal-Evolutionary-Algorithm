@@ -1,12 +1,26 @@
+version: '1'
 services:
   web:
     build: .
     ports:
       - "5000:5000"
     volumes:
-      - .:/code
+      - .:/app
     environment:
-      - FLASK_ENV=development
-      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - FLASK_APP=app
+      - FLASK_DEBUG=0
+    working_dir: /app
   redis:
     image: "redis:alpine"
+    command: redis-server
+  celery:
+    build: .
+    command: celery -A server.lib.celery.celery.celery worker --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - FLASK_APP=app
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis

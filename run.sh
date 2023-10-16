@@ -1,1 +1,2 @@
-gunicorn --bind 0.0.0.0:5000 --worker-class eventlet -w 1 --keep-alive 600 app:app
+#!/bin/bash
+gunicorn -c gunicorn_config.py app:app

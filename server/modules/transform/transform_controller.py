@@ -1,20 +1,12 @@
 import os
 import random
-from typing import Callable, Union
-import threading
-
-from PIL import Image
 from flask import Request, request, render_template
 
-from server.lib import sockets
-from src.lib.deap_config import DeapConfig
-from src.models.evolutionary_algorithm.ea_handler import EAHandler
-from src.models.evolutionary_algorithm.ea_methods import EA
 from src.utils.image_processor import ImageProcessor
 from src.utils.argument_checker import ArgumentChecker
 from server.lib.sockets import socketio
-from server.lib import broker
 from server import config
+from server.lib.celery.tasks import transform_image
 
 def parse_value_signature(value, signature):
     try:
@@ -92,30 +84,6 @@ def get_form_arguments(form):
         "manual_console": manual_console
     }
 
-def transform_image(user_id: str, args: dict, ea: EA, image_added_callback: Callable):
-    try:
-        dc = DeapConfig(**args)
-        eac = EAHandler(ea, dc)
-        eac.build_ea_module(**args)
-        eac.build_deap_module()
-        eac.run(image_added_callback=image_added_callback, save=False)
-    except Exception as e:
-        print("Something wrong happened while initializing the EA; ", e)
-
-def get_image_callback(ea: EA):
-    def image_added_callback(individuals_data: dict):
-        encoded_images = {"images": [], "fitness": individuals_data["fitness"]}
-        images = individuals_data["population"]
-
-        for image in images:
-            image = ea.decode(image)
-            image = ea.image_processor.encode_image(image)
-            encoded_images["images"].append(image)
-            
-        sockets.emit('added_image', encoded_images)
-        return
-    
-    return image_added_callback
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -138,15 +106,8 @@ def transform(request: Request):
             decoded_image = ImageProcessor.decode_image(image_data)
             base64_image = ImageProcessor.encode_image(decoded_image)
 
-            image_processor_args = {**args, 'input_image': decoded_image}
-            image_processor = ImageProcessor(**image_processor_args)
-            evolutionary_algorithm = EA(image_processor)
-            user_id = request.remote_addr
-
-            image_added_callback = get_image_callback(evolutionary_algorithm)
-            thread_args = (user_id, args, evolutionary_algorithm, image_added_callback)
-            thread = threading.Thread(target=transform_image, args=thread_args) # Should i join?
-            thread.start()
+            image_processor_args = {**args, 'input_image': image_data}
+            transform_image.delay(image_processor_args, args)
 
             context = {**args, 
                        'width': decoded_image.width,

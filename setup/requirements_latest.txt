@@ -1,7 +1,7 @@
 deap
 matplotlib
 numpy
-opencv_python
+opencv-python-headless
 pandas
 Pillow
 scikit_posthocs
@@ -14,3 +14,4 @@ gunicorn
 eventlet
 python-dotenv
 Flask-Redis
+Celery

@@ -4,7 +4,7 @@ from typing import Callable, Union
 import threading
 
 from PIL import Image
-from flask import Request, render_template
+from flask import Request, request, render_template
 
 from server.lib import sockets
 from src.lib.deap_config import DeapConfig
@@ -13,6 +13,7 @@ from src.models.evolutionary_algorithm.ea_methods import EA
 from src.utils.image_processor import ImageProcessor
 from src.utils.argument_checker import ArgumentChecker
 from server.lib.sockets import socketio
+from server.lib import broker
 from server import config
 
 def parse_value_signature(value, signature):
@@ -40,7 +41,7 @@ def get_form_arguments(form):
 
     NGEN = form.get("NGEN", 5)
     NGEN = parse_value_signature(NGEN, int)
-    NGEN = None if NGEN is None else min(NGEN, 100) # NGEN > 100 would cause the system to overload
+    NGEN = None if NGEN is None else min(NGEN, 15) # NGEN > 10 would cause the system to overload
 
     MU = form.get("MU", 50)
     MU = parse_value_signature(MU, int)
@@ -63,7 +64,7 @@ def get_form_arguments(form):
 
     vertex_count = form.get("vertex_count", None)
     vertex_count = parse_value_signature(vertex_count, int)
-    vertex_count = None if vertex_count is None else min(vertex_count, 20_000) # vertex_count > 20_000 would cause the system to overload
+    vertex_count = None if vertex_count is None else min(vertex_count, 10_000) # vertex_count > 10_000 would cause the system to overload
 
     tri_outline = None
     edge_rate = form.get("edge_rate", 0.5)
@@ -91,17 +92,15 @@ def get_form_arguments(form):
         "manual_console": manual_console
     }
 
-def transform_image(args: dict, ea: EA, image_added_callback: Callable):
+def transform_image(user_id: str, args: dict, ea: EA, image_added_callback: Callable):
     try:
         dc = DeapConfig(**args)
         eac = EAHandler(ea, dc)
         eac.build_ea_module(**args)
         eac.build_deap_module()
-
         eac.run(image_added_callback=image_added_callback, save=False)
     except Exception as e:
         print("Something wrong happened while initializing the EA; ", e)
-        eac.exit()
 
 def get_image_callback(ea: EA):
     def image_added_callback(individuals_data: dict):
@@ -118,12 +117,9 @@ def get_image_callback(ea: EA):
     
     return image_added_callback
 
-
 @socketio.on('disconnect')
 def handle_disconnect():
     print('Client disconnected')
-    # if eac is not None:
-    #     eac.exit()
 
 def transform(request: Request):
     image_file = request.files['image']
@@ -145,9 +141,10 @@ def transform(request: Request):
             image_processor_args = {**args, 'input_image': decoded_image}
             image_processor = ImageProcessor(**image_processor_args)
             evolutionary_algorithm = EA(image_processor)
+            user_id = request.remote_addr
 
             image_added_callback = get_image_callback(evolutionary_algorithm)
-            thread_args = (args, evolutionary_algorithm, image_added_callback)
+            thread_args = (user_id, args, evolutionary_algorithm, image_added_callback)
             thread = threading.Thread(target=transform_image, args=thread_args) # Should i join?
             thread.start()
 

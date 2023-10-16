@@ -1,7 +1,6 @@
 from src.models.evolutionary_algorithm.ea_handler import EAHandler
 
 from flask import Flask
-from server.lib import redis_module
 # from celery import Celery
 
 from server import config

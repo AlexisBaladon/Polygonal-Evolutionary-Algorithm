@@ -12,7 +12,8 @@ from src.models.evolutionary_algorithm.ea_handler import EAHandler
 from src.models.evolutionary_algorithm.ea_methods import EA
 from src.utils.image_processor import ImageProcessor
 from src.utils.argument_checker import ArgumentChecker
-from server import config, UserContext, redis
+from server import config, UserContext
+from server.lib import redis_module as redis
 
 def parse_value_signature(value, signature):
     try:

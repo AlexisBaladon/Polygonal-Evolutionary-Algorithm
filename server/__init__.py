@@ -1,8 +1,8 @@
 from src.models.evolutionary_algorithm.ea_handler import EAHandler
 
-from flask import Flask, g
-from flask_redis import FlaskRedis
-from celery import Celery
+from flask import Flask
+from server.lib import redis_module
+# from celery import Celery
 
 from server import config
 
@@ -32,21 +32,15 @@ def create_app(development=False):
     app.config['DEBUG'] = development
     app.config['SECRET_KEY'] = config.secret_key
 
-    app.app_context().push()
     return app
 
 app = create_app(development=not config.production)
-app.config.from_mapping(
-    CELERY=dict(
-        broker_url=REDIS_URL,
-        result_backend=REDIS_URL,
-        task_ignore_result=True
-    )
-)
-redis = FlaskRedis(app)
-
-redis.set('user_context', UserContext())
-user_context = redis.get('user_context')
-print(user_context)
+# app.config.from_mapping(
+#     CELERY=dict(
+#         broker_url=REDIS_URL,
+#         result_backend=REDIS_URL,
+#         task_ignore_result=True
+#     )
+# )
 
 from server import modules

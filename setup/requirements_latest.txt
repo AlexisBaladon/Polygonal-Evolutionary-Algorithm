@@ -9,6 +9,7 @@ scipy
 statsmodels
 ipykernel
 Flask
-Flask-SocketIO
 gunicorn
 eventlet
+flask-redis
+python-dotenv

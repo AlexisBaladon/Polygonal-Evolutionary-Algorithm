@@ -18,7 +18,7 @@ def set(key: str, value, object=True):
 def get(key: str, object=True):
     value = redis.get(key)
 
-    if object:
+    if object and value is not None:
         value = pickle.loads(value)
 
     return value

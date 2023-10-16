@@ -1,13 +1,15 @@
 FROM python:3.9-slim
 
-WORKDIR /app
+WORKDIR /
 COPY . /
 
-RUN pip install -r /app/setup/requirements_latest.txt
+# RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
+
+RUN pip install -r /setup/requirements_latest.txt
 
 EXPOSE 5000
 
-ENV FLASK_APP=/app/app.py
+ENV FLASK_APP=/app.py
 ENV FLASK_ENV=production
 
-CMD ["/app/run.sh"]
+CMD ["bash", "/run.sh"]

@@ -1,19 +1,18 @@
 import os
+import time
 import random
-from typing import Callable, Union
+from typing import Callable
+import collections
 import threading
 
-from PIL import Image
 from flask import Request, render_template
 
-from server.lib import sockets
 from src.lib.deap_config import DeapConfig
 from src.models.evolutionary_algorithm.ea_handler import EAHandler
 from src.models.evolutionary_algorithm.ea_methods import EA
 from src.utils.image_processor import ImageProcessor
 from src.utils.argument_checker import ArgumentChecker
-from server.lib.sockets import socketio
-from server import config
+from server import config, g, UserContext, app
 
 def parse_value_signature(value, signature):
     try:
@@ -91,19 +90,7 @@ def get_form_arguments(form):
         "manual_console": manual_console
     }
 
-def transform_image(args: dict, ea: EA, image_added_callback: Callable):
-    try:
-        dc = DeapConfig(**args)
-        eac = EAHandler(ea, dc)
-        eac.build_ea_module(**args)
-        eac.build_deap_module()
-
-        eac.run(image_added_callback=image_added_callback, save=False)
-    except Exception as e:
-        print("Something wrong happened while initializing the EA; ", e)
-        eac.exit()
-
-def get_image_callback(ea: EA):
+def get_image_callback(ea: EA, user_id: str):
     def image_added_callback(individuals_data: dict):
         encoded_images = {"images": [], "fitness": individuals_data["fitness"]}
         images = individuals_data["population"]
@@ -112,18 +99,87 @@ def get_image_callback(ea: EA):
             image = ea.decode(image)
             image = ea.image_processor.encode_image(image)
             encoded_images["images"].append(image)
+
+        with app.app_context():
+            user_context: UserContext = getattr(g, user_id, None)
+            if user_context is None:
+                raise Exception("User context not found")
             
-        sockets.emit('added_image', encoded_images)
+            user_context.encoded_images.append(encoded_images) # TODO: THREAD SAFE
+            setattr(g, user_id, user_context)
+        
         return
     
     return image_added_callback
 
+def get_user_id(request: Request):
+    return request.remote_addr
 
-@socketio.on('disconnect')
-def handle_disconnect():
-    print('Client disconnected')
-    # if eac is not None:
-    #     eac.exit()
+def get_next_generation(request: Request):
+    try:
+        user_id = get_user_id(request)
+
+        with app.app_context():
+            user_context: UserContext = getattr(g, user_id, None)
+            if user_context is None:
+                raise Exception("User context not found")
+            
+            while len(user_context.encoded_images) == 0:
+                time.sleep(1)
+
+            encoded_images = user_context.encoded_images.pop(0)
+
+        return encoded_images
+    except Exception as e:
+        print("Something wrong happened while getting the next generation; ", e)
+        return str(e)
+    
+def run_ea(eac: EAHandler, args: tuple):
+    with app.app_context():
+        eac.run(*args)
+
+def transform_image(request: Request):
+    try:
+        with app.app_context():
+            user_id = get_user_id(request)
+            user_context: UserContext = getattr(g, user_id, None)
+            if user_context is None:
+                raise Exception("User context not found")
+            
+            args = user_context.args
+            if args is None:
+                raise Exception("Arguments not found")
+            
+            decoded_image = user_context.decoded_image
+            if decoded_image is None:
+                raise Exception("Input image not found")
+
+            image_processor_args = {**args, 'input_image': decoded_image}
+            image_processor = ImageProcessor(**image_processor_args)
+            evolutionary_algorithm = EA(image_processor)
+
+            user_id = get_user_id(request)
+            image_added_callback = get_image_callback(evolutionary_algorithm, user_id)
+            
+            deap_config = DeapConfig(**args)
+            eac = EAHandler(evolutionary_algorithm, deap_config)
+            eac.build_ea_module(**args)
+            eac.build_deap_module()
+
+            # user_context.user_eac = eac
+            # setattr(g, user_id, user_context)
+
+            eac_args = (image_added_callback, False, False, 0, False)
+            # thread_args = (eac, eac_args)
+            # thread = threading.Thread(target=eac.run, args=thread_args)
+            # thread.start()
+
+            eac.run(*eac_args)
+
+        return "ok"
+    except Exception as e:
+        print("Something wrong happened while initializing the EA; ", e.with_traceback())
+        return str(e)
 
 def transform(request: Request):
     image_file = request.files['image']
@@ -142,13 +198,16 @@ def transform(request: Request):
             decoded_image = ImageProcessor.decode_image(image_data)
             base64_image = ImageProcessor.encode_image(decoded_image)
 
-            image_processor_args = {**args, 'input_image': decoded_image}
-            image_processor = ImageProcessor(**image_processor_args)
-            evolutionary_algorithm = EA(image_processor)
+            user_id = get_user_id(request)
 
-            image_added_callback = get_image_callback(evolutionary_algorithm)
-            thread_args = (args, evolutionary_algorithm, image_added_callback)
-            thread = threading.Thread(target=transform_image, args=thread_args) # Should i join?
+            with app.app_context():
+                user_context = getattr(g, user_id, None)
+                if user_context is None:
+                    user_context = UserContext(args=args, decoded_image=decoded_image)
+                    setattr(g, user_id, user_context)
+
+            thread_args = (request,)
+            thread = threading.Thread(target=transform_image, args=thread_args)
             thread.start()
 
             context = {**args, 

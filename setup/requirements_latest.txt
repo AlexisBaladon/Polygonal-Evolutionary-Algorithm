@@ -9,6 +9,7 @@ scipy
 statsmodels
 ipykernel
 Flask
-Flask-SocketIO
+Flask-Socketio==4.3.2
 gunicorn
 eventlet
+Flask-Cors

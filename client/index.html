@@ -179,6 +179,8 @@
 </style>
 <head>
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js" crossorigin="anonymous"></script>
+    <script type="text/javascript"></script>
 </head>
 <body>
     <h1>Polygonal Evolutionary Algorithm</h1>
@@ -187,7 +189,7 @@
     </div>
     <div id="container" >
         <div style="justify-content: center; display: flex; width: 100%">
-            <form method="POST" enctype="multipart/form-data" action="/transform">
+            <form id="ea-form" onsubmit="onSubmit()">
                 <div id="image-elements">
                     <div class="image-preview">
                         <img id="image-preview" src="{{url_for('static', filename='images/default.png')}}" alt="Image Preview">
@@ -329,7 +331,9 @@
     </div>
 </body>
 
+<script src="./socket.js"></script>
 <script>
+    var socket = io.connect('http://localhost:5000');
     const imageInput = document.getElementById('image');
     const imagePreview = document.getElementById('image-preview');
 
@@ -350,7 +354,6 @@
     });
 
     // Event handler for tournament size
-
     const selection = document.getElementsByName('selection')[0];
     selection.onchange = function() {
         const tournamentSize = document.getElementById('tournament-size-subgroup');
@@ -361,5 +364,41 @@
         }
     }
 
+    function onSubmit() {
+        event.preventDefault();
+        // Send parameters to server through sockets and NOT POST requests.
+        var formData = {
+            'image': document.getElementsByName('image')[0].value,
+            'NGEN': document.getElementsByName('NGEN')[0].value,
+            'vertex_count': document.getElementsByName('vertex_count')[0].value,
+            'seed': document.getElementsByName('seed')[0].value,
+            'MUTPB': document.getElementsByName('MUTPB')[0].value,
+            'INDPB': document.getElementsByName('INDPB')[0].value,
+            'gaussian_rate': document.getElementsByName('gaussian_rate')[0].value,
+            'CXPB': document.getElementsByName('CXPB')[0].value,
+            'MU': document.getElementsByName('MU')[0].value,
+            'LAMBDA': document.getElementsByName('LAMBDA')[0].value,
+            'selection': document.getElementsByName('selection')[0].value,
+            'tournament_size': document.getElementsByName('tournament_size')[0].value,
+            'edge_rate': document.getElementsByName('edge_rate')[0].value,
+            'width': document.getElementsByName('width')[0].value,
+            'height': document.getElementsByName('height')[0].value,
+        }
+
+        const file = imageInput.files[0];
+        var reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function() {
+            var base64 = reader.result;
+            formData.image = base64
+            localStorage.setItem('args', JSON.stringify(formData));
+            socket.emit('process_transformation_parameters', formData);
+            window.location.href = './transform_template.html';
+        };
+    }
+
+    socket.on('connect', function() {
+        console.log('Connected');
+    });
 </script>
 </html>

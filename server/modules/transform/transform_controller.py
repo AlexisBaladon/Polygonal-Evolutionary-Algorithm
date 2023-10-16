@@ -1,10 +1,8 @@
 import os
 import random
-from typing import Callable, Union
-import threading
+from typing import Callable
 
-from PIL import Image
-from flask import Request, render_template
+from flask import request
 
 from server.lib import sockets
 from src.lib.deap_config import DeapConfig
@@ -91,17 +89,10 @@ def get_form_arguments(form):
         "manual_console": manual_console
     }
 
-def transform_image(args: dict, ea: EA, image_added_callback: Callable):
-    try:
-        dc = DeapConfig(**args)
-        eac = EAHandler(ea, dc)
-        eac.build_ea_module(**args)
-        eac.build_deap_module()
+import collections
 
-        eac.run(image_added_callback=image_added_callback, save=False)
-    except Exception as e:
-        print("Something wrong happened while initializing the EA; ", e)
-        eac.exit()
+client_eac = {}
+client_responses = collections.defaultdict(collections.deque)
 
 def get_image_callback(ea: EA):
     def image_added_callback(individuals_data: dict):
@@ -113,49 +104,66 @@ def get_image_callback(ea: EA):
             image = ea.image_processor.encode_image(image)
             encoded_images["images"].append(image)
             
-        sockets.emit('added_image', encoded_images)
+        print("added image")
+        #sockets.emit('added_image', encoded_images)
+        client_responses[request.remote_addr].append(encoded_images)
         return
     
     return image_added_callback
 
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
 
 @socketio.on('disconnect')
 def handle_disconnect():
     print('Client disconnected')
-    # if eac is not None:
-    #     eac.exit()
-
-def transform(request: Request):
-    image_file = request.files['image']
-    
-    if image_file is not None:
+    if request.remote_addr in client_eac:
         try:
-            argument_checker = ArgumentChecker()
-            get_arguments = lambda: get_form_arguments(request.form)
-            args = argument_checker.process_arguments(get_arguments=get_arguments)
-            print(args)
+            client_eac[request.remote_addr].exit()
+        except:
+            pass
 
-            seed = args["seed"]
-            random.seed(seed)
+@socketio.on('process_transformation_parameters')
+def transform(form_data):
+    try:
+        image_base64 = form_data['image']
 
-            image_data = image_file.read()
-            decoded_image = ImageProcessor.decode_image(image_data)
-            base64_image = ImageProcessor.encode_image(decoded_image)
+        argument_checker = ArgumentChecker()
+        get_arguments = lambda: get_form_arguments(form_data)
+        args = argument_checker.process_arguments(get_arguments=get_arguments)
 
-            image_processor_args = {**args, 'input_image': decoded_image}
-            image_processor = ImageProcessor(**image_processor_args)
-            evolutionary_algorithm = EA(image_processor)
+        seed = args["seed"]
+        random.seed(seed)
 
-            image_added_callback = get_image_callback(evolutionary_algorithm)
-            thread_args = (args, evolutionary_algorithm, image_added_callback)
-            thread = threading.Thread(target=transform_image, args=thread_args) # Should i join?
-            thread.start()
+        decoded_image = ImageProcessor.decode_image(image_base64)
+        base64_image = ImageProcessor.encode_image(decoded_image)
 
-            context = {**args, 
-                       'width': decoded_image.width,
-                       'height': decoded_image.height,
-                       'input_image': base64_image}
-            return render_template('transform/transform_template.html', **context)
-        except Exception as e:
-            return str(e.with_traceback())
-    return "No image received :("
+        image_processor_args = {**args, 'input_image': decoded_image}
+        image_processor = ImageProcessor(**image_processor_args)
+        evolutionary_algorithm = EA(image_processor)
+
+        context = {**args, 
+                    'width': decoded_image.width,
+                    'height': decoded_image.height,
+                    'input_image': base64_image}
+        
+        client_eac[request.remote_addr] = (context, evolutionary_algorithm)
+        
+    except Exception as e:
+        print("Something wrong happened while initializing the EA", e.with_traceback())
+        socketio.emit('error', "Something wrong happened while initializing the EA")
+
+@socketio.on('start_sending_images')
+def start_sending_images():
+    try:
+        context, evolutionary_algorithm = client_eac.pop(request.remote_addr)
+        image_added_callback = get_image_callback(evolutionary_algorithm)
+        dc = DeapConfig(**context)
+        eac = EAHandler(evolutionary_algorithm, dc)
+        eac.build_ea_module(**context)
+        eac.build_deap_module()
+        client_eac[request.remote_addr] = eac
+        eac.run(image_added_callback=image_added_callback, save=False)
+    except Exception as e:
+        print("Something wrong happened while initializing the EA; ", e)

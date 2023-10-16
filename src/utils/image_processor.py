@@ -127,6 +127,10 @@ class ImageProcessor():
         return image_base64
 
     @staticmethod
-    def decode_image(image_data: bytes):
+    def decode_image(image_data: str):
+        if image_data.startswith('data:image'):
+            image_data = image_data.split(',')[-1]
+
+        image_data = base64.b64decode(image_data)
         image = Image.open(io.BytesIO(image_data))
         return image

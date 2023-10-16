@@ -1,10 +1,12 @@
-from server import app, router, config
+from server import app, config
+from server.lib import cors
+from server.modules.transform import transform_controller
 
 from server.lib.sockets import socketio
 from src.lib.deap_config import DeapConfig
 
 DeapConfig.register_fitness() #DEAP CONFIGURATION MUST BE OUTSIDE OF MAIN WHEN USING PARALLELISM
-router.initialize()
+cors.declare_cors_policy(app)
 
 if __name__ == "__main__":
     production = config.production

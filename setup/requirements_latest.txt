@@ -13,3 +13,4 @@ gunicorn
 eventlet
 flask-redis
 python-dotenv
+celery

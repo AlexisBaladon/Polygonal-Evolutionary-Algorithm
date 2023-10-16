@@ -8,14 +8,14 @@ def create_redis():
 
 redis = create_redis()
 
-def set(key: str, value, object=False):
+def set(key: str, value, object=True):
     if object:
         value = pickle.dumps(value)
 
     redis.set(key, value)
     return
 
-def get(key: str, object=False):
+def get(key: str, object=True):
     value = redis.get(key)
 
     if object:

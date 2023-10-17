@@ -186,9 +186,8 @@
 <head>
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <title>Image Processing</title>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js" crossorigin="anonymous"></script> -->
 </head>
-<body onload="initializeGenerations({{ NGEN }})">
+<body onload="initialize({{ NGEN }}, '{{ user_id }}')">
     <div>
         <aside id="menu">
             <div id="image-container">
@@ -254,9 +253,13 @@
     // var socket = io.connect(null, {port: 5000, rememberTransport: false});
     var currentGeneration = 1
     var generations = null
+    var userId = null
 
-    function initializeGenerations(n) {
-        generations = n
+    function initialize(ngen, userId_) {
+        generations = ngen
+        userId = userId_
+        console.log(userId)
+        fetchNextGeneration(userId)
     }
 
     function appendImage(imageData, fitness) {
@@ -301,7 +304,7 @@
         container.appendChild(progressBar)
     }
 
-    function updateProgressBar() {
+    function updateProgressBar(currentGeneration) {
         const progress = document.getElementById('progress');
         const progressLabel = document.getElementById('progress-label');
 
@@ -310,14 +313,13 @@
                 const percentage = (currentGeneration / generations) * 100;
                 progress.style.width = percentage + '%';
                 progressLabel.textContent = 'Generation: ' + currentGeneration.toString() + '/' + generations.toString();
-                currentGeneration++;
             }
         }
 
         updateProgress();
     }
 
-    function addImage(imageData) {
+    function addImage(imageData, currentGeneration) {
         fitnesses = imageData.fitness.map((x) => x[0])
         imageData = imageData.images
 
@@ -342,7 +344,7 @@
             createProgressBar()
         }
         else {
-            updateProgressBar()
+            updateProgressBar(currentGeneration)
         }
 
         imageElements = Array.from(imageContainer.getElementsByTagName('img'));
@@ -360,31 +362,21 @@
         }
     }
     
-    function fetchNextGeneration() {
-        fetch(`/transform?generation=${currentGeneration}`, {
+    function fetchNextGeneration(userId, currentGeneration=1) {
+        fetch(`/transform?generation=${currentGeneration.toString()}&user_id=${userId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
             }
         })
         .then(response => response.json())
-        .then(data => addImage(data))
+        .then(data => addImage(data, currentGeneration + 1))
         .then(() => {
             if (currentGeneration <= generations) {
-                fetchNextGeneration()
+                fetchNextGeneration(userId, currentGeneration + 1)
             }
         })
     }
-
-    fetchNextGeneration()
-
-    // socket.on('connect', function() {
-    //     console.log('Connected');
-    // });
-
-    // socket.on('added_image', function(imageData) {
-    //     addImage(imageData)
-    // });
 
 </script>
 </html>

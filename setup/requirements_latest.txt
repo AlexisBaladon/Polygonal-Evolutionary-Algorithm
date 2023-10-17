@@ -10,3 +10,4 @@ eventlet
 python-dotenv
 Flask-Redis
 Celery
+flower

@@ -26,21 +26,22 @@ def get_image_callback(ea: EA, user_id: str):
     
     return image_added_callback
 
-def get_stop_condition_callback(user_id: str, max_iddle_seconds=15):
+def get_stop_condition_callback(user_id: str, max_iddle_seconds=90):
     def stop_condition_callback():
         last_connection_key = broker.get_last_connection_key(user_id)
         last_connection = broker.get(last_connection_key)
         current_time = time.time()
 
         if last_connection is None:
-            broker.set(last_connection_key, current_time)
+            print("First connection")
             return False
         
         if current_time - last_connection > max_iddle_seconds:
+            print("Max iddle time reached")
             broker.set(last_connection_key, None)
             return True
         
-        broker.set(last_connection_key, current_time)
+        print("Connection is still alive: ", current_time - last_connection, " seconds")
         return False
     
     return stop_condition_callback

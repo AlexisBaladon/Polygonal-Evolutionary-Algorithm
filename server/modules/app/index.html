@@ -187,7 +187,7 @@
     </div>
     <div id="container" >
         <div style="justify-content: center; display: flex; width: 100%">
-            <form method="POST" enctype="multipart/form-data" action="/transform">
+            <form id="transform-form" method="POST" enctype="multipart/form-data" action="/transform">
                 <div id="image-elements">
                     <div class="image-preview">
                         <img id="image-preview" src="{{url_for('static', filename='images/default.png')}}" alt="Image Preview">
@@ -330,6 +330,9 @@
 </body>
 
 <script>
+    const userId = Date.now().toString(36)
+    document.getElementById('transform-form').action += `?user_id=${userId}`
+
     const imageInput = document.getElementById('image');
     const imagePreview = document.getElementById('image-preview');
 
@@ -340,7 +343,7 @@
         const reader = new FileReader();
 
         reader.onload = function (e) {
-        imagePreview.src = e.target.result;
+            imagePreview.src = e.target.result;
         };
 
         reader.readAsDataURL(file);

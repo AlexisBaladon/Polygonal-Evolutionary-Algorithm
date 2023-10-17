@@ -88,38 +88,42 @@ def get_form_arguments(form):
     }
 
 def get_user_id(request: Request):
-    return request.remote_addr
+    return request.remote_addr + request.args['user_id']
 
-# @socketio.on('disconnect')
-# def handle_disconnect():
-#     print('Client disconnected')
-
-def get_transformed_images(request: Request, max_fails=30, sleep_time=1):
+def get_transformed_images(request: Request, max_iddle_time=90, sleep_time=1):
     try:
         user_id = get_user_id(request)
-        generation = request.args['generation']
+        generation = int(request.args['generation'])
         fail_count = 0
 
         last_connection = time.time()
         last_connection_key = broker.get_last_connection_key(user_id)
         broker.set(last_connection_key, last_connection)
+        initial_time = time.time()
 
         while True: # TODO: Busy waiting is not a good practice
+            current_time = time.time()
             added_image_key = broker.get_added_image_key(user_id, generation)
             added_image = broker.get(added_image_key)
 
+            fail_count += 1
+            if fail_count % 10 == 0:
+                print(f"Waiting for image {generation} - {current_time - initial_time} seconds")
+
             if added_image is not None:
+                broker.set(added_image_key, None)
                 return added_image
             
-            fail_count += 1
-            if fail_count > max_fails:
+            if current_time - last_connection > max_iddle_time:
                 for i in range(1,generation+1):
                     added_image_key = broker.get_added_image_key(user_id, i)
                     broker.set(added_image_key, None)
-                return f"Image transformation timed out after {fail_count*sleep_time} seconds"
+                return {"error": f"Image transformation timed out after {fail_count*sleep_time} seconds"}
             time.sleep(sleep_time)
+
     except Exception as e:
-        return "Something went wrong while getting the transformed images: " + str(e.with_traceback())
+        print(e.with_traceback())
+        return {"error": "Something went wrong while getting the transformed images"}
 
 def transform(request: Request):
     image_file = request.files['image']
@@ -142,11 +146,12 @@ def transform(request: Request):
             image_processor_args = {**args, 'input_image': image_data}
             transform_image.delay(image_processor_args, args, user_id)
 
-            context = {**args, 
+            context = {**args,
+                       'user_id': request.args['user_id'],
                        'width': decoded_image.width,
                        'height': decoded_image.height,
                        'input_image': base64_image}
             return render_template('transform/transform_template.html', **context)
         except Exception as e:
             return str(e.with_traceback())
-    return "No image received :("
+    return {"error": "No image received :("}

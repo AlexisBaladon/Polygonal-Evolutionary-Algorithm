@@ -30,15 +30,17 @@ def get_stop_condition_callback(user_id: str, max_iddle_seconds=15):
     def stop_condition_callback():
         last_connection_key = broker.get_last_connection_key(user_id)
         last_connection = broker.get(last_connection_key)
-
-        if last_connection is None:
-            return False
-        
         current_time = time.time()
 
+        if last_connection is None:
+            broker.set(last_connection_key, current_time)
+            return False
+        
         if current_time - last_connection > max_iddle_seconds:
+            broker.set(last_connection_key, None)
             return True
         
+        broker.set(last_connection_key, current_time)
         return False
     
     return stop_condition_callback

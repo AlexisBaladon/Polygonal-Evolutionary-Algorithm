@@ -64,10 +64,6 @@ def transform_image(self, image_processor_args: dict, ea_args: dict, user_id: st
         eac.run(image_added_callback=image_added_callback,
                 stop_condition_callback=stop_condition_callback,
                 save=False)
-        
-        for i in range(1, ea_args["NGEN"]+1):
-            added_image_key = broker.get_added_image_key(user_id, i)
-            broker.set(added_image_key, None)
 
     except Exception as e:
         print("Something wrong happened while initializing the EA; ", e)

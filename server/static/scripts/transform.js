@@ -46,7 +46,7 @@ function createProgressBar() {
     
     const progressLabel = document.createElement('span');
     progressLabel.id = 'progress-label'
-    progressLabel.textContent = 'Generation: ' + currentGeneration.toString() + '/' + generations.toString();
+    progressLabel.textContent = 'Generation: 1/' + generations.toString();
 
     container.appendChild(progressLabel)
     container.appendChild(progressBar)
@@ -55,16 +55,10 @@ function createProgressBar() {
 function updateProgressBar(currentGeneration) {
     const progress = document.getElementById('progress');
     const progressLabel = document.getElementById('progress-label');
+    const percentage = (currentGeneration / generations) * 100;
 
-    function updateProgress() {
-        if (currentGeneration <= generations) {
-            const percentage = (currentGeneration / generations) * 100;
-            progress.style.width = percentage + '%';
-            progressLabel.textContent = 'Generation: ' + currentGeneration.toString() + '/' + generations.toString();
-        }
-    }
-
-    updateProgress();
+    progress.style.width = percentage + '%';
+    progressLabel.textContent = 'Generation: ' + currentGeneration.toString() + '/' + generations.toString();
 }
 
 function addImage(imageData, currentGeneration) {

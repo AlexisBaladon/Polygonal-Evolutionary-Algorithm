@@ -309,8 +309,8 @@
             if (currentGeneration <= generations) {
                 const percentage = (currentGeneration / generations) * 100;
                 progress.style.width = percentage + '%';
-                currentGeneration++;
                 progressLabel.textContent = 'Generation: ' + currentGeneration.toString() + '/' + generations.toString();
+                currentGeneration++;
             }
         }
 

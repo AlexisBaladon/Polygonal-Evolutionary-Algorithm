@@ -10,8 +10,6 @@
 
 # Libraries
 
-Software built using the most popular libraries in the field of Data Science:
-
 ### Evolutionary Algorithms
 
 - [DEAP] - Provides basic functionalities for instantiating evolutionary algorithm problems.
@@ -19,6 +17,7 @@ Software built using the most popular libraries in the field of Data Science:
 
 ![DEAP](./readme/icons/DEAP.png)
 ![multiprocessing](./readme/icons/multiprocessing.png)
+
 ### Image Processing
 
 - [OpenCV] - For denoising and edge detection algorithms.
@@ -41,10 +40,44 @@ Software built using the most popular libraries in the field of Data Science:
 ![pandas](./readme/icons/pandas.png)
 ![matplotlib](./readme/icons/matplotlib.png)
 
+### Web Server
+
+- [Flask] - Web server for the application.
+- [Redis] - Memory cache for storing results within workers.
+- [Celery] - Asynchronous task queue for executing tasks in parallel.
+- [Gunicorn] - WSGI HTTP Server for production.
+- [Docker] - Containerization.
+
+![flask](./readme/icons/flask.png)
+![redis](./readme/icons/redis.png)
+![celery](./readme/icons/celery.png)
+![gunicorn](./readme/icons/gunicorn.png)
+![docker](./readme/icons/docker.png)
+
 # Results
 
 ![faces](./readme/results/extra_faces1.png)
 ![animals](./readme/results/extra_animals1.png)
+
+# Run the application
+
+To run the web application to try our evolutionary algorithm, try using our docker-compose file:
+
+
+```
+docker-compose build
+```
+
+```
+docker-compose up
+```
+
+After that, the docker containers should be running on localhost, with the ports:
+- 5000: Flask server
+- 5555: Redis server
+- 5556: Celery server
+- 5557: Celery flower server 🌷
+
 
 # Data Source
 

@@ -10,8 +10,6 @@
 
 # Libraries
 
-Software built using the most popular libraries in the field of Data Science:
-
 ### Evolutionary Algorithms
 
 - [DEAP] - Provides basic functionalities for instantiating evolutionary algorithm problems.
@@ -19,6 +17,7 @@ Software built using the most popular libraries in the field of Data Science:
 
 ![DEAP](./readme/icons/DEAP.png)
 ![multiprocessing](./readme/icons/multiprocessing.png)
+
 ### Image Processing
 
 - [OpenCV] - For denoising and edge detection algorithms.
@@ -41,16 +40,44 @@ Software built using the most popular libraries in the field of Data Science:
 ![pandas](./readme/icons/pandas.png)
 ![matplotlib](./readme/icons/matplotlib.png)
 
+### Web Server
+
+- [Flask] - Web server for the application.
+- [Redis] - Memory cache for storing results within workers.
+- [Celery] - Asynchronous task queue for executing tasks in parallel.
+- [Gunicorn] - WSGI HTTP Server for production.
+- [Docker] - Containerization.
+
+![flask](./readme/icons/flask.png)
+![docker](./readme/icons/docker.png)
+![redis](./readme/icons/redis.png)
+![celery](./readme/icons/celery.png)
+![gunicorn](./readme/icons/gunicorn.png)
+
 # Results
 
 ![faces](./readme/results/extra_faces1.png)
 ![animals](./readme/results/extra_animals1.png)
 
-# Data Source
+# Run the web application
 
-All images where taken from https://www.pexels.com/es-es/
+To run the web application to try our evolutionary algorithm, try using our docker-compose file:
 
-# Program Instructions
+```
+docker compose build
+```
+
+```
+docker compose up
+```
+
+After that, the docker containers should be running on localhost, with the ports:
+- 5000: Flask server
+- 5555: Redis server
+- 5556: Celery server
+- 5557: Celery flower server 🌷
+
+# Console Program Instructions
 
 ## Dependencies:
 The libraries used in the project can be installed using the following command:
@@ -141,3 +168,8 @@ python main.py --input_path ./img --input_name imagen.jpg --vertex_count 5000 --
 ```
 
 Note: Specifying only the width or height size adjusts the other automatically.
+
+
+# Data Source
+
+All images where taken from https://www.pexels.com/es-es/

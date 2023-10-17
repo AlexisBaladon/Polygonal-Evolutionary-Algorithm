@@ -1,0 +1,186 @@
+h1 {
+    text-align: center;
+    font-size: 40px;
+    padding: 15px 15px 0 15px;
+    color: #040404;
+
+    margin-bottom: 5px;
+    font-weight: 900;
+}
+
+input[name="image"] {
+    width: 390px;
+}
+
+
+form {
+    width: fit-content;
+    justify-content: center; 
+    display: flex; 
+    flex-direction: column; 
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 2.5px;
+    margin-right: 10px;
+    text-align: start;
+    width: 150px;
+}
+
+select {
+    width: 112px;
+}
+
+form div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    margin: 5px 0 5px 0;
+}
+
+body {
+    background: #e6e6e6aa;
+    font-family: "Roboto", sans-serif;
+}
+
+body > div {
+    background: #f8f8f8;
+    width: fit-content;
+    padding: 15px;
+    margin-bottom: 50px
+}
+
+body div {
+    width: fit-content;
+    padding: 5px 5px 5px 5px;
+}
+
+button {
+    background-color: #364954;
+    color: #fff;
+    padding: 10px 7.5px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+button:hover {
+    background-color: #2B3033;
+}
+
+
+input[type="number"], input[type="text"] {
+    width: 100px;
+    box-shadow: 0 0 1px 0 rgba(0,0,0,0.2);
+}
+
+input[type="file"],
+input[type="number"], 
+input[type="text"],
+select {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+input[type="file"]:focus,
+input[type="number"]:focus,
+input[type="text"]:focus,
+select:focus {
+    border-color: #364954;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    outline: none;
+}
+
+#image-elements {
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+}
+
+#image-parameters {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+
+#size-row, #file-row {
+    display: flex;
+    flex-direction: row;
+}
+
+#image-elements label {
+    width: fit-content;
+}
+
+#container {
+    display: flex;
+    flex-direction: row;
+    margin-right: auto; 
+    justify-content: space-between;
+    margin-left: auto; margin-right: auto;
+
+    border-radius: 5px;
+    padding: 7.5px;
+    box-shadow: 0 0 5px 0 rgba(0,0,0,0.2);
+}
+
+.sub-group {
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+}
+
+.image-preview {
+    max-height: 250px;
+    max-width: 350px;
+    margin: 15px 15px 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 0 5px 0 rgba(0,0,0,0.2);
+}
+
+#image-preview {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.sub-group {
+    position: relative;
+}
+
+.info-popup {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    z-index: 1;
+}
+
+label:hover + .info-popup, .info-popup:hover {
+    display: block;
+}
+
+#tournament-size-subgroup {
+    display: none
+}
+
+#description {
+    width: 100%;
+    background: none;
+    text-align: center;
+    font-size: 15px;
+    padding: 15px 15px 0px 15px;
+    color: #040404
+}
+
+#description p {
+    margin: 10px
+}

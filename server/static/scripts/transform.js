@@ -12,7 +12,7 @@ function initialize(ngen, userId_) {
 
 function appendImage(imageData, fitness) {
     const individualContainer = document.getElementById('individual-container');
-    const imageContainer = document.getElementById('images-container')
+    let imageContainer = document.getElementById('images-container')
 
     if (imageContainer == null) {
         imageContainer = document.createElement('div');
@@ -20,15 +20,15 @@ function appendImage(imageData, fitness) {
         individualContainer.appendChild(imageContainer);
     }
     
-    let imageObject = document.createElement('img');
+    const imageObject = document.createElement('img');
     imageObject.src = 'data:image/png;base64,' + imageData;
     imageObject.className = 'individual-image'
 
-    var imageOverlay = document.createElement('div');
+    const imageOverlay = document.createElement('div');
     imageOverlay.className = 'overlay';
     imageOverlay.textContent = 'Loss: ' + fitness.toString().slice(0, 6);
     
-    var hoverImageContainer = document.createElement('div');
+    const hoverImageContainer = document.createElement('div');
     hoverImageContainer.className = 'hover-image-container';
     
     hoverImageContainer.appendChild(imageOverlay);
@@ -118,7 +118,7 @@ function fetchNextGeneration(userId, currentGeneration=1) {
         }
     })
     .then(response => response.json())
-    .then(data => addImage(data, currentGeneration + 1))
+    .then(data => addImage(data, currentGeneration))
     .then(() => {
         if (currentGeneration <= generations) {
             fetchNextGeneration(userId, currentGeneration + 1)

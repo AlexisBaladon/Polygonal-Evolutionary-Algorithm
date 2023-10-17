@@ -108,9 +108,14 @@ select:focus {
     justify-content: start;
 }
 
-#size-row, #file-row {
+.size-row, #file-row {
     display: flex;
     flex-direction: row;
+}
+
+.size-text {
+    margin: 0 5px 0 5px;
+    width: 450px;
 }
 
 #image-elements label {

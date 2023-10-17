@@ -49,27 +49,26 @@
 - [Docker] - Containerization.
 
 ![flask](./readme/icons/flask.png)
+![docker](./readme/icons/docker.png)
 ![redis](./readme/icons/redis.png)
 ![celery](./readme/icons/celery.png)
 ![gunicorn](./readme/icons/gunicorn.png)
-![docker](./readme/icons/docker.png)
 
 # Results
 
 ![faces](./readme/results/extra_faces1.png)
 ![animals](./readme/results/extra_animals1.png)
 
-# Run the application
+# Run the web application
 
 To run the web application to try our evolutionary algorithm, try using our docker-compose file:
 
+```
+docker compose build
+```
 
 ```
-docker-compose build
-```
-
-```
-docker-compose up
+docker compose up
 ```
 
 After that, the docker containers should be running on localhost, with the ports:
@@ -78,12 +77,7 @@ After that, the docker containers should be running on localhost, with the ports
 - 5556: Celery server
 - 5557: Celery flower server 🌷
 
-
-# Data Source
-
-All images where taken from https://www.pexels.com/es-es/
-
-# Program Instructions
+# Console Program Instructions
 
 ## Dependencies:
 The libraries used in the project can be installed using the following command:
@@ -174,3 +168,8 @@ python main.py --input_path ./img --input_name imagen.jpg --vertex_count 5000 --
 ```
 
 Note: Specifying only the width or height size adjusts the other automatically.
+
+
+# Data Source
+
+All images where taken from https://www.pexels.com/es-es/

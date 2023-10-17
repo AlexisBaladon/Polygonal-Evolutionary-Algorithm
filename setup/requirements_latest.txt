@@ -1,13 +1,9 @@
 deap
-matplotlib
 numpy
 opencv-python-headless
 pandas
 Pillow
-scikit_posthocs
 scipy
-statsmodels
-ipykernel
 Flask
 Flask-SocketIO
 gunicorn

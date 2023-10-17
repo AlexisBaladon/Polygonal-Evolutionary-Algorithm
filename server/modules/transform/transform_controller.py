@@ -1,12 +1,15 @@
 import os
 import random
+import time
+
 from flask import Request, request, render_template
 
 from src.utils.image_processor import ImageProcessor
 from src.utils.argument_checker import ArgumentChecker
-from server.lib.sockets import socketio
+# from server.lib.sockets import socketio
 from server import config
 from server.lib.celery.tasks import transform_image
+from server.lib import broker
 
 def parse_value_signature(value, signature):
     try:
@@ -84,10 +87,32 @@ def get_form_arguments(form):
         "manual_console": manual_console
     }
 
+def get_user_id(request: Request):
+    return request.remote_addr
 
-@socketio.on('disconnect')
-def handle_disconnect():
-    print('Client disconnected')
+# @socketio.on('disconnect')
+# def handle_disconnect():
+#     print('Client disconnected')
+
+def get_transformed_images(request: Request, max_fails=30, sleep_time=1):
+    try:
+        user_id = get_user_id(request)
+        generation = request.args['generation']
+        fail_count = 0
+
+        while True: # TODO: Busy waiting is not a good practice
+            added_image_key = broker.get_added_image_key(user_id, generation)
+            added_image = broker.get(added_image_key)
+
+            if added_image is not None:
+                return added_image
+            
+            fail_count += 1
+            if fail_count > max_fails:
+                return f"Image transformation timed out after {fail_count*sleep_time} seconds"
+            time.sleep(sleep_time)
+    except Exception as e:
+        return "Something went wrong while getting the transformed images: " + str(e.with_traceback())
 
 def transform(request: Request):
     image_file = request.files['image']
@@ -105,9 +130,10 @@ def transform(request: Request):
             image_data = image_file.read()
             decoded_image = ImageProcessor.decode_image(image_data)
             base64_image = ImageProcessor.encode_image(decoded_image)
+            user_id = get_user_id(request)
 
             image_processor_args = {**args, 'input_image': image_data}
-            transform_image.delay(image_processor_args, args)
+            transform_image.delay(image_processor_args, args, user_id)
 
             context = {**args, 
                        'width': decoded_image.width,

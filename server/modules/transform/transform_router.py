@@ -7,3 +7,7 @@ transform_blueprint = Blueprint("transform", __name__)
 @transform_blueprint.route("", methods=['POST'])
 def transformed_image():
     return transform_controller.transform(request)
+
+@transform_blueprint.route("", methods=['GET'])
+def get_transformed_image(generation):
+    return transform_controller.get_transformed_images(generation)

@@ -5,7 +5,6 @@ pandas
 Pillow
 scipy
 Flask
-Flask-SocketIO
 gunicorn
 eventlet
 python-dotenv

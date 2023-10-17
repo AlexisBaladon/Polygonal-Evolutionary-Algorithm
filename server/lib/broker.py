@@ -25,3 +25,6 @@ def get(key: str, object=True):
 
 def get_added_image_key(user_id: str, i: int):
     return f"added_image/{user_id}/{i}"
+
+def get_last_connection_key(user_id: str):
+    return f"last_connection/{user_id}"

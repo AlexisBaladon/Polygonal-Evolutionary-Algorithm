@@ -103,16 +103,23 @@ class DeapConfig:
             hall_of_fame_dir = os.path.join(self.log_dir, f'{file_name}_{seed}.csv')
             df_hall_of_fame.to_csv(hall_of_fame_dir, index=False)
     
-    def run_algorithm(self, image_added_callback=lambda *_: None, parallel=True):
+    def run_algorithm(self, 
+                      image_added_callback=lambda *_: None, 
+                      stop_condition_callback=lambda: False, 
+                      parallel=True):
         if parallel:
             with self.process_pool:
-                population, logbook, hof, best_fitnesses = self.__run_algorithm(image_added_callback=image_added_callback)
+                population, logbook, hof, best_fitnesses = self.__run_algorithm(image_added_callback=image_added_callback,
+                                                                                stop_condition_callback=stop_condition_callback)
         else:
-            population, logbook, hof, best_fitnesses = self.__run_algorithm(image_added_callback=image_added_callback)
+            population, logbook, hof, best_fitnesses = self.__run_algorithm(image_added_callback=image_added_callback,
+                                                                            stop_condition_callback=stop_condition_callback)
 
         return population, logbook, hof, best_fitnesses
 
-    def __run_algorithm(self, image_added_callback=lambda *_: None):
+    def __run_algorithm(self, 
+                        image_added_callback=lambda *_: None,
+                        stop_condition_callback=lambda: False):
             pop = self.toolbox.population(n=self.MU)
             pop, logbook, hof, best_fitnesses = self.__eaMuPlusLambda(pop, 
                                                                       self.toolbox, 
@@ -123,17 +130,22 @@ class DeapConfig:
                                                                       self.NGEN, 
                                                                       stats=self.stats, 
                                                                       image_added_callback=image_added_callback,
+                                                                      stop_condition_callback=stop_condition_callback,
                                                                       verbose=True)
             return pop, logbook, hof, best_fitnesses
 
     def force_stop(self):
         self.forced_stop = True
 
-    def __stop_condition(self, gen: int, ngen: int):
+    def __stop_condition(self, 
+                         gen: int, 
+                         ngen: int, 
+                         stop_condition_callback=lambda: False):
+        self.forced_stop = self.forced_stop or stop_condition_callback()
         
         conditions = [
             gen >= ngen,
-            self.forced_stop #user is allowed to stop the algorithm from the main thread
+            self.forced_stop, # User is allowed to stop the algorithm from the main thread,
         ]
 
         return any(conditions)
@@ -146,6 +158,7 @@ class DeapConfig:
                          stats: tools.Statistics = None, 
                          halloffame: tools.HallOfFame = HallOfFame(1),
                          image_added_callback= lambda *_: None,
+                         stop_condition_callback=lambda: False,
                          verbose=True):
 
         logbook = tools.Logbook()
@@ -174,7 +187,7 @@ class DeapConfig:
                               "fitness": fitnesses[:]},
                               gen)
 
-        while not self.__stop_condition(gen, ngen):
+        while not self.__stop_condition(gen, ngen, stop_condition_callback):
             offspring = algorithms.varOr(population, toolbox, 
                                          lambda_, cxpb, mutpb)
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]

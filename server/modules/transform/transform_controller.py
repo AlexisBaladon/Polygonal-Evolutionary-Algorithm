@@ -100,6 +100,10 @@ def get_transformed_images(request: Request, max_fails=30, sleep_time=1):
         generation = request.args['generation']
         fail_count = 0
 
+        last_connection = time.time()
+        last_connection_key = broker.get_last_connection_key(user_id)
+        broker.set(last_connection_key, last_connection)
+
         while True: # TODO: Busy waiting is not a good practice
             added_image_key = broker.get_added_image_key(user_id, generation)
             added_image = broker.get(added_image_key)
@@ -109,6 +113,9 @@ def get_transformed_images(request: Request, max_fails=30, sleep_time=1):
             
             fail_count += 1
             if fail_count > max_fails:
+                for i in range(generation):
+                    added_image_key = broker.get_added_image_key(user_id, i)
+                    broker.set(added_image_key, None)
                 return f"Image transformation timed out after {fail_count*sleep_time} seconds"
             time.sleep(sleep_time)
     except Exception as e:

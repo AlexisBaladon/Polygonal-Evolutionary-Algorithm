@@ -100,7 +100,7 @@ def get_transformed_images(request: Request, max_iddle_time=90, sleep_time=1):
         broker.set(last_connection_key, last_connection)
         initial_time = time.time()
 
-        while True: # TODO: Busy waiting is not a good practice
+        while True: # TODO: Replace Busy waiting a queue system.
             current_time = time.time()
             added_image_key = broker.get_added_image_key(user_id, generation)
             added_image = broker.get(added_image_key)

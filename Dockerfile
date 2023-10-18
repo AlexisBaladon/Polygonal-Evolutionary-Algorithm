@@ -10,4 +10,4 @@ EXPOSE 5000
 ENV FLASK_APP=/app.py
 ENV FLASK_ENV=production
 
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "-w", "4", "app:app", "worker-class", "eventlet", "--reload"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "-w", "4", "app:app", "worker-class", "eventlet", "--timeout", "90", "--reload"]

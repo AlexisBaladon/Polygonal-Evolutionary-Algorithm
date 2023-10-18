@@ -49,7 +49,6 @@ def get_stop_condition_callback(user_id: str, max_iddle_seconds=90):
 @shared_task(bind=True, base=AbortableTask)
 def transform_image(self, image_processor_args: dict, ea_args: dict, user_id: str):
     try:
-        print("Starting EA")
         image_processor_args["input_image"] = ImageProcessor.decode_image(image_processor_args["input_image"])
         image_processor = ImageProcessor(**image_processor_args)
         ea = EA(image_processor)

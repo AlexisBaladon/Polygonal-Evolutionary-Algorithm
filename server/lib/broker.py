@@ -3,13 +3,12 @@ import json
 from flask_redis import FlaskRedis
 from server import app
 
-def create_broker():
+def create_broker(app=app):
     return FlaskRedis(app)
 
 broker = create_broker()
 
 def set(key: str, value, object=True):
-    print(f"Set key={key}")
     if object:
         value = json.dumps(value)
 
@@ -17,7 +16,6 @@ def set(key: str, value, object=True):
     return
 
 def get(key: str, object=True):
-    print(f"Get key={key}")
     value = broker.get(key)
 
     if object and value is not None:

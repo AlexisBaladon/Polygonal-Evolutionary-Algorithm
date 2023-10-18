@@ -6,7 +6,6 @@ from flask import Request, request, render_template
 
 from src.utils.image_processor import ImageProcessor
 from src.utils.argument_checker import ArgumentChecker
-# from server.lib.sockets import socketio
 from server import config
 from server.lib.celery.tasks import transform_image
 from server.lib import broker
@@ -18,8 +17,8 @@ def parse_value_signature(value, signature):
     except:
         return None
 
-def get_form_arguments(form):
-    cpu_count = 1 if config.production else os.cpu_count()
+def get_form_arguments(form, production=config.production):
+    cpu_count = 1 if production else os.cpu_count()
     verbose = 1
     show = 0
     manual_console = 0
@@ -119,6 +118,7 @@ def get_transformed_images(request: Request, max_iddle_time=90, sleep_time=1):
                     added_image_key = broker.get_added_image_key(user_id, i)
                     broker.set(added_image_key, None)
                 return {"error": f"Image transformation timed out after {fail_count*sleep_time} seconds"}
+            
             time.sleep(sleep_time)
 
     except Exception as e:

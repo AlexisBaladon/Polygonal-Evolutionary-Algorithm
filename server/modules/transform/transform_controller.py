@@ -35,7 +35,7 @@ def get_form_arguments(form, production=config.production):
 
     NGEN = form.get("NGEN", 5)
     NGEN = parse_value_signature(NGEN, int)
-    NGEN = None if NGEN is None else min(NGEN, 15) # NGEN > 10 would cause the system to overload
+    NGEN = None if NGEN is None else min(NGEN, 100) # NGEN > 100 would cause the system to overload
 
     MU = form.get("MU", 50)
     MU = parse_value_signature(MU, int)

@@ -73,9 +73,8 @@ docker compose up
 
 After that, the docker containers should be running on localhost, with the ports:
 - 5000: Flask server
-- 5555: Redis server
-- 5556: Celery server
-- 5557: Celery flower server 🌷
+- 6379: Redis server
+- 5557: flower server 🌷
 
 # Console Program Instructions
 

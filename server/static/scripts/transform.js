@@ -6,7 +6,6 @@ let userId = null
 function initialize(ngen, userId_) {
     generations = ngen
     userId = userId_
-    console.log(userId)
     fetchNextGeneration(userId)
 }
 

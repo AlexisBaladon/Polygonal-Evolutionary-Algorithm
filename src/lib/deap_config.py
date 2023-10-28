@@ -10,7 +10,7 @@ import pandas
 import numpy as np
 
 BEST_SELECTION = 'best'
-TOURNAMENT_SELECTION = 'torunament'
+TOURNAMENT_SELECTION = 'tournament'
 CPU_COUNT = os.cpu_count()
 
 class DeapConfig:
@@ -68,7 +68,7 @@ class DeapConfig:
                            max_x, max_y):
         
         selections = {BEST_SELECTION: {"function": tools.selBest},
-                     TOURNAMENT_SELECTION: {"function": tools.selTournament, 
+                      TOURNAMENT_SELECTION: {"function": tools.selTournament, 
                                             "tournsize": self.tournament_size}}
 
         self.toolbox.register("evaluate", fitness_custom_function)

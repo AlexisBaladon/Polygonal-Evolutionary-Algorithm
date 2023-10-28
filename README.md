@@ -1,5 +1,7 @@
 # Image Approximation with Polygons using Delaunay Triangulation
 
+![evolisa](./readme/results/evolisa.png)
+
 # Features:
 
 - Parametric configuration
@@ -7,6 +9,7 @@
 - Automated testing and graph generation with fixed seeds for result reproducibility.
 - Multiprocessing
 - Denoising and edge detection
+
 
 # Libraries
 
